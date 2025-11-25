@@ -14,6 +14,7 @@ export type LoginApiResponse =
         id: string;
         name: string;
         email: string;
+        isAdmin: boolean;
       };
     }
   | {

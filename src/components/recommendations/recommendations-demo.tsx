@@ -201,7 +201,13 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
 
 type FeedbackAction = FeedbackEventPayload["action"];
 
-function RecommendationCard({ card, userId }: { card: RecommendationCard; userId: string }) {
+type RecommendationCardProps = {
+  card: RecommendationCard;
+  userId: string;
+  readOnly?: boolean;
+};
+
+export function RecommendationCard({ card, userId, readOnly = false }: RecommendationCardProps) {
   const statusTheme = statusCopy[card.inventory.status];
   const feedbackMutation = useFeedbackMutation();
   const [lastAction, setLastAction] = useState<FeedbackAction | null>(null);
@@ -243,9 +249,10 @@ function RecommendationCard({ card, userId }: { card: RecommendationCard; userId
   };
 
   const isPending = feedbackMutation.isPending;
+  const actionsDisabled = readOnly || isPending;
 
   function handleAction(action: FeedbackAction, note?: string | null) {
-    if (isPending) {
+    if (actionsDisabled) {
       return;
     }
 
@@ -340,7 +347,7 @@ function RecommendationCard({ card, userId }: { card: RecommendationCard; userId
                 key={`${card.recommendationId}-${action}`}
                 type='button'
                 onClick={() => handleAction(action, note)}
-                disabled={isPending}
+                disabled={readOnly || isPending}
                 aria-describedby={descriptionId}
                 className={cn(
                   "flex w-full min-w-0 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[150px] sm:flex-1",

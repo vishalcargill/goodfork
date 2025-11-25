@@ -92,6 +92,11 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - Instrument analytics pipeline (conversion, latency, AI failures) and expose analyst-facing report page.
 - Harden error boundaries, fallback copy for AI outages, and integrate feature flags for risky features (values stored in `.env.local`).
 
+## Admin Tools
+- `/admin` – operator landing page with quick links into recipes and upcoming inventory tooling (only accessible to the configured `ADMIN_EMAIL`).
+- `/admin/recipes` – password-protected console to create, edit, preview, or delete recipes with real-time recommendation card previewing.
+- `/api/admin/recipes` + `/api/admin/recipes/[id]` – CRUD endpoints wrapping Prisma with validation to keep recipe + inventory tables in sync with operator edits.
+
 ## Phase 3 – Polish & Launch
 - Accessibility audit (WCAG AA), keyboard focus outlines, and semantic labeling for nutrition data.
 - Performance tuning: enable Next.js image optimizations, preload critical fonts, and verify lighthouse scores on mobile.

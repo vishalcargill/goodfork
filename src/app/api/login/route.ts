@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { loginSchema } from "@/schema/login.schema";
 import { authenticateUser } from "@/services/server/auth.server";
+import { ADMIN_EMAIL } from "@/constants/app.constants";
 
 const SESSION_COOKIE_NAME = "gf_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
       ipAddress,
     });
 
+    const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+
     const response = NextResponse.json({
       success: true,
       message: "Logged in successfully.",
@@ -39,6 +42,7 @@ export async function POST(request: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
+        isAdmin,
       },
     });
 

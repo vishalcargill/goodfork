@@ -24,6 +24,7 @@ GoodFork is our Hackathon 2025 build for the **AI-Driven Menu Personalization an
    RECIPE_EMBEDDING_PROVIDER="openai"
    RECIPE_EMBEDDING_VERSION="v1"
    OPENAI_BASE_URL="https://api.openai.com/v1" # override if using Azure/OpenAI proxy
+   ADMIN_EMAIL="admin@cargill.com"
    ```
 
 ### Install & Database
@@ -47,6 +48,12 @@ Seeds provision the `admin@cargill.com` account plus three flagship recipes + in
 | `npm run db:seed` | Seed demo users + inventory. |
 | `npm run recipes:import -- data/recipes.json` | Load the Kaggle dataset into the `Recipe` + `InventoryItem` tables. |
 | `npm run recipes:embed -- 50` | Generate embeddings for up to 50 recipes missing the configured vector version. |
+
+### Admin Recipes
+- After logging in as `admin@cargill.com` you’ll be redirected to the `/admin` hub with entry cards for Recipes and Inventory management.
+- Visit `/admin/recipes` to manage dishes; the route is server-guarded against non-admin sessions.
+- The admin console exposes CRUD over every recipe + inventory column defined in Prisma along with a live Recommendation Card preview so operators can see consumer-facing output instantly.
+- All actions flow through `/api/admin/recipes` (POST for create, PUT for update, DELETE for removal) and respect the `InventoryItem` relation. Inventory status + restock dates update the same row the recommendation engine uses.
 
 ### Recipe Dataset & Embeddings
 1. Place the Kaggle payload at `data/recipes.json` (already checked in).

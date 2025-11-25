@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Lock, Sparkles } from "lucide-react";
 
 import { useLoginMutation } from "@/services/client/login.client";
@@ -9,6 +10,7 @@ import { useLoginMutation } from "@/services/client/login.client";
 export function LoginCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
   const loginMutation = useLoginMutation();
 
   const apiResponse = loginMutation.data;
@@ -20,9 +22,17 @@ export function LoginCard() {
     (!isSuccess && apiResponse && !apiResponse.success ? apiResponse.message : null) ??
     (loginMutation.isError ? loginMutation.error.message : null);
 
-  const recommendationsHref = isSuccess
-    ? `/?prefillEmail=${encodeURIComponent(apiResponse.user.email)}`
+  const successHref = isSuccess
+    ? apiResponse.user.isAdmin
+      ? "/admin"
+      : `/?prefillEmail=${encodeURIComponent(apiResponse.user.email)}`
     : "/onboarding";
+
+  useEffect(() => {
+    if (isSuccess && apiResponse.user.isAdmin) {
+      router.replace("/admin");
+    }
+  }, [apiResponse?.user.isAdmin, isSuccess, router]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,8 +63,8 @@ export function LoginCard() {
               <CheckCircle2 className='h-4 w-4 text-emerald-600' />
               {apiResponse.message}
             </p>
-            <Link href={recommendationsHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
-              Jump to recommendations
+            <Link href={successHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
+              {apiResponse.user.isAdmin ? "Open admin console" : "Jump to recommendations"}
               <Sparkles className='h-3.5 w-3.5' />
             </Link>
           </div>

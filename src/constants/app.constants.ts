@@ -3,6 +3,7 @@ export const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
 export const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1";
 export const RECOMMENDER_MODEL = process.env.RECOMMENDER_MODEL ?? "gpt-4o-mini";
 export const JWT_SECRET = process.env.JWT_SECRET ?? "";
+export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? "admin@cargill.com").toLowerCase();
 export const RECIPE_EMBEDDING_MODEL =
   process.env.RECIPE_EMBEDDING_MODEL ?? "text-embedding-3-large";
 export const RECIPE_EMBEDDING_PROVIDER = (
