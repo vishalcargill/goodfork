@@ -57,7 +57,8 @@ export const ModelName = {
   InventoryItem: 'InventoryItem',
   Recommendation: 'Recommendation',
   Feedback: 'Feedback',
-  UserSession: 'UserSession'
+  UserSession: 'UserSession',
+  RecipeEmbedding: 'RecipeEmbedding'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -107,6 +108,9 @@ export type UserProfileScalarFieldEnum = (typeof UserProfileScalarFieldEnum)[key
 export const RecipeScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
+  sourceId: 'sourceId',
+  sourceUrl: 'sourceUrl',
+  author: 'author',
   title: 'title',
   description: 'description',
   cuisine: 'cuisine',
@@ -117,8 +121,21 @@ export const RecipeScalarFieldEnum = {
   priceCents: 'priceCents',
   tags: 'tags',
   allergens: 'allergens',
+  ingredients: 'ingredients',
+  instructions: 'instructions',
   imageUrl: 'imageUrl',
   healthyHighlights: 'healthyHighlights',
+  serves: 'serves',
+  difficulty: 'difficulty',
+  prepTimeMinutes: 'prepTimeMinutes',
+  cookTimeMinutes: 'cookTimeMinutes',
+  averageRating: 'averageRating',
+  ratingCount: 'ratingCount',
+  dishType: 'dishType',
+  mainCategory: 'mainCategory',
+  subCategory: 'subCategory',
+  nutrients: 'nutrients',
+  timers: 'timers',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -182,6 +199,23 @@ export const UserSessionScalarFieldEnum = {
 } as const
 
 export type UserSessionScalarFieldEnum = (typeof UserSessionScalarFieldEnum)[keyof typeof UserSessionScalarFieldEnum]
+
+
+export const RecipeEmbeddingScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  provider: 'provider',
+  model: 'model',
+  version: 'version',
+  dimension: 'dimension',
+  embedding: 'embedding',
+  status: 'status',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeEmbeddingScalarFieldEnum = (typeof RecipeEmbeddingScalarFieldEnum)[keyof typeof RecipeEmbeddingScalarFieldEnum]
 
 
 export const SortOrder = {

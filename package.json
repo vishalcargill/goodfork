@@ -10,7 +10,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "recipes:import": "tsx scripts/import-recipes.ts",
+    "recipes:embed": "tsx scripts/generate-recipe-embeddings.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

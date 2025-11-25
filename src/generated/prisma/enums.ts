@@ -45,3 +45,12 @@ export const InventoryStatus = {
 } as const
 
 export type InventoryStatus = (typeof InventoryStatus)[keyof typeof InventoryStatus]
+
+
+export const EmbeddingStatus = {
+  ACTIVE: 'ACTIVE',
+  STALE: 'STALE',
+  FAILED: 'FAILED'
+} as const
+
+export type EmbeddingStatus = (typeof EmbeddingStatus)[keyof typeof EmbeddingStatus]

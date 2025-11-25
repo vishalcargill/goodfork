@@ -74,3 +74,8 @@ export type Feedback = Prisma.FeedbackModel
  * 
  */
 export type UserSession = Prisma.UserSessionModel
+/**
+ * Model RecipeEmbedding
+ * 
+ */
+export type RecipeEmbedding = Prisma.RecipeEmbeddingModel

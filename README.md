@@ -20,6 +20,10 @@ GoodFork is our Hackathon 2025 build for the **AI-Driven Menu Personalization an
    RECOMMENDER_MODEL="gpt-4o-mini" # defaults to gpt-4o-mini
    NEXT_PUBLIC_ENABLE_HEALTHY_SWAP=true
    JWT_SECRET="local-dev-secret"
+   RECIPE_EMBEDDING_MODEL="text-embedding-3-large"
+   RECIPE_EMBEDDING_PROVIDER="openai"
+   RECIPE_EMBEDDING_VERSION="v1"
+   OPENAI_BASE_URL="https://api.openai.com/v1" # override if using Azure/OpenAI proxy
    ```
 
 ### Install & Database
@@ -41,6 +45,14 @@ Seeds provision the `admin@cargill.com` account plus three flagship recipes + in
 | `npm run prisma:migrate` | Apply Prisma migrations (dev). |
 | `npm run prisma:generate` | Rebuild Prisma client (`src/generated/prisma`). |
 | `npm run db:seed` | Seed demo users + inventory. |
+| `npm run recipes:import -- data/recipes.json` | Load the Kaggle dataset into the `Recipe` + `InventoryItem` tables. |
+| `npm run recipes:embed -- 50` | Generate embeddings for up to 50 recipes missing the configured vector version. |
+
+### Recipe Dataset & Embeddings
+1. Place the Kaggle payload at `data/recipes.json` (already checked in).
+2. Run `npm run recipes:import -- data/recipes.json` to normalize slugs, macros, prep/cook times, and seed inventory placeholders. Re-running updates existing rows via `sourceId`.
+3. Ensure `OPENAI_API_KEY`, `RECIPE_EMBEDDING_MODEL`, and `RECIPE_EMBEDDING_PROVIDER` are configured. Then run `npm run recipes:embed -- 25` (limit optional) to create semantic vectors in the new `RecipeEmbedding` table.
+4. Recommendation services can now read both the enriched recipe metadata and embeddings to support semantic filtering, swaps, and similarity lookups.
 
 ### Phase 1 Flows
 1. **Onboarding (`/onboarding`)**

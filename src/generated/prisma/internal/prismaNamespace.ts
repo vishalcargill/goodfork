@@ -390,7 +390,8 @@ export const ModelName = {
   InventoryItem: 'InventoryItem',
   Recommendation: 'Recommendation',
   Feedback: 'Feedback',
-  UserSession: 'UserSession'
+  UserSession: 'UserSession',
+  RecipeEmbedding: 'RecipeEmbedding'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userProfile" | "recipe" | "inventoryItem" | "recommendation" | "feedback" | "userSession"
+    modelProps: "user" | "userProfile" | "recipe" | "inventoryItem" | "recommendation" | "feedback" | "userSession" | "recipeEmbedding"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -928,6 +929,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RecipeEmbedding: {
+      payload: Prisma.$RecipeEmbeddingPayload<ExtArgs>
+      fields: Prisma.RecipeEmbeddingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecipeEmbeddingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecipeEmbeddingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>
+        }
+        findFirst: {
+          args: Prisma.RecipeEmbeddingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecipeEmbeddingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>
+        }
+        findMany: {
+          args: Prisma.RecipeEmbeddingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>[]
+        }
+        create: {
+          args: Prisma.RecipeEmbeddingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>
+        }
+        createMany: {
+          args: Prisma.RecipeEmbeddingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecipeEmbeddingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>[]
+        }
+        delete: {
+          args: Prisma.RecipeEmbeddingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>
+        }
+        update: {
+          args: Prisma.RecipeEmbeddingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecipeEmbeddingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecipeEmbeddingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecipeEmbeddingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecipeEmbeddingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeEmbeddingPayload>
+        }
+        aggregate: {
+          args: Prisma.RecipeEmbeddingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecipeEmbedding>
+        }
+        groupBy: {
+          args: Prisma.RecipeEmbeddingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecipeEmbeddingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecipeEmbeddingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecipeEmbeddingCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -998,6 +1073,9 @@ export type UserProfileScalarFieldEnum = (typeof UserProfileScalarFieldEnum)[key
 export const RecipeScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
+  sourceId: 'sourceId',
+  sourceUrl: 'sourceUrl',
+  author: 'author',
   title: 'title',
   description: 'description',
   cuisine: 'cuisine',
@@ -1008,8 +1086,21 @@ export const RecipeScalarFieldEnum = {
   priceCents: 'priceCents',
   tags: 'tags',
   allergens: 'allergens',
+  ingredients: 'ingredients',
+  instructions: 'instructions',
   imageUrl: 'imageUrl',
   healthyHighlights: 'healthyHighlights',
+  serves: 'serves',
+  difficulty: 'difficulty',
+  prepTimeMinutes: 'prepTimeMinutes',
+  cookTimeMinutes: 'cookTimeMinutes',
+  averageRating: 'averageRating',
+  ratingCount: 'ratingCount',
+  dishType: 'dishType',
+  mainCategory: 'mainCategory',
+  subCategory: 'subCategory',
+  nutrients: 'nutrients',
+  timers: 'timers',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1073,6 +1164,23 @@ export const UserSessionScalarFieldEnum = {
 } as const
 
 export type UserSessionScalarFieldEnum = (typeof UserSessionScalarFieldEnum)[keyof typeof UserSessionScalarFieldEnum]
+
+
+export const RecipeEmbeddingScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  provider: 'provider',
+  model: 'model',
+  version: 'version',
+  dimension: 'dimension',
+  embedding: 'embedding',
+  status: 'status',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeEmbeddingScalarFieldEnum = (typeof RecipeEmbeddingScalarFieldEnum)[keyof typeof RecipeEmbeddingScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1165,6 +1273,34 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'InventoryStatus'
  */
 export type EnumInventoryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryStatus'>
@@ -1189,20 +1325,6 @@ export type EnumRecommendationStatusFieldRefInput<$PrismaModel> = FieldRefInputT
  * Reference to a field of type 'RecommendationStatus[]'
  */
 export type ListEnumRecommendationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecommendationStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1235,16 +1357,16 @@ export type ListEnumFeedbackSentimentFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
- * Reference to a field of type 'Float'
+ * Reference to a field of type 'EmbeddingStatus'
  */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+export type EnumEmbeddingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmbeddingStatus'>
     
 
 
 /**
- * Reference to a field of type 'Float[]'
+ * Reference to a field of type 'EmbeddingStatus[]'
  */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+export type ListEnumEmbeddingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmbeddingStatus[]'>
     
 
 /**
@@ -1333,6 +1455,7 @@ export type GlobalOmitConfig = {
   recommendation?: Prisma.RecommendationOmit
   feedback?: Prisma.FeedbackOmit
   userSession?: Prisma.UserSessionOmit
+  recipeEmbedding?: Prisma.RecipeEmbeddingOmit
 }
 
 /* Types for Logging */

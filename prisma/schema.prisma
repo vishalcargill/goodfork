@@ -37,6 +37,9 @@ model UserProfile {
 model Recipe {
   id                String           @id @default(cuid())
   slug              String           @unique
+  sourceId          String?          @unique
+  sourceUrl         String?
+  author            String?
   title             String
   description       String?
   cuisine           String?
@@ -47,13 +50,27 @@ model Recipe {
   priceCents        Int              @default(0)
   tags              String[]         @default([])
   allergens         String[]         @default([])
+  ingredients       String[]         @default([])
+  instructions      String[]         @default([])
   imageUrl          String?
   healthyHighlights String[]         @default([])
+  serves            Int?
+  difficulty        String?
+  prepTimeMinutes   Int?
+  cookTimeMinutes   Int?
+  averageRating     Float?
+  ratingCount       Int?
+  dishType          String?
+  mainCategory      String?
+  subCategory       String?
+  nutrients         Json?
+  timers            Json?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   inventory         InventoryItem?
   healthySwapFor    Recommendation[] @relation("HealthySwap")
   recommendations   Recommendation[]
+  embeddings        RecipeEmbedding[]
 }
 
 model InventoryItem {
@@ -143,4 +160,29 @@ enum InventoryStatus {
   IN_STOCK
   LOW_STOCK
   OUT_OF_STOCK
+}
+
+model RecipeEmbedding {
+  id         String           @id @default(cuid())
+  recipeId   String
+  provider   String
+  model      String
+  version    String           @default("v1")
+  dimension  Int
+  embedding  Float[]
+  status     EmbeddingStatus  @default(ACTIVE)
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  recipe     Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, provider, model, version])
+  @@index([model])
+  @@index([provider])
+}
+
+enum EmbeddingStatus {
+  ACTIVE
+  STALE
+  FAILED
 }
