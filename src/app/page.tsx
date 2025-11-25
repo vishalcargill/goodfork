@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { RecommendationsDemo } from "@/components/recommendations/recommendations-demo";
+
 const phasePillars = [
   {
     title: "Stay aligned to your goals",
@@ -15,43 +17,21 @@ const phasePillars = [
   },
 ];
 
-const sampleMenus = [
-  {
-    title: "Citrus Ginger Salmon Bowl",
-    price: "$14",
-    calories: "540 kcal",
-    macros: "38g protein · 42g carbs · 21g fat",
-    rationale:
-      "Omega-3 rich protein, slow carbs, and leafy greens aligned to your pescatarian goal.",
-    swap: "Quinoa ↔️ cauli-rice to drop ~70 kcal.",
-  },
-  {
-    title: "Harissa Chickpea Grain Salad",
-    price: "$11",
-    calories: "480 kcal",
-    macros: "22g protein · 54g carbs · 18g fat",
-    rationale:
-      "Allergen-safe, fiber-forward, and uses in-stock herbs for freshness and satiety.",
-    swap: "Feta ↔️ toasted pepitas for dairy-free crunch.",
-  },
-  {
-    title: "Zesty Chicken Power Wrap",
-    price: "$12",
-    calories: "510 kcal",
-    macros: "40g protein · 46g carbs · 17g fat",
-    rationale:
-      "High protein density within your budget band, paired with a tangy slaw for micronutrients.",
-    swap: "Flour wrap ↔️ lettuce cups to reduce refined carbs.",
-  },
-];
-
 const loginBenefits = [
   "Save your goals and allergens once—every session stays in sync.",
   "Pick up where you left off with recently viewed menus.",
   "Secure by default with magic link or password options.",
 ];
 
-export default function Home() {
+type HomeProps = {
+  searchParams?: {
+    prefillEmail?: string;
+  };
+};
+
+export default function Home({ searchParams }: HomeProps) {
+  const prefillEmail = searchParams?.prefillEmail;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-lime-50 text-slate-900">
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-70">
@@ -136,37 +116,11 @@ export default function Home() {
             </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              Sample data — UI focus
+              Live data — powered by your onboarding profile
             </span>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {sampleMenus.map((menu) => (
-              <article
-                key={menu.title}
-                className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-emerald-100 bg-white p-5 shadow-[0_14px_36px_rgba(16,185,129,0.18)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_20px_56px_rgba(16,185,129,0.25)]"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      {menu.title}
-                    </h3>
-                    <p className="text-sm text-emerald-700">{menu.price}</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                    Ready now
-                  </span>
-                </div>
-                <div className="mt-4 space-y-2 text-sm text-slate-700">
-                  <p>{menu.calories}</p>
-                  <p className="text-xs text-slate-500">{menu.macros}</p>
-                  <p className="text-sm text-slate-700">{menu.rationale}</p>
-                </div>
-                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                  <p className="font-semibold text-emerald-800">Healthy swap</p>
-                  <p>{menu.swap}</p>
-                </div>
-              </article>
-            ))}
+          <div className="mt-8">
+            <RecommendationsDemo prefillEmail={prefillEmail} />
           </div>
         </section>
 

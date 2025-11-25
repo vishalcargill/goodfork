@@ -157,6 +157,9 @@ export function OnboardingFlow() {
   const fieldError = (field: keyof OnboardingPayload) => result?.fieldErrors?.[field]?.[0];
 
   const showSuccess = result?.success;
+  const recommendationsHref = values.email
+    ? `/?prefillEmail=${encodeURIComponent(values.email.trim())}`
+    : "/";
 
   return (
     <div className='rounded-[28px] border border-emerald-100 bg-white/95 p-6 shadow-[0_24px_65px_rgba(16,185,129,0.15)] sm:p-10'>
@@ -439,10 +442,7 @@ export function OnboardingFlow() {
               <CheckCircle2 className='h-4 w-4' />
               {result?.message}
             </p>
-            <Link
-              href='/'
-              className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'
-            >
+            <Link href={recommendationsHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
               Head to menus
               <ArrowRight className='h-3.5 w-3.5' />
             </Link>

@@ -42,7 +42,7 @@
 | --- | --- | --- | --- | --- |
 | [x] | Must | Implement consumer onboarding flow persisting user profile to the database. | FE + BE | Multi-step onboarding route now calls `/api/onboarding` via shared Axios + TanStack mutation to persist through Prisma. |
 | [x] | Must | Build recommendation API and service combining deterministic filters with LLM ranking. | BE | `/api/recommendations` now calls a Prisma-backed service with inventory/profile filters plus optional LLM rerank + fallback rationale. |
-| [ ] | Must | Render recommendation cards with nutrition badges, rationale, and healthy swap UI. | FE | Landing page now showcases sample nutrition cards + swap UI; need to hook into real data once API exists. |
+| [x] | Must | Render recommendation cards with nutrition badges, rationale, and healthy swap UI. | FE | Home recommendations section now calls `/api/recommendations` with onboarding email + renders live cards, skeletons, and empty/error states. |
 | [ ] | Should | Capture feedback events (accept/save/swap) and persist them for analytics. | BE | Pending—depends on recommendation API + DB tables. |
 | [ ] | Should | Add basic telemetry for recommendation requests and failures. | TL | Pending instrumentation plan; will follow API integration. |
 | [ ] | Should | Validate mobile SSR experience and basic accessibility for the flow. | FE | New nutrition theme + login shell built; need formal mobile/AT pass post-integration. |

@@ -2,7 +2,7 @@
 
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 
-import type { OnboardingPayload } from "@/schem/onboarding.schema";
+import type { OnboardingPayload } from "@/schema/onboarding.schema";
 import { apiClient } from "@/config/axios.config";
 
 export type OnboardingResult = {
@@ -18,11 +18,7 @@ async function submitOnboarding(payload: OnboardingPayload): Promise<OnboardingR
   return data;
 }
 
-export function useOnboardingSubmitMutation(): UseMutationResult<
-  OnboardingResult,
-  Error,
-  OnboardingPayload
-> {
+export function useOnboardingSubmitMutation(): UseMutationResult<OnboardingResult, Error, OnboardingPayload> {
   return useMutation({
     mutationFn: submitOnboarding,
   });
