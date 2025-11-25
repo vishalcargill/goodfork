@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { LoginCard } from "@/components/auth/login-card";
+import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
 import { RecommendationsDemo } from "@/components/recommendations/recommendations-demo";
 
 const phasePillars = [
@@ -24,13 +26,13 @@ const loginBenefits = [
 ];
 
 type HomeProps = {
-  searchParams?: {
-    prefillEmail?: string;
-  };
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default function Home({ searchParams }: HomeProps) {
-  const prefillEmail = searchParams?.prefillEmail;
+export default async function Home({ searchParams }: HomeProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const prefillValue = resolvedSearchParams?.prefillEmail;
+  const prefillEmail = typeof prefillValue === "string" ? prefillValue : undefined;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-lime-50 text-slate-900">
@@ -43,7 +45,7 @@ export default function Home({ searchParams }: HomeProps) {
       <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
         <section
           id="product"
-          className="relative overflow-hidden rounded-[28px] border border-emerald-100/70 bg-white/90 px-6 py-10 shadow-[0_24px_70px_rgba(16,185,129,0.15)] sm:px-10"
+          className="relative overflow-hidden rounded-[28px] border border-emerald-100/70 bg-white/90 px-6 py-10 shadow-[0_24px_70px_rgba(16,185,129,0.15)] scroll-mt-32 lg:scroll-mt-48 sm:px-10"
         >
           <div className="absolute inset-0 bg-emerald-50/60" />
           <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
@@ -64,12 +66,12 @@ export default function Home({ searchParams }: HomeProps) {
                 >
                   Start onboarding
                 </Link>
-                <Link
-                  href="#recommendations"
+                <SmoothScrollLink
+                  targetId="recommendations"
                   className="rounded-full border border-emerald-200 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 shadow-sm transition hover:shadow-[0_12px_30px_rgba(16,185,129,0.2)]"
                 >
                   View sample menus
-                </Link>
+                </SmoothScrollLink>
               </div>
             </div>
 
@@ -100,7 +102,7 @@ export default function Home({ searchParams }: HomeProps) {
 
         <section
           id="recommendations"
-          className="rounded-[28px] border border-emerald-100 bg-white p-8 shadow-[0_22px_60px_rgba(16,185,129,0.12)]"
+          className="rounded-[28px] border border-emerald-100 bg-white p-8 shadow-[0_22px_60px_rgba(16,185,129,0.12)] scroll-mt-32 lg:scroll-mt-48"
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
@@ -126,7 +128,7 @@ export default function Home({ searchParams }: HomeProps) {
 
         <section
           id="login"
-          className="rounded-[28px] border border-emerald-100 bg-white p-8 shadow-[0_22px_60px_rgba(16,185,129,0.12)]"
+          className="rounded-[28px] border border-emerald-100 bg-white p-8 shadow-[0_22px_60px_rgba(16,185,129,0.12)] scroll-mt-32 lg:scroll-mt-48"
         >
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div className="space-y-4">
@@ -151,77 +153,7 @@ export default function Home({ searchParams }: HomeProps) {
                 ))}
               </ul>
             </div>
-            <div className="relative">
-              <div className="absolute right-6 top-4 h-20 w-20 animate-[pulse_5s_ease-in-out_infinite] rounded-full bg-lime-100 blur-2xl" />
-              <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-white p-6 shadow-[0_18px_45px_rgba(16,185,129,0.16)]">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Welcome back</p>
-                    <p className="text-xs text-slate-600">Log in to personalize</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                    Secure
-                  </span>
-                </div>
-                <form className="space-y-4">
-                  <label className="block space-y-2 text-sm font-medium text-slate-800">
-                    Email
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="you@example.com"
-                      className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none ring-0 transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]"
-                      required
-                    />
-                  </label>
-                  <label className="block space-y-2 text-sm font-medium text-slate-800">
-                    Password
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="••••••••"
-                      className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none ring-0 transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]"
-                      required
-                    />
-                  </label>
-                  <div className="flex items-center justify-between text-xs text-slate-700">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border border-emerald-200 text-emerald-600 focus:ring-0"
-                      />
-                      Remember me
-                    </label>
-                    <a href="#" className="font-semibold text-emerald-700">
-                      Forgot password?
-                    </a>
-                  </div>
-                  <button
-                    type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(16,185,129,0.28)] transition hover:-translate-y-0.5"
-                  >
-                    Continue
-                  </button>
-                  <div className="text-center text-xs text-slate-600">
-                    Or continue with
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(16,185,129,0.12)]"
-                    >
-                      Magic link
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(16,185,129,0.12)]"
-                    >
-                      Continue with Google
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            <LoginCard />
           </div>
         </section>
       </div>

@@ -17,6 +17,7 @@ This plan breaks the hackathon build into concrete tasks per phase. Assume all s
 
 ## Phase 1 – Personalized Recommendations
 - Build onboarding wizard (goals, allergens, diet type) with Server Actions persisting to PostgreSQL.
+- Implement secure email/password login that validates stored hashes, mints short-lived sessions, and removes unused auth CTAs until providers exist.
 - Implement recommendation service combining deterministic filters + OpenAI rerank; store service config in `.env.local` (e.g., `RECOMMENDER_MODEL`).
 - Render recommendation cards with nutrition badges, AI rationale, and “Healthy Swap” CTA; include loading skeletons and empty/error views.
 - Wire feedback events (save/swap/accept) to analytics table and expose route handler for frontend logging.

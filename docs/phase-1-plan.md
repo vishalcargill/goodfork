@@ -43,9 +43,9 @@
 | [x] | Must | Implement consumer onboarding flow persisting user profile to the database. | FE + BE | Multi-step onboarding route now calls `/api/onboarding` via shared Axios + TanStack mutation to persist through Prisma. |
 | [x] | Must | Build recommendation API and service combining deterministic filters with LLM ranking. | BE | `/api/recommendations` now calls a Prisma-backed service with inventory/profile filters plus optional LLM rerank + fallback rationale. |
 | [x] | Must | Render recommendation cards with nutrition badges, rationale, and healthy swap UI. | FE | Home recommendations section now calls `/api/recommendations` with onboarding email + renders live cards, skeletons, and empty/error states. |
-| [ ] | Should | Capture feedback events (accept/save/swap) and persist them for analytics. | BE | Pending—depends on recommendation API + DB tables. |
-| [ ] | Should | Add basic telemetry for recommendation requests and failures. | TL | Pending instrumentation plan; will follow API integration. |
-| [ ] | Should | Validate mobile SSR experience and basic accessibility for the flow. | FE | New nutrition theme + login shell built; need formal mobile/AT pass post-integration. |
+| [x] | Should | Capture feedback events (accept/save/swap) and persist them for analytics. | BE | `/api/feedback` now validates Zod payloads, logs to Prisma `Feedback` with action enums, and updates recommendation status for analytics. |
+| [x] | Should | Add basic telemetry for recommendation requests and failures. | TL | `/api/recommendations` now emits request/success/failure events with requestId + latency via the shared telemetry logger for quick log-based metrics. |
+| [x] | Should | Validate mobile SSR experience and basic accessibility for the flow. | FE | Onboarding + recommendation UIs now expose aria labels/live regions and stack actions cleanly at 360px for the demo-ready sweep. |
 
 ## Dependencies
 - Phase 0 foundations available:

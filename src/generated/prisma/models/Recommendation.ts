@@ -226,10 +226,10 @@ export type RecommendationWhereInput = {
   metadata?: Prisma.JsonNullableFilter<"Recommendation">
   createdAt?: Prisma.DateTimeFilter<"Recommendation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Recommendation"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  recipe?: Prisma.XOR<Prisma.RecipeScalarRelationFilter, Prisma.RecipeWhereInput>
-  healthySwapRecipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   feedback?: Prisma.FeedbackListRelationFilter
+  healthySwapRecipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
+  recipe?: Prisma.XOR<Prisma.RecipeScalarRelationFilter, Prisma.RecipeWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type RecommendationOrderByWithRelationInput = {
@@ -244,10 +244,10 @@ export type RecommendationOrderByWithRelationInput = {
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
-  recipe?: Prisma.RecipeOrderByWithRelationInput
-  healthySwapRecipe?: Prisma.RecipeOrderByWithRelationInput
   feedback?: Prisma.FeedbackOrderByRelationAggregateInput
+  healthySwapRecipe?: Prisma.RecipeOrderByWithRelationInput
+  recipe?: Prisma.RecipeOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type RecommendationWhereUniqueInput = Prisma.AtLeast<{
@@ -265,10 +265,10 @@ export type RecommendationWhereUniqueInput = Prisma.AtLeast<{
   metadata?: Prisma.JsonNullableFilter<"Recommendation">
   createdAt?: Prisma.DateTimeFilter<"Recommendation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Recommendation"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  recipe?: Prisma.XOR<Prisma.RecipeScalarRelationFilter, Prisma.RecipeWhereInput>
-  healthySwapRecipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   feedback?: Prisma.FeedbackListRelationFilter
+  healthySwapRecipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
+  recipe?: Prisma.XOR<Prisma.RecipeScalarRelationFilter, Prisma.RecipeWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type RecommendationOrderByWithAggregationInput = {
@@ -314,10 +314,10 @@ export type RecommendationCreateInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
-  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
-  healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutRecommendationInput
+  healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
+  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
+  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
 }
 
 export type RecommendationUncheckedCreateInput = {
@@ -344,10 +344,10 @@ export type RecommendationUpdateInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
-  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
-  healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutRecommendationNestedInput
+  healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
+  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
 }
 
 export type RecommendationUncheckedUpdateInput = {
@@ -501,13 +501,6 @@ export type RecommendationUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.RecommendationScalarWhereInput | Prisma.RecommendationScalarWhereInput[]
 }
 
-export type RecommendationCreateNestedManyWithoutRecipeInput = {
-  create?: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput> | Prisma.RecommendationCreateWithoutRecipeInput[] | Prisma.RecommendationUncheckedCreateWithoutRecipeInput[]
-  connectOrCreate?: Prisma.RecommendationCreateOrConnectWithoutRecipeInput | Prisma.RecommendationCreateOrConnectWithoutRecipeInput[]
-  createMany?: Prisma.RecommendationCreateManyRecipeInputEnvelope
-  connect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
-}
-
 export type RecommendationCreateNestedManyWithoutHealthySwapRecipeInput = {
   create?: Prisma.XOR<Prisma.RecommendationCreateWithoutHealthySwapRecipeInput, Prisma.RecommendationUncheckedCreateWithoutHealthySwapRecipeInput> | Prisma.RecommendationCreateWithoutHealthySwapRecipeInput[] | Prisma.RecommendationUncheckedCreateWithoutHealthySwapRecipeInput[]
   connectOrCreate?: Prisma.RecommendationCreateOrConnectWithoutHealthySwapRecipeInput | Prisma.RecommendationCreateOrConnectWithoutHealthySwapRecipeInput[]
@@ -515,7 +508,7 @@ export type RecommendationCreateNestedManyWithoutHealthySwapRecipeInput = {
   connect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
 }
 
-export type RecommendationUncheckedCreateNestedManyWithoutRecipeInput = {
+export type RecommendationCreateNestedManyWithoutRecipeInput = {
   create?: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput> | Prisma.RecommendationCreateWithoutRecipeInput[] | Prisma.RecommendationUncheckedCreateWithoutRecipeInput[]
   connectOrCreate?: Prisma.RecommendationCreateOrConnectWithoutRecipeInput | Prisma.RecommendationCreateOrConnectWithoutRecipeInput[]
   createMany?: Prisma.RecommendationCreateManyRecipeInputEnvelope
@@ -529,18 +522,11 @@ export type RecommendationUncheckedCreateNestedManyWithoutHealthySwapRecipeInput
   connect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
 }
 
-export type RecommendationUpdateManyWithoutRecipeNestedInput = {
+export type RecommendationUncheckedCreateNestedManyWithoutRecipeInput = {
   create?: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput> | Prisma.RecommendationCreateWithoutRecipeInput[] | Prisma.RecommendationUncheckedCreateWithoutRecipeInput[]
   connectOrCreate?: Prisma.RecommendationCreateOrConnectWithoutRecipeInput | Prisma.RecommendationCreateOrConnectWithoutRecipeInput[]
-  upsert?: Prisma.RecommendationUpsertWithWhereUniqueWithoutRecipeInput | Prisma.RecommendationUpsertWithWhereUniqueWithoutRecipeInput[]
   createMany?: Prisma.RecommendationCreateManyRecipeInputEnvelope
-  set?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
-  disconnect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
-  delete?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
   connect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
-  update?: Prisma.RecommendationUpdateWithWhereUniqueWithoutRecipeInput | Prisma.RecommendationUpdateWithWhereUniqueWithoutRecipeInput[]
-  updateMany?: Prisma.RecommendationUpdateManyWithWhereWithoutRecipeInput | Prisma.RecommendationUpdateManyWithWhereWithoutRecipeInput[]
-  deleteMany?: Prisma.RecommendationScalarWhereInput | Prisma.RecommendationScalarWhereInput[]
 }
 
 export type RecommendationUpdateManyWithoutHealthySwapRecipeNestedInput = {
@@ -557,7 +543,7 @@ export type RecommendationUpdateManyWithoutHealthySwapRecipeNestedInput = {
   deleteMany?: Prisma.RecommendationScalarWhereInput | Prisma.RecommendationScalarWhereInput[]
 }
 
-export type RecommendationUncheckedUpdateManyWithoutRecipeNestedInput = {
+export type RecommendationUpdateManyWithoutRecipeNestedInput = {
   create?: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput> | Prisma.RecommendationCreateWithoutRecipeInput[] | Prisma.RecommendationUncheckedCreateWithoutRecipeInput[]
   connectOrCreate?: Prisma.RecommendationCreateOrConnectWithoutRecipeInput | Prisma.RecommendationCreateOrConnectWithoutRecipeInput[]
   upsert?: Prisma.RecommendationUpsertWithWhereUniqueWithoutRecipeInput | Prisma.RecommendationUpsertWithWhereUniqueWithoutRecipeInput[]
@@ -582,6 +568,20 @@ export type RecommendationUncheckedUpdateManyWithoutHealthySwapRecipeNestedInput
   connect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
   update?: Prisma.RecommendationUpdateWithWhereUniqueWithoutHealthySwapRecipeInput | Prisma.RecommendationUpdateWithWhereUniqueWithoutHealthySwapRecipeInput[]
   updateMany?: Prisma.RecommendationUpdateManyWithWhereWithoutHealthySwapRecipeInput | Prisma.RecommendationUpdateManyWithWhereWithoutHealthySwapRecipeInput[]
+  deleteMany?: Prisma.RecommendationScalarWhereInput | Prisma.RecommendationScalarWhereInput[]
+}
+
+export type RecommendationUncheckedUpdateManyWithoutRecipeNestedInput = {
+  create?: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput> | Prisma.RecommendationCreateWithoutRecipeInput[] | Prisma.RecommendationUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.RecommendationCreateOrConnectWithoutRecipeInput | Prisma.RecommendationCreateOrConnectWithoutRecipeInput[]
+  upsert?: Prisma.RecommendationUpsertWithWhereUniqueWithoutRecipeInput | Prisma.RecommendationUpsertWithWhereUniqueWithoutRecipeInput[]
+  createMany?: Prisma.RecommendationCreateManyRecipeInputEnvelope
+  set?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
+  disconnect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
+  delete?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
+  connect?: Prisma.RecommendationWhereUniqueInput | Prisma.RecommendationWhereUniqueInput[]
+  update?: Prisma.RecommendationUpdateWithWhereUniqueWithoutRecipeInput | Prisma.RecommendationUpdateWithWhereUniqueWithoutRecipeInput[]
+  updateMany?: Prisma.RecommendationUpdateManyWithWhereWithoutRecipeInput | Prisma.RecommendationUpdateManyWithWhereWithoutRecipeInput[]
   deleteMany?: Prisma.RecommendationScalarWhereInput | Prisma.RecommendationScalarWhereInput[]
 }
 
@@ -612,9 +612,9 @@ export type RecommendationCreateWithoutUserInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
-  healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutRecommendationInput
+  healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
+  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
 }
 
 export type RecommendationUncheckedCreateWithoutUserInput = {
@@ -674,44 +674,6 @@ export type RecommendationScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Recommendation"> | Date | string
 }
 
-export type RecommendationCreateWithoutRecipeInput = {
-  id?: string
-  rationale: string
-  healthySwapRationale?: string | null
-  status?: $Enums.RecommendationStatus
-  sessionId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
-  healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
-  feedback?: Prisma.FeedbackCreateNestedManyWithoutRecommendationInput
-}
-
-export type RecommendationUncheckedCreateWithoutRecipeInput = {
-  id?: string
-  userId: string
-  healthySwapRecipeId?: string | null
-  rationale: string
-  healthySwapRationale?: string | null
-  status?: $Enums.RecommendationStatus
-  sessionId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutRecommendationInput
-}
-
-export type RecommendationCreateOrConnectWithoutRecipeInput = {
-  where: Prisma.RecommendationWhereUniqueInput
-  create: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput>
-}
-
-export type RecommendationCreateManyRecipeInputEnvelope = {
-  data: Prisma.RecommendationCreateManyRecipeInput | Prisma.RecommendationCreateManyRecipeInput[]
-  skipDuplicates?: boolean
-}
-
 export type RecommendationCreateWithoutHealthySwapRecipeInput = {
   id?: string
   rationale: string
@@ -721,9 +683,9 @@ export type RecommendationCreateWithoutHealthySwapRecipeInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
-  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutRecommendationInput
+  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
+  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
 }
 
 export type RecommendationUncheckedCreateWithoutHealthySwapRecipeInput = {
@@ -750,20 +712,42 @@ export type RecommendationCreateManyHealthySwapRecipeInputEnvelope = {
   skipDuplicates?: boolean
 }
 
-export type RecommendationUpsertWithWhereUniqueWithoutRecipeInput = {
+export type RecommendationCreateWithoutRecipeInput = {
+  id?: string
+  rationale: string
+  healthySwapRationale?: string | null
+  status?: $Enums.RecommendationStatus
+  sessionId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutRecommendationInput
+  healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
+  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
+}
+
+export type RecommendationUncheckedCreateWithoutRecipeInput = {
+  id?: string
+  userId: string
+  healthySwapRecipeId?: string | null
+  rationale: string
+  healthySwapRationale?: string | null
+  status?: $Enums.RecommendationStatus
+  sessionId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutRecommendationInput
+}
+
+export type RecommendationCreateOrConnectWithoutRecipeInput = {
   where: Prisma.RecommendationWhereUniqueInput
-  update: Prisma.XOR<Prisma.RecommendationUpdateWithoutRecipeInput, Prisma.RecommendationUncheckedUpdateWithoutRecipeInput>
   create: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput>
 }
 
-export type RecommendationUpdateWithWhereUniqueWithoutRecipeInput = {
-  where: Prisma.RecommendationWhereUniqueInput
-  data: Prisma.XOR<Prisma.RecommendationUpdateWithoutRecipeInput, Prisma.RecommendationUncheckedUpdateWithoutRecipeInput>
-}
-
-export type RecommendationUpdateManyWithWhereWithoutRecipeInput = {
-  where: Prisma.RecommendationScalarWhereInput
-  data: Prisma.XOR<Prisma.RecommendationUpdateManyMutationInput, Prisma.RecommendationUncheckedUpdateManyWithoutRecipeInput>
+export type RecommendationCreateManyRecipeInputEnvelope = {
+  data: Prisma.RecommendationCreateManyRecipeInput | Prisma.RecommendationCreateManyRecipeInput[]
+  skipDuplicates?: boolean
 }
 
 export type RecommendationUpsertWithWhereUniqueWithoutHealthySwapRecipeInput = {
@@ -782,6 +766,22 @@ export type RecommendationUpdateManyWithWhereWithoutHealthySwapRecipeInput = {
   data: Prisma.XOR<Prisma.RecommendationUpdateManyMutationInput, Prisma.RecommendationUncheckedUpdateManyWithoutHealthySwapRecipeInput>
 }
 
+export type RecommendationUpsertWithWhereUniqueWithoutRecipeInput = {
+  where: Prisma.RecommendationWhereUniqueInput
+  update: Prisma.XOR<Prisma.RecommendationUpdateWithoutRecipeInput, Prisma.RecommendationUncheckedUpdateWithoutRecipeInput>
+  create: Prisma.XOR<Prisma.RecommendationCreateWithoutRecipeInput, Prisma.RecommendationUncheckedCreateWithoutRecipeInput>
+}
+
+export type RecommendationUpdateWithWhereUniqueWithoutRecipeInput = {
+  where: Prisma.RecommendationWhereUniqueInput
+  data: Prisma.XOR<Prisma.RecommendationUpdateWithoutRecipeInput, Prisma.RecommendationUncheckedUpdateWithoutRecipeInput>
+}
+
+export type RecommendationUpdateManyWithWhereWithoutRecipeInput = {
+  where: Prisma.RecommendationScalarWhereInput
+  data: Prisma.XOR<Prisma.RecommendationUpdateManyMutationInput, Prisma.RecommendationUncheckedUpdateManyWithoutRecipeInput>
+}
+
 export type RecommendationCreateWithoutFeedbackInput = {
   id?: string
   rationale: string
@@ -791,9 +791,9 @@ export type RecommendationCreateWithoutFeedbackInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
-  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
   healthySwapRecipe?: Prisma.RecipeCreateNestedOneWithoutHealthySwapForInput
+  recipe: Prisma.RecipeCreateNestedOneWithoutRecommendationsInput
+  user: Prisma.UserCreateNestedOneWithoutRecommendationsInput
 }
 
 export type RecommendationUncheckedCreateWithoutFeedbackInput = {
@@ -835,9 +835,9 @@ export type RecommendationUpdateWithoutFeedbackInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
-  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
   healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
+  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
 }
 
 export type RecommendationUncheckedUpdateWithoutFeedbackInput = {
@@ -876,9 +876,9 @@ export type RecommendationUpdateWithoutUserInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
-  healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutRecommendationNestedInput
+  healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
+  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
 }
 
 export type RecommendationUncheckedUpdateWithoutUserInput = {
@@ -908,19 +908,6 @@ export type RecommendationUncheckedUpdateManyWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type RecommendationCreateManyRecipeInput = {
-  id?: string
-  userId: string
-  healthySwapRecipeId?: string | null
-  rationale: string
-  healthySwapRationale?: string | null
-  status?: $Enums.RecommendationStatus
-  sessionId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
 export type RecommendationCreateManyHealthySwapRecipeInput = {
   id?: string
   userId: string
@@ -934,45 +921,17 @@ export type RecommendationCreateManyHealthySwapRecipeInput = {
   updatedAt?: Date | string
 }
 
-export type RecommendationUpdateWithoutRecipeInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  rationale?: Prisma.StringFieldUpdateOperationsInput | string
-  healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
-  sessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+export type RecommendationCreateManyRecipeInput = {
+  id?: string
+  userId: string
+  healthySwapRecipeId?: string | null
+  rationale: string
+  healthySwapRationale?: string | null
+  status?: $Enums.RecommendationStatus
+  sessionId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
-  healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
-  feedback?: Prisma.FeedbackUpdateManyWithoutRecommendationNestedInput
-}
-
-export type RecommendationUncheckedUpdateWithoutRecipeInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  healthySwapRecipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rationale?: Prisma.StringFieldUpdateOperationsInput | string
-  healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
-  sessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutRecommendationNestedInput
-}
-
-export type RecommendationUncheckedUpdateManyWithoutRecipeInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  healthySwapRecipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rationale?: Prisma.StringFieldUpdateOperationsInput | string
-  healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
-  sessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RecommendationUpdateWithoutHealthySwapRecipeInput = {
@@ -984,9 +943,9 @@ export type RecommendationUpdateWithoutHealthySwapRecipeInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
-  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutRecommendationNestedInput
+  recipe?: Prisma.RecipeUpdateOneRequiredWithoutRecommendationsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
 }
 
 export type RecommendationUncheckedUpdateWithoutHealthySwapRecipeInput = {
@@ -1007,6 +966,47 @@ export type RecommendationUncheckedUpdateManyWithoutHealthySwapRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   recipeId?: Prisma.StringFieldUpdateOperationsInput | string
+  rationale?: Prisma.StringFieldUpdateOperationsInput | string
+  healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
+  sessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RecommendationUpdateWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rationale?: Prisma.StringFieldUpdateOperationsInput | string
+  healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
+  sessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUpdateManyWithoutRecommendationNestedInput
+  healthySwapRecipe?: Prisma.RecipeUpdateOneWithoutHealthySwapForNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutRecommendationsNestedInput
+}
+
+export type RecommendationUncheckedUpdateWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  healthySwapRecipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rationale?: Prisma.StringFieldUpdateOperationsInput | string
+  healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
+  sessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutRecommendationNestedInput
+}
+
+export type RecommendationUncheckedUpdateManyWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  healthySwapRecipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rationale?: Prisma.StringFieldUpdateOperationsInput | string
   healthySwapRationale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumRecommendationStatusFieldUpdateOperationsInput | $Enums.RecommendationStatus
@@ -1059,10 +1059,10 @@ export type RecommendationSelect<ExtArgs extends runtime.Types.Extensions.Intern
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
-  healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
   feedback?: boolean | Prisma.Recommendation$feedbackArgs<ExtArgs>
+  healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
+  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.RecommendationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["recommendation"]>
 
@@ -1078,9 +1078,9 @@ export type RecommendationSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
   healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
+  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["recommendation"]>
 
 export type RecommendationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1095,9 +1095,9 @@ export type RecommendationSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
   healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
+  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["recommendation"]>
 
 export type RecommendationSelectScalar = {
@@ -1116,30 +1116,30 @@ export type RecommendationSelectScalar = {
 
 export type RecommendationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "recipeId" | "healthySwapRecipeId" | "rationale" | "healthySwapRationale" | "status" | "sessionId" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["recommendation"]>
 export type RecommendationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
-  healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
   feedback?: boolean | Prisma.Recommendation$feedbackArgs<ExtArgs>
+  healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
+  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.RecommendationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RecommendationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
   healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
+  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type RecommendationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
   healthySwapRecipe?: boolean | Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>
+  recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $RecommendationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Recommendation"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
-    recipe: Prisma.$RecipePayload<ExtArgs>
-    healthySwapRecipe: Prisma.$RecipePayload<ExtArgs> | null
     feedback: Prisma.$FeedbackPayload<ExtArgs>[]
+    healthySwapRecipe: Prisma.$RecipePayload<ExtArgs> | null
+    recipe: Prisma.$RecipePayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1547,10 +1547,10 @@ readonly fields: RecommendationFieldRefs;
  */
 export interface Prisma__RecommendationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  recipe<T extends Prisma.RecipeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RecipeDefaultArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  healthySwapRecipe<T extends Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   feedback<T extends Prisma.Recommendation$feedbackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Recommendation$feedbackArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  healthySwapRecipe<T extends Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Recommendation$healthySwapRecipeArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  recipe<T extends Prisma.RecipeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RecipeDefaultArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1987,25 +1987,6 @@ export type RecommendationDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
- * Recommendation.healthySwapRecipe
- */
-export type Recommendation$healthySwapRecipeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Recipe
-   */
-  select?: Prisma.RecipeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Recipe
-   */
-  omit?: Prisma.RecipeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RecipeInclude<ExtArgs> | null
-  where?: Prisma.RecipeWhereInput
-}
-
-/**
  * Recommendation.feedback
  */
 export type Recommendation$feedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2027,6 +2008,25 @@ export type Recommendation$feedbackArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.FeedbackScalarFieldEnum | Prisma.FeedbackScalarFieldEnum[]
+}
+
+/**
+ * Recommendation.healthySwapRecipe
+ */
+export type Recommendation$healthySwapRecipeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Recipe
+   */
+  select?: Prisma.RecipeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Recipe
+   */
+  omit?: Prisma.RecipeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecipeInclude<ExtArgs> | null
+  where?: Prisma.RecipeWhereInput
 }
 
 /**

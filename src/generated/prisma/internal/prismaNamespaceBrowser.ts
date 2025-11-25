@@ -161,6 +161,7 @@ export const FeedbackScalarFieldEnum = {
   id: 'id',
   recommendationId: 'recommendationId',
   userId: 'userId',
+  action: 'action',
   sentiment: 'sentiment',
   notes: 'notes',
   createdAt: 'createdAt'

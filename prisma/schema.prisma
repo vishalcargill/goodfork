@@ -93,6 +93,7 @@ model Feedback {
   id               String            @id @default(cuid())
   recommendationId String
   userId           String
+  action           FeedbackAction
   sentiment        FeedbackSentiment @default(NEUTRAL)
   notes            String?
   createdAt        DateTime          @default(now())
@@ -130,6 +131,12 @@ enum FeedbackSentiment {
   POSITIVE
   NEUTRAL
   NEGATIVE
+}
+
+enum FeedbackAction {
+  ACCEPT
+  SAVE
+  SWAP
 }
 
 enum InventoryStatus {

@@ -198,9 +198,15 @@ export function OnboardingFlow() {
                       onChange={(event) => updateField("name", event.target.value)}
                       placeholder='Jordan Winters'
                       className='w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
+                      aria-invalid={Boolean(fieldError("name"))}
+                      aria-describedby={fieldError("name") ? "onboarding-name-error" : undefined}
                       autoComplete='name'
                     />
-                    {fieldError("name") && <span className='text-xs text-rose-600'>{fieldError("name")}</span>}
+                    {fieldError("name") && (
+                      <span id='onboarding-name-error' className='text-xs text-rose-600'>
+                        {fieldError("name")}
+                      </span>
+                    )}
                   </label>
                   <label className='block space-y-2 text-sm font-medium text-slate-800'>
                     Email
@@ -210,9 +216,15 @@ export function OnboardingFlow() {
                       onChange={(event) => updateField("email", event.target.value)}
                       placeholder='you@goodfork.com'
                       className='w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
+                      aria-invalid={Boolean(fieldError("email"))}
+                      aria-describedby={fieldError("email") ? "onboarding-email-error" : undefined}
                       autoComplete='email'
                     />
-                    {fieldError("email") && <span className='text-xs text-rose-600'>{fieldError("email")}</span>}
+                    {fieldError("email") && (
+                      <span id='onboarding-email-error' className='text-xs text-rose-600'>
+                        {fieldError("email")}
+                      </span>
+                    )}
                   </label>
                   <label className='block space-y-2 text-sm font-medium text-slate-800'>
                     Password
@@ -222,16 +234,22 @@ export function OnboardingFlow() {
                       onChange={(event) => updateField("password", event.target.value)}
                       placeholder='••••••••'
                       className='w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
+                      aria-invalid={Boolean(fieldError("password"))}
+                      aria-describedby={fieldError("password") ? "onboarding-password-error" : undefined}
                       autoComplete='new-password'
                     />
-                    {fieldError("password") && <span className='text-xs text-rose-600'>{fieldError("password")}</span>}
+                    {fieldError("password") && (
+                      <span id='onboarding-password-error' className='text-xs text-rose-600'>
+                        {fieldError("password")}
+                      </span>
+                    )}
                   </label>
                 </>
               )}
 
               {stepIndex === 1 && (
                 <>
-                  <div className='space-y-3'>
+                  <div className='space-y-3' role='group' aria-label='Primary goals'>
                     <p className='text-sm font-semibold text-slate-900'>Primary goals</p>
                     <div className='grid gap-3 sm:grid-cols-2'>
                       {goalOptions.map((goal) => {
@@ -247,6 +265,7 @@ export function OnboardingFlow() {
                                 ? "border-emerald-500 bg-white text-emerald-800 shadow-[0_12px_30px_rgba(16,185,129,0.18)]"
                                 : "border-emerald-100 bg-white text-slate-700 hover:border-emerald-300"
                             )}
+                            aria-pressed={active}
                           >
                             <p className='text-sm font-semibold'>{goal.label}</p>
                             <p className='text-xs text-slate-500'>{goal.helper}</p>
@@ -259,7 +278,7 @@ export function OnboardingFlow() {
                     )}
                   </div>
 
-                  <div className='space-y-3'>
+                  <div className='space-y-3' role='group' aria-label='Allergens to avoid'>
                     <p className='text-sm font-semibold text-slate-900'>Allergens to avoid</p>
                     <div className='flex flex-wrap gap-2'>
                       {allergenOptions.map((option) => {
@@ -275,6 +294,7 @@ export function OnboardingFlow() {
                                 ? "border-rose-200 bg-rose-50 text-rose-700"
                                 : "border-emerald-100 bg-white text-slate-600 hover:border-emerald-200"
                             )}
+                            aria-pressed={active}
                           >
                             {option.label}
                           </button>
@@ -287,7 +307,7 @@ export function OnboardingFlow() {
 
               {stepIndex === 2 && (
                 <>
-                  <div className='space-y-3'>
+                  <div className='space-y-3' role='group' aria-label='Dietary styles'>
                     <p className='text-sm font-semibold text-slate-900'>Dietary styles</p>
                     <div className='flex flex-wrap gap-2'>
                       {dietOptions.map((diet) => {
@@ -303,6 +323,7 @@ export function OnboardingFlow() {
                                 ? "border-emerald-400 bg-emerald-50 text-emerald-800"
                                 : "border-emerald-100 bg-white text-slate-600 hover:border-emerald-200"
                             )}
+                            aria-pressed={active}
                           >
                             {diet.label}
                           </button>
@@ -313,7 +334,7 @@ export function OnboardingFlow() {
                       <p className='text-xs text-rose-600'>{fieldError("dietaryPreferences")}</p>
                     )}
                   </div>
-                  <div className='space-y-3'>
+                  <div className='space-y-3' role='group' aria-label='Taste profile'>
                     <p className='text-sm font-semibold text-slate-900'>Taste profile</p>
                     <div className='flex flex-wrap gap-2'>
                       {tasteOptions.map((taste) => {
@@ -329,6 +350,7 @@ export function OnboardingFlow() {
                                 ? "border-lime-400 bg-lime-50 text-emerald-800"
                                 : "border-emerald-100 bg-white text-slate-600 hover:border-emerald-200"
                             )}
+                            aria-pressed={active}
                           >
                             {taste.label}
                           </button>
@@ -336,7 +358,7 @@ export function OnboardingFlow() {
                       })}
                     </div>
                   </div>
-                  <div className='space-y-3'>
+                  <div className='space-y-3' role='group' aria-label='Budget band'>
                     <p className='text-sm font-semibold text-slate-900'>Budget band</p>
                     <div className='grid gap-3 sm:grid-cols-3'>
                       {budgetOptions.map((band) => {
@@ -352,6 +374,7 @@ export function OnboardingFlow() {
                                 ? "border-emerald-400 bg-white text-emerald-800 shadow-[0_12px_30px_rgba(16,185,129,0.18)]"
                                 : "border-emerald-100 bg-white text-slate-700 hover:border-emerald-300"
                             )}
+                            aria-pressed={active}
                           >
                             <p>{band.label}</p>
                             <p className='text-xs font-normal text-slate-500'>{band.helper}</p>
@@ -370,9 +393,13 @@ export function OnboardingFlow() {
                       onChange={(event) => updateField("lifestyleNotes", event.target.value)}
                       placeholder='E.g., remote work lunches, training for a half marathon, etc.'
                       className='h-28 w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
+                      aria-invalid={Boolean(fieldError("lifestyleNotes"))}
+                      aria-describedby={fieldError("lifestyleNotes") ? "onboarding-notes-error" : undefined}
                     />
                     {fieldError("lifestyleNotes") && (
-                      <span className='text-xs text-rose-600'>{fieldError("lifestyleNotes")}</span>
+                      <span id='onboarding-notes-error' className='text-xs text-rose-600'>
+                        {fieldError("lifestyleNotes")}
+                      </span>
                     )}
                   </label>
                 </>
@@ -434,10 +461,18 @@ export function OnboardingFlow() {
             )}
           </div>
 
-          {!showSuccess && result && !result.success && <p className='text-sm text-rose-600'>{result.message}</p>}
+          {!showSuccess && result && !result.success && (
+            <p className='text-sm text-rose-600' role='alert' aria-live='assertive'>
+              {result.message}
+            </p>
+          )}
         </div>
         {showSuccess ? (
-          <div className='rounded-3xl border border-emerald-100 bg-white p-6 text-sm text-emerald-800 shadow-[0_18px_45px_rgba(16,185,129,0.18)]'>
+          <div
+            className='rounded-3xl border border-emerald-100 bg-white p-6 text-sm text-emerald-800 shadow-[0_18px_45px_rgba(16,185,129,0.18)]'
+            role='status'
+            aria-live='polite'
+          >
             <p className='flex items-center gap-2 text-emerald-700'>
               <CheckCircle2 className='h-4 w-4' />
               {result?.message}

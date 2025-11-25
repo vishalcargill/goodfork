@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/common/logo.component";
+import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
 
 const navLinks = [
   { label: "Product", href: "#product" },
@@ -21,15 +22,25 @@ export function Footer() {
           <Logo tagline="AI-powered nutrition" />
         </Link>
         <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-700">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="transition hover:text-emerald-700"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.href.startsWith("#") ? (
+              <SmoothScrollLink
+                key={link.href}
+                targetId={link.href.replace("#", "")}
+                className="cursor-pointer transition hover:text-emerald-700"
+              >
+                {link.label}
+              </SmoothScrollLink>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="transition hover:text-emerald-700"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </div>
         <p className="text-xs text-slate-500">
           Crafted for the Hackathon · Nutrition-first, inventory-aware menus

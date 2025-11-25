@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  AlertCircle,
+  Bookmark,
+  CheckCircle2,
+  Loader2,
+  Repeat2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useFeedbackMutation } from "@/services/client/feedback.client";
 import { useRecommendationsMutation } from "@/services/client/recommendations.client";
+import type { FeedbackEventPayload } from "@/schema/feedback.schema";
 import type {
   RecommendationCard,
   RecommendationResponse,
@@ -118,18 +128,30 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
           </div>
         </div>
         <div className='mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-emerald-700'>
-          <span className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-4 py-1'>
+          <span
+            className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-4 py-1'
+            role='status'
+            aria-live='polite'
+          >
             <ShieldCheck className='h-3.5 w-3.5 text-emerald-500' />
             {statusLabel}
           </span>
           {localError ? (
-            <span className='inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-1 text-rose-700'>
+            <span
+              className='inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-1 text-rose-700'
+              role='alert'
+              aria-live='assertive'
+            >
               <AlertCircle className='h-3.5 w-3.5' />
               {localError}
             </span>
           ) : null}
           {data && !data.success ? (
-            <span className='inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1 text-amber-800'>
+            <span
+              className='inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1 text-amber-800'
+              role='alert'
+              aria-live='assertive'
+            >
               <AlertCircle className='h-3.5 w-3.5' />
               {data.message}
             </span>
@@ -170,15 +192,88 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
       </div>
       <div className='grid gap-4 md:grid-cols-3'>
         {apiResponse.recommendations.map((card) => (
-          <RecommendationCard key={card.recommendationId} card={card} />
+          <RecommendationCard key={card.recommendationId} card={card} userId={apiResponse.userId} />
         ))}
       </div>
     </div>
   );
 }
 
-function RecommendationCard({ card }: { card: RecommendationCard }) {
+type FeedbackAction = FeedbackEventPayload["action"];
+
+function RecommendationCard({ card, userId }: { card: RecommendationCard; userId: string }) {
   const statusTheme = statusCopy[card.inventory.status];
+  const feedbackMutation = useFeedbackMutation();
+  const [lastAction, setLastAction] = useState<FeedbackAction | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<FeedbackAction | null>(null);
+  const actionOrder: FeedbackAction[] = ["ACCEPT", "SAVE", "SWAP"];
+  const swapDescription = card.swapRecipe
+    ? `Swap for ${card.swapRecipe.title}`
+    : "Request a lighter pick";
+
+  const actionConfigs: Record<
+    FeedbackAction,
+    { label: string; description: string; className: string; icon: JSX.Element }
+  > = {
+    ACCEPT: {
+      label: "Accept",
+      description: "Add to today's plate",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      icon: <CheckCircle2 className='h-4 w-4 text-emerald-600' />,
+    },
+    SAVE: {
+      label: "Save",
+      description: "Shortlist to revisit later",
+      className: "border-slate-200 bg-white text-slate-900",
+      icon: <Bookmark className='h-4 w-4 text-slate-500' />,
+    },
+    SWAP: {
+      label: "Request swap",
+      description: swapDescription,
+      className: "border-amber-200 bg-amber-50 text-amber-900",
+      icon: <Repeat2 className='h-4 w-4 text-amber-600' />,
+    },
+  };
+
+  const successCopy: Record<FeedbackAction, string> = {
+    ACCEPT: "Locked in — we'll prioritize this in your next visit.",
+    SAVE: "Saved to your shortlist. We'll nudge you when inventory changes.",
+    SWAP: "Swap request logged. Expect lighter picks next time.",
+  };
+
+  const isPending = feedbackMutation.isPending;
+
+  function handleAction(action: FeedbackAction, note?: string | null) {
+    if (isPending) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setPendingAction(action);
+
+    const trimmedNote = note && note.trim().length >= 2 ? note.trim() : undefined;
+
+    feedbackMutation.mutate(
+      {
+        recommendationId: card.recommendationId,
+        userId,
+        action,
+        ...(trimmedNote ? { notes: trimmedNote } : {}),
+      },
+      {
+        onSuccess: () => {
+          setLastAction(action);
+        },
+        onError: (error) => {
+          setErrorMessage(error.message || "Unable to capture that signal. Try again.");
+        },
+        onSettled: () => {
+          setPendingAction(null);
+        },
+      }
+    );
+  }
 
   return (
     <article className='group flex h-full flex-col justify-between rounded-3xl border border-emerald-100 bg-white p-5 shadow-[0_14px_36px_rgba(16,185,129,0.18)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_20px_56px_rgba(16,185,129,0.25)]'>
@@ -228,6 +323,65 @@ function RecommendationCard({ card }: { card: RecommendationCard }) {
                 Alt: <span className='font-semibold'>{card.swapRecipe.title}</span>
               </p>
             ) : null}
+          </div>
+        ) : null}
+
+        <div className='flex flex-col gap-2 pt-1 text-sm sm:flex-row sm:flex-wrap' role='group' aria-label='Feedback actions'>
+          {actionOrder.map((action) => {
+            const config = actionConfigs[action];
+            const note =
+              action === "SWAP"
+                ? card.swapRecipe?.title ?? card.healthySwapCopy ?? undefined
+                : undefined;
+            const descriptionId = `${card.recommendationId}-${action}-desc`;
+
+            return (
+              <button
+                key={`${card.recommendationId}-${action}`}
+                type='button'
+                onClick={() => handleAction(action, note)}
+                disabled={isPending}
+                aria-describedby={descriptionId}
+                className={cn(
+                  "flex w-full min-w-0 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[150px] sm:flex-1",
+                  config.className
+                )}
+              >
+                {pendingAction === action && isPending ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  config.icon
+                )}
+                <div className='flex-1 text-xs font-normal leading-tight'>
+                  <p className='text-sm font-semibold'>{config.label}</p>
+                  <p id={descriptionId} className='text-[11px] text-slate-600'>
+                    {config.description}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {lastAction ? (
+          <div
+            className='flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-2 text-sm text-emerald-800'
+            role='status'
+            aria-live='polite'
+          >
+            <CheckCircle2 className='h-4 w-4 text-emerald-600' />
+            <span>{successCopy[lastAction]}</span>
+          </div>
+        ) : null}
+
+        {errorMessage ? (
+          <div
+            className='flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700'
+            role='alert'
+            aria-live='assertive'
+          >
+            <AlertCircle className='h-4 w-4' />
+            <span>{errorMessage}</span>
           </div>
         ) : null}
       </div>

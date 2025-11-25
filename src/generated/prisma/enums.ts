@@ -29,6 +29,15 @@ export const FeedbackSentiment = {
 export type FeedbackSentiment = (typeof FeedbackSentiment)[keyof typeof FeedbackSentiment]
 
 
+export const FeedbackAction = {
+  ACCEPT: 'ACCEPT',
+  SAVE: 'SAVE',
+  SWAP: 'SWAP'
+} as const
+
+export type FeedbackAction = (typeof FeedbackAction)[keyof typeof FeedbackAction]
+
+
 export const InventoryStatus = {
   IN_STOCK: 'IN_STOCK',
   LOW_STOCK: 'LOW_STOCK',

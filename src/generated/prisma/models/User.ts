@@ -190,10 +190,10 @@ export type UserWhereInput = {
   passwordHash?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  feedback?: Prisma.FeedbackListRelationFilter
+  recommendations?: Prisma.RecommendationListRelationFilter
   profile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
   sessions?: Prisma.UserSessionListRelationFilter
-  recommendations?: Prisma.RecommendationListRelationFilter
-  feedback?: Prisma.FeedbackListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -203,10 +203,10 @@ export type UserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  feedback?: Prisma.FeedbackOrderByRelationAggregateInput
+  recommendations?: Prisma.RecommendationOrderByRelationAggregateInput
   profile?: Prisma.UserProfileOrderByWithRelationInput
   sessions?: Prisma.UserSessionOrderByRelationAggregateInput
-  recommendations?: Prisma.RecommendationOrderByRelationAggregateInput
-  feedback?: Prisma.FeedbackOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -219,10 +219,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  feedback?: Prisma.FeedbackListRelationFilter
+  recommendations?: Prisma.RecommendationListRelationFilter
   profile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
   sessions?: Prisma.UserSessionListRelationFilter
-  recommendations?: Prisma.RecommendationListRelationFilter
-  feedback?: Prisma.FeedbackListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -256,10 +256,10 @@ export type UserCreateInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
-  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
-  feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -269,10 +269,10 @@ export type UserUncheckedCreateInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
-  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
-  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -282,10 +282,10 @@ export type UserUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
-  feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -295,10 +295,10 @@ export type UserUncheckedUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
-  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -431,9 +431,9 @@ export type UserCreateWithoutProfileInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
-  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -443,9 +443,9 @@ export type UserUncheckedCreateWithoutProfileInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
-  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -471,9 +471,9 @@ export type UserUpdateWithoutProfileInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -483,9 +483,9 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecommendationsInput = {
@@ -495,9 +495,9 @@ export type UserCreateWithoutRecommendationsInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
-  feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecommendationsInput = {
@@ -507,9 +507,9 @@ export type UserUncheckedCreateWithoutRecommendationsInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
-  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecommendationsInput = {
@@ -535,9 +535,9 @@ export type UserUpdateWithoutRecommendationsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
-  feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecommendationsInput = {
@@ -547,9 +547,9 @@ export type UserUncheckedUpdateWithoutRecommendationsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
-  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFeedbackInput = {
@@ -559,9 +559,9 @@ export type UserCreateWithoutFeedbackInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
-  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFeedbackInput = {
@@ -571,9 +571,9 @@ export type UserUncheckedCreateWithoutFeedbackInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
-  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFeedbackInput = {
@@ -599,9 +599,9 @@ export type UserUpdateWithoutFeedbackInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFeedbackInput = {
@@ -611,9 +611,9 @@ export type UserUncheckedUpdateWithoutFeedbackInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -623,9 +623,9 @@ export type UserCreateWithoutSessionsInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
-  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -635,9 +635,9 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   passwordHash: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
-  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -663,9 +663,9 @@ export type UserUpdateWithoutSessionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -675,9 +675,9 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
-  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -686,15 +686,15 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
  */
 
 export type UserCountOutputType = {
-  sessions: number
-  recommendations: number
   feedback: number
+  recommendations: number
+  sessions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
-  recommendations?: boolean | UserCountOutputTypeCountRecommendationsArgs
   feedback?: boolean | UserCountOutputTypeCountFeedbackArgs
+  recommendations?: boolean | UserCountOutputTypeCountRecommendationsArgs
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
 }
 
 /**
@@ -710,8 +710,8 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserSessionWhereInput
+export type UserCountOutputTypeCountFeedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FeedbackWhereInput
 }
 
 /**
@@ -724,8 +724,8 @@ export type UserCountOutputTypeCountRecommendationsArgs<ExtArgs extends runtime.
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountFeedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.FeedbackWhereInput
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserSessionWhereInput
 }
 
 
@@ -736,10 +736,10 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
+  recommendations?: boolean | Prisma.User$recommendationsArgs<ExtArgs>
   profile?: boolean | Prisma.User$profileArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
-  recommendations?: boolean | Prisma.User$recommendationsArgs<ExtArgs>
-  feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -772,10 +772,10 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
+  recommendations?: boolean | Prisma.User$recommendationsArgs<ExtArgs>
   profile?: boolean | Prisma.User$profileArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
-  recommendations?: boolean | Prisma.User$recommendationsArgs<ExtArgs>
-  feedback?: boolean | Prisma.User$feedbackArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -784,10 +784,10 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    feedback: Prisma.$FeedbackPayload<ExtArgs>[]
+    recommendations: Prisma.$RecommendationPayload<ExtArgs>[]
     profile: Prisma.$UserProfilePayload<ExtArgs> | null
     sessions: Prisma.$UserSessionPayload<ExtArgs>[]
-    recommendations: Prisma.$RecommendationPayload<ExtArgs>[]
-    feedback: Prisma.$FeedbackPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1190,10 +1190,10 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  feedback<T extends Prisma.User$feedbackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$feedbackArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recommendations<T extends Prisma.User$recommendationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recommendationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecommendationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   profile<T extends Prisma.User$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$profileArgs<ExtArgs>>): Prisma.Prisma__UserProfileClient<runtime.Types.Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  recommendations<T extends Prisma.User$recommendationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recommendationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecommendationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  feedback<T extends Prisma.User$feedbackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$feedbackArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1617,6 +1617,54 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * User.feedback
+ */
+export type User$feedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Feedback
+   */
+  select?: Prisma.FeedbackSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Feedback
+   */
+  omit?: Prisma.FeedbackOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FeedbackInclude<ExtArgs> | null
+  where?: Prisma.FeedbackWhereInput
+  orderBy?: Prisma.FeedbackOrderByWithRelationInput | Prisma.FeedbackOrderByWithRelationInput[]
+  cursor?: Prisma.FeedbackWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FeedbackScalarFieldEnum | Prisma.FeedbackScalarFieldEnum[]
+}
+
+/**
+ * User.recommendations
+ */
+export type User$recommendationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Recommendation
+   */
+  select?: Prisma.RecommendationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Recommendation
+   */
+  omit?: Prisma.RecommendationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecommendationInclude<ExtArgs> | null
+  where?: Prisma.RecommendationWhereInput
+  orderBy?: Prisma.RecommendationOrderByWithRelationInput | Prisma.RecommendationOrderByWithRelationInput[]
+  cursor?: Prisma.RecommendationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RecommendationScalarFieldEnum | Prisma.RecommendationScalarFieldEnum[]
+}
+
+/**
  * User.profile
  */
 export type User$profileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1657,54 +1705,6 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.UserSessionScalarFieldEnum | Prisma.UserSessionScalarFieldEnum[]
-}
-
-/**
- * User.recommendations
- */
-export type User$recommendationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Recommendation
-   */
-  select?: Prisma.RecommendationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Recommendation
-   */
-  omit?: Prisma.RecommendationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RecommendationInclude<ExtArgs> | null
-  where?: Prisma.RecommendationWhereInput
-  orderBy?: Prisma.RecommendationOrderByWithRelationInput | Prisma.RecommendationOrderByWithRelationInput[]
-  cursor?: Prisma.RecommendationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.RecommendationScalarFieldEnum | Prisma.RecommendationScalarFieldEnum[]
-}
-
-/**
- * User.feedback
- */
-export type User$feedbackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Feedback
-   */
-  select?: Prisma.FeedbackSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Feedback
-   */
-  omit?: Prisma.FeedbackOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FeedbackInclude<ExtArgs> | null
-  where?: Prisma.FeedbackWhereInput
-  orderBy?: Prisma.FeedbackOrderByWithRelationInput | Prisma.FeedbackOrderByWithRelationInput[]
-  cursor?: Prisma.FeedbackWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.FeedbackScalarFieldEnum | Prisma.FeedbackScalarFieldEnum[]
 }
 
 /**

@@ -28,6 +28,7 @@ export type FeedbackMinAggregateOutputType = {
   id: string | null
   recommendationId: string | null
   userId: string | null
+  action: $Enums.FeedbackAction | null
   sentiment: $Enums.FeedbackSentiment | null
   notes: string | null
   createdAt: Date | null
@@ -37,6 +38,7 @@ export type FeedbackMaxAggregateOutputType = {
   id: string | null
   recommendationId: string | null
   userId: string | null
+  action: $Enums.FeedbackAction | null
   sentiment: $Enums.FeedbackSentiment | null
   notes: string | null
   createdAt: Date | null
@@ -46,6 +48,7 @@ export type FeedbackCountAggregateOutputType = {
   id: number
   recommendationId: number
   userId: number
+  action: number
   sentiment: number
   notes: number
   createdAt: number
@@ -57,6 +60,7 @@ export type FeedbackMinAggregateInputType = {
   id?: true
   recommendationId?: true
   userId?: true
+  action?: true
   sentiment?: true
   notes?: true
   createdAt?: true
@@ -66,6 +70,7 @@ export type FeedbackMaxAggregateInputType = {
   id?: true
   recommendationId?: true
   userId?: true
+  action?: true
   sentiment?: true
   notes?: true
   createdAt?: true
@@ -75,6 +80,7 @@ export type FeedbackCountAggregateInputType = {
   id?: true
   recommendationId?: true
   userId?: true
+  action?: true
   sentiment?: true
   notes?: true
   createdAt?: true
@@ -157,6 +163,7 @@ export type FeedbackGroupByOutputType = {
   id: string
   recommendationId: string
   userId: string
+  action: $Enums.FeedbackAction
   sentiment: $Enums.FeedbackSentiment
   notes: string | null
   createdAt: Date
@@ -187,22 +194,24 @@ export type FeedbackWhereInput = {
   id?: Prisma.StringFilter<"Feedback"> | string
   recommendationId?: Prisma.StringFilter<"Feedback"> | string
   userId?: Prisma.StringFilter<"Feedback"> | string
+  action?: Prisma.EnumFeedbackActionFilter<"Feedback"> | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFilter<"Feedback"> | $Enums.FeedbackSentiment
   notes?: Prisma.StringNullableFilter<"Feedback"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   recommendation?: Prisma.XOR<Prisma.RecommendationScalarRelationFilter, Prisma.RecommendationWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type FeedbackOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   recommendationId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  action?: Prisma.SortOrder
   sentiment?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   recommendation?: Prisma.RecommendationOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type FeedbackWhereUniqueInput = Prisma.AtLeast<{
@@ -212,17 +221,19 @@ export type FeedbackWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.FeedbackWhereInput | Prisma.FeedbackWhereInput[]
   recommendationId?: Prisma.StringFilter<"Feedback"> | string
   userId?: Prisma.StringFilter<"Feedback"> | string
+  action?: Prisma.EnumFeedbackActionFilter<"Feedback"> | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFilter<"Feedback"> | $Enums.FeedbackSentiment
   notes?: Prisma.StringNullableFilter<"Feedback"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   recommendation?: Prisma.XOR<Prisma.RecommendationScalarRelationFilter, Prisma.RecommendationWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type FeedbackOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   recommendationId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  action?: Prisma.SortOrder
   sentiment?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -238,6 +249,7 @@ export type FeedbackScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Feedback"> | string
   recommendationId?: Prisma.StringWithAggregatesFilter<"Feedback"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Feedback"> | string
+  action?: Prisma.EnumFeedbackActionWithAggregatesFilter<"Feedback"> | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentWithAggregatesFilter<"Feedback"> | $Enums.FeedbackSentiment
   notes?: Prisma.StringNullableWithAggregatesFilter<"Feedback"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Feedback"> | Date | string
@@ -245,17 +257,19 @@ export type FeedbackScalarWhereWithAggregatesInput = {
 
 export type FeedbackCreateInput = {
   id?: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutFeedbackInput
   recommendation: Prisma.RecommendationCreateNestedOneWithoutFeedbackInput
+  user: Prisma.UserCreateNestedOneWithoutFeedbackInput
 }
 
 export type FeedbackUncheckedCreateInput = {
   id?: string
   recommendationId: string
   userId: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -263,17 +277,19 @@ export type FeedbackUncheckedCreateInput = {
 
 export type FeedbackUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutFeedbackNestedInput
   recommendation?: Prisma.RecommendationUpdateOneRequiredWithoutFeedbackNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutFeedbackNestedInput
 }
 
 export type FeedbackUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   recommendationId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -283,6 +299,7 @@ export type FeedbackCreateManyInput = {
   id?: string
   recommendationId: string
   userId: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -290,6 +307,7 @@ export type FeedbackCreateManyInput = {
 
 export type FeedbackUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -299,6 +317,7 @@ export type FeedbackUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   recommendationId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -318,6 +337,7 @@ export type FeedbackCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   recommendationId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  action?: Prisma.SortOrder
   sentiment?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -327,6 +347,7 @@ export type FeedbackMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   recommendationId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  action?: Prisma.SortOrder
   sentiment?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -336,6 +357,7 @@ export type FeedbackMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   recommendationId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  action?: Prisma.SortOrder
   sentiment?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -425,12 +447,17 @@ export type FeedbackUncheckedUpdateManyWithoutRecommendationNestedInput = {
   deleteMany?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
 }
 
+export type EnumFeedbackActionFieldUpdateOperationsInput = {
+  set?: $Enums.FeedbackAction
+}
+
 export type EnumFeedbackSentimentFieldUpdateOperationsInput = {
   set?: $Enums.FeedbackSentiment
 }
 
 export type FeedbackCreateWithoutUserInput = {
   id?: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -440,6 +467,7 @@ export type FeedbackCreateWithoutUserInput = {
 export type FeedbackUncheckedCreateWithoutUserInput = {
   id?: string
   recommendationId: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -478,6 +506,7 @@ export type FeedbackScalarWhereInput = {
   id?: Prisma.StringFilter<"Feedback"> | string
   recommendationId?: Prisma.StringFilter<"Feedback"> | string
   userId?: Prisma.StringFilter<"Feedback"> | string
+  action?: Prisma.EnumFeedbackActionFilter<"Feedback"> | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFilter<"Feedback"> | $Enums.FeedbackSentiment
   notes?: Prisma.StringNullableFilter<"Feedback"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
@@ -485,6 +514,7 @@ export type FeedbackScalarWhereInput = {
 
 export type FeedbackCreateWithoutRecommendationInput = {
   id?: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -494,6 +524,7 @@ export type FeedbackCreateWithoutRecommendationInput = {
 export type FeedbackUncheckedCreateWithoutRecommendationInput = {
   id?: string
   userId: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -528,6 +559,7 @@ export type FeedbackUpdateManyWithWhereWithoutRecommendationInput = {
 export type FeedbackCreateManyUserInput = {
   id?: string
   recommendationId: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -535,6 +567,7 @@ export type FeedbackCreateManyUserInput = {
 
 export type FeedbackUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -544,6 +577,7 @@ export type FeedbackUpdateWithoutUserInput = {
 export type FeedbackUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   recommendationId?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -552,6 +586,7 @@ export type FeedbackUncheckedUpdateWithoutUserInput = {
 export type FeedbackUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   recommendationId?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -560,6 +595,7 @@ export type FeedbackUncheckedUpdateManyWithoutUserInput = {
 export type FeedbackCreateManyRecommendationInput = {
   id?: string
   userId: string
+  action: $Enums.FeedbackAction
   sentiment?: $Enums.FeedbackSentiment
   notes?: string | null
   createdAt?: Date | string
@@ -567,6 +603,7 @@ export type FeedbackCreateManyRecommendationInput = {
 
 export type FeedbackUpdateWithoutRecommendationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -576,6 +613,7 @@ export type FeedbackUpdateWithoutRecommendationInput = {
 export type FeedbackUncheckedUpdateWithoutRecommendationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -584,6 +622,7 @@ export type FeedbackUncheckedUpdateWithoutRecommendationInput = {
 export type FeedbackUncheckedUpdateManyWithoutRecommendationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumFeedbackActionFieldUpdateOperationsInput | $Enums.FeedbackAction
   sentiment?: Prisma.EnumFeedbackSentimentFieldUpdateOperationsInput | $Enums.FeedbackSentiment
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -595,68 +634,73 @@ export type FeedbackSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   recommendationId?: boolean
   userId?: boolean
+  action?: boolean
   sentiment?: boolean
   notes?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recommendation?: boolean | Prisma.RecommendationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["feedback"]>
 
 export type FeedbackSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   recommendationId?: boolean
   userId?: boolean
+  action?: boolean
   sentiment?: boolean
   notes?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recommendation?: boolean | Prisma.RecommendationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["feedback"]>
 
 export type FeedbackSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   recommendationId?: boolean
   userId?: boolean
+  action?: boolean
   sentiment?: boolean
   notes?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recommendation?: boolean | Prisma.RecommendationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["feedback"]>
 
 export type FeedbackSelectScalar = {
   id?: boolean
   recommendationId?: boolean
   userId?: boolean
+  action?: boolean
   sentiment?: boolean
   notes?: boolean
   createdAt?: boolean
 }
 
-export type FeedbackOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "recommendationId" | "userId" | "sentiment" | "notes" | "createdAt", ExtArgs["result"]["feedback"]>
+export type FeedbackOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "recommendationId" | "userId" | "action" | "sentiment" | "notes" | "createdAt", ExtArgs["result"]["feedback"]>
 export type FeedbackInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recommendation?: boolean | Prisma.RecommendationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type FeedbackIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recommendation?: boolean | Prisma.RecommendationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type FeedbackIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recommendation?: boolean | Prisma.RecommendationDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $FeedbackPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Feedback"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     recommendation: Prisma.$RecommendationPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     recommendationId: string
     userId: string
+    action: $Enums.FeedbackAction
     sentiment: $Enums.FeedbackSentiment
     notes: string | null
     createdAt: Date
@@ -1054,8 +1098,8 @@ readonly fields: FeedbackFieldRefs;
  */
 export interface Prisma__FeedbackClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   recommendation<T extends Prisma.RecommendationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RecommendationDefaultArgs<ExtArgs>>): Prisma.Prisma__RecommendationClient<runtime.Types.Result.GetResult<Prisma.$RecommendationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1088,6 +1132,7 @@ export interface FeedbackFieldRefs {
   readonly id: Prisma.FieldRef<"Feedback", 'String'>
   readonly recommendationId: Prisma.FieldRef<"Feedback", 'String'>
   readonly userId: Prisma.FieldRef<"Feedback", 'String'>
+  readonly action: Prisma.FieldRef<"Feedback", 'FeedbackAction'>
   readonly sentiment: Prisma.FieldRef<"Feedback", 'FeedbackSentiment'>
   readonly notes: Prisma.FieldRef<"Feedback", 'String'>
   readonly createdAt: Prisma.FieldRef<"Feedback", 'DateTime'>

@@ -1052,6 +1052,7 @@ export const FeedbackScalarFieldEnum = {
   id: 'id',
   recommendationId: 'recommendationId',
   userId: 'userId',
+  action: 'action',
   sentiment: 'sentiment',
   notes: 'notes',
   createdAt: 'createdAt'
@@ -1202,6 +1203,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'FeedbackAction'
+ */
+export type EnumFeedbackActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeedbackAction'>
+    
+
+
+/**
+ * Reference to a field of type 'FeedbackAction[]'
+ */
+export type ListEnumFeedbackActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeedbackAction[]'>
     
 
 
