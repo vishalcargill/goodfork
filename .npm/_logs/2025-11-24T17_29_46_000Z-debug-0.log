@@ -1,0 +1,18 @@
+0 verbose cli /Users/vishal/.nvm/versions/node/v24.10.0/bin/node /Users/vishal/.nvm/versions/node/v24.10.0/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.6.1
+2 info using node@v24.10.0
+3 silly config load:file:/Users/vishal/.nvm/versions/node/v24.10.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/vishal/Documents/Projects/hackathon/goodfork/.npmrc
+5 silly config load:file:/Users/vishal/.nvm/versions/node/v24.10.0/etc/npmrc
+6 verbose title npm exec prisma dev --name goodfork
+7 verbose argv "exec" "--" "prisma" "dev" "--name" "goodfork"
+8 verbose logfile logs-max:10 dir:/Users/vishal/Documents/Projects/hackathon/goodfork/.npm/_logs/2025-11-24T17_29_46_000Z-
+9 verbose logfile /Users/vishal/Documents/Projects/hackathon/goodfork/.npm/_logs/2025-11-24T17_29_46_000Z-debug-0.log
+10 silly logfile done cleaning log files
+11 http fetch GET https://registry.npmjs.org/npm attempt 1 failed with ENOTFOUND
+12 verbose cwd /Users/vishal/Documents/Projects/hackathon/goodfork
+13 verbose os Darwin 24.6.0
+14 verbose node v24.10.0
+15 verbose npm  v11.6.1
+16 verbose exit 1
+17 verbose code 1

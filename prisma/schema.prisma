@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  feedback        Feedback[]
+  recommendations Recommendation[]
+  profile         UserProfile?
+  sessions        UserSession[]
+}
+
+model UserProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  dietaryGoals       String[] @default([])
+  allergens          String[] @default([])
+  dietaryPreferences String[] @default([])
+  tastePreferences   String[] @default([])
+  budgetTargetCents  Int?
+  lifestyleNotes     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Recipe {
+  id                String           @id @default(cuid())
+  slug              String           @unique
+  title             String
+  description       String?
+  cuisine           String?
+  calories          Int?
+  proteinGrams      Int?
+  carbsGrams        Int?
+  fatGrams          Int?
+  priceCents        Int              @default(0)
+  tags              String[]         @default([])
+  allergens         String[]         @default([])
+  imageUrl          String?
+  healthyHighlights String[]         @default([])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  inventory         InventoryItem?
+  healthySwapFor    Recommendation[] @relation("HealthySwap")
+  recommendations   Recommendation[]
+}
+
+model InventoryItem {
+  id          String          @id @default(cuid())
+  recipeId    String          @unique
+  quantity    Int             @default(0)
+  unitLabel   String          @default("unit")
+  restockDate DateTime?
+  status      InventoryStatus @default(IN_STOCK)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  recipe      Recipe          @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model Recommendation {
+  id                   String               @id @default(cuid())
+  userId               String
+  recipeId             String
+  healthySwapRecipeId  String?
+  rationale            String
+  healthySwapRationale String?
+  status               RecommendationStatus @default(SHOWN)
+  sessionId            String?
+  metadata             Json?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  feedback             Feedback[]
+  healthySwapRecipe    Recipe?              @relation("HealthySwap", fields: [healthySwapRecipeId], references: [id])
+  recipe               Recipe               @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([recipeId])
+}
+
+model Feedback {
+  id               String            @id @default(cuid())
+  recommendationId String
+  userId           String
+  sentiment        FeedbackSentiment @default(NEUTRAL)
+  notes            String?
+  createdAt        DateTime          @default(now())
+  recommendation   Recommendation    @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([recommendationId])
+}
+
+model UserSession {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenId    String   @unique
+  expiresAt  DateTime
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum RecommendationStatus {
+  SHOWN
+  SAVED
+  ACCEPTED
+  DECLINED
+  SWAPPED
+}
+
+enum FeedbackSentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+enum InventoryStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
