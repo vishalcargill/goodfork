@@ -8,6 +8,10 @@ package:
   build_dir: .
   index_document: public/index.html
   error_document: public/404.html
+database:
+  type: postgres
+  db_params:
+    log_statement: "none"
 dns:
   zone: cglcloud
   name: goodfork
