@@ -206,7 +206,7 @@ async function main() {
       dishType: entry.dish_type ?? null,
       mainCategory: entry.maincategory ?? null,
       subCategory: entry.subcategory ?? null,
-  nutrients: entry.nutrients == null ? { set: null } : entry.nutrients,
+      nutrients: entry.nutrients == null ? { set: null } : { set: entry.nutrients },
       timers: entry.times ?? null,
     };
 
