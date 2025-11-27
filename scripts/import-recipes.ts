@@ -29,7 +29,7 @@ function slugify(value: string): string {
 
 async function bootstrapSlugSet() {
   const records = await prisma.recipe.findMany({ select: { slug: true } });
-  records.forEach((entry) => existingSlugs.add(entry.slug));
+  records.forEach((entry: { slug: string }) => existingSlugs.add(entry.slug));
 }
 
 function ensureUniqueSlug(base: string): string {
