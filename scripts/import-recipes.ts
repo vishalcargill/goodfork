@@ -6,6 +6,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   PrismaClient,
   InventoryStatus,
+  Prisma,
 } from "../src/generated/prisma/client";
 
 const DATABASE_URL = process.env.DATABASE_URL ?? "";
@@ -206,7 +207,7 @@ async function main() {
       dishType: entry.dish_type ?? null,
       mainCategory: entry.maincategory ?? null,
       subCategory: entry.subcategory ?? null,
-      nutrients: entry.nutrients == null ? { set: null } : { set: entry.nutrients },
+      nutrients: entry.nutrients ?? Prisma.JsonNull,
       timers: entry.times ?? null,
     };
 
