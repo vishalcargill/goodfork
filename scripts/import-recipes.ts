@@ -11,12 +11,9 @@ if (!DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined. Cannot import recipes.");
 }
 
-const INVENTORY_LOW_STOCK_PERCENT =
-  Number(process.env.INVENTORY_LOW_STOCK_PERCENT ?? "0.35") || 0.35;
-const INVENTORY_RESTOCK_LEAD_DAYS =
-  Number(process.env.INVENTORY_RESTOCK_LEAD_DAYS ?? "5") || 5;
-const INVENTORY_BASELINE_SERVINGS =
-  Number(process.env.INVENTORY_BASELINE_SERVINGS ?? "12") || 12;
+const INVENTORY_LOW_STOCK_PERCENT = Number(process.env.INVENTORY_LOW_STOCK_PERCENT ?? "0.35") || 0.35;
+const INVENTORY_RESTOCK_LEAD_DAYS = Number(process.env.INVENTORY_RESTOCK_LEAD_DAYS ?? "5") || 5;
+const INVENTORY_BASELINE_SERVINGS = Number(process.env.INVENTORY_BASELINE_SERVINGS ?? "12") || 12;
 
 const adapter = new PrismaPg({ connectionString: DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -33,7 +30,7 @@ function slugify(value: string): string {
 
 async function bootstrapSlugSet() {
   const records = await prisma.recipe.findMany({ select: { slug: true } });
-  records.forEach((entry) => existingSlugs.add(entry.slug));
+  records.forEach((entry: { slug: string }) => existingSlugs.add(entry.slug));
 }
 
 function ensureUniqueSlug(base: string): string {
@@ -80,11 +77,7 @@ function cleanText(value: unknown): string | null {
 function estimatePriceCents(ingredientCount: number, difficulty?: string | null): number {
   const base = 900 + ingredientCount * 120;
   const normalizedDifficulty = difficulty?.toLowerCase() ?? "";
-  const difficultyLift = normalizedDifficulty.includes("easy")
-    ? 0
-    : normalizedDifficulty.includes("hard")
-      ? 400
-      : 200;
+  const difficultyLift = normalizedDifficulty.includes("easy") ? 0 : normalizedDifficulty.includes("hard") ? 400 : 200;
   return Math.min(3200, base + difficultyLift);
 }
 
@@ -106,7 +99,11 @@ function normalizeTags(...values: (string | null | undefined)[]): string[] {
   const tags = new Set<string>();
 
   values
-    .map((entry) => cleanText(entry ?? undefined)?.toUpperCase().replace(/\s+/g, "_"))
+    .map((entry) =>
+      cleanText(entry ?? undefined)
+        ?.toUpperCase()
+        .replace(/\s+/g, "_")
+    )
     .filter((entry): entry is string => Boolean(entry))
     .forEach((tag) => tags.add(tag));
 
@@ -141,16 +138,9 @@ type InventoryComputationInput = {
   difficulty: string | null;
 };
 
-function computeInventoryDefaults({
-  ratingCount,
-  serves,
-  difficulty,
-}: InventoryComputationInput) {
-  const normalizedServings =
-    serves && serves > 0 ? serves : INVENTORY_BASELINE_SERVINGS;
-  const popularityMultiplier = ratingCount
-    ? Math.min(3.5, Math.max(1, ratingCount / 40))
-    : 1;
+function computeInventoryDefaults({ ratingCount, serves, difficulty }: InventoryComputationInput) {
+  const normalizedServings = serves && serves > 0 ? serves : INVENTORY_BASELINE_SERVINGS;
+  const popularityMultiplier = ratingCount ? Math.min(3.5, Math.max(1, ratingCount / 40)) : 1;
   const difficultyFactor = (() => {
     if (!difficulty) return 1;
     const normalized = difficulty.toLowerCase();
@@ -158,9 +148,7 @@ function computeInventoryDefaults({
     if (normalized.includes("hard")) return 1.2;
     return 1;
   })();
-  const estimatedQuantity = Math.round(
-    normalizedServings * 2 * popularityMultiplier * difficultyFactor
-  );
+  const estimatedQuantity = Math.round(normalizedServings * 2 * popularityMultiplier * difficultyFactor);
   const safeQuantity = Math.max(0, estimatedQuantity);
   const lowStockThreshold = Math.max(5, Math.round(safeQuantity * INVENTORY_LOW_STOCK_PERCENT));
 

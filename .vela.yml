@@ -1,0 +1,25 @@
+version: "1"
+
+steps:
+  # build goodfork app
+  - name: build-goodfork-app
+    image: node:20-alpine
+    environment:
+      DO_BUILD_GOODFORK_APP: 'true'
+    ruleset:
+      branch: [ test-deployment ]
+      event: [ push, pull_request, schedule, deployment ]
+    commands:
+      - npm install
+      - npm run build
+
+  # deploy captain dev goodfork app
+  - name: captain-deploy-goodfork-dev
+    ruleset:
+      branch: [ test-deployment ]
+      event: [ push ]
+    image: docker-utilities.binrepo.cglcloud.in/captain:1-stable
+    parameters:
+      env: dev
+      run_apply: true
+      edge_auth: false
