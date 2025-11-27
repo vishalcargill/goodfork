@@ -5,6 +5,7 @@ GoodFork is our Hackathon 2025 build for the **AI-Driven Menu Personalization an
 ### Repo Tour
 - `docs/` - working plans + PRD (`phase-0.md`, `phase-1-plan.md`, `work-items.md`).
 - `src/app/` - App Router routes (home, onboarding, API handlers, layout, global styles).
+- `/menus` hosts the personalized dashboard (requires an onboarding email query param), while `/recipes/[slug]` will surface deep-dive nutrition details once that route ships; the landing page at `/` now stays marketing-heavy.
 - `src/constants/` - centralized env + feature flag helpers.
 - `src/services/` - `server/` Prisma + OpenAI logic, `client/` React Query hooks, `shared/` DTOs.
 - `prisma/` - schema, migrations, and `seed.ts` for demo data.
@@ -65,19 +66,22 @@ Seeds provision the `admin@cargill.com` account plus three flagship recipes + in
 1. **Onboarding (`/onboarding`)**
    - Multi-step client flow posting to `POST /api/onboarding`.
    - Persists/updates `User` + `UserProfile` rows via `saveOnboardingProfile`.
-   - Success banner links back home with `/?prefillEmail=<your-email>` so the recommendation pane preloads the same user.
+   - Success banner links to `/menus?prefillEmail=<your-email>` so the dedicated menus route preloads the same user.
 2. **Recommendations (`/api/recommendations`)**
    - Input: `{ userId?: string, email?: string, limit?: number (3-5), sessionId?: string }`.
    - Service filters allergen-safe, in-stock recipes, scores them, optionally re-ranks with OpenAI, and saves `Recommendation` rows (metadata stores scoring deltas + AI/deterministic provenance).
    - Response: `{ success, message, data: { userId, requested, delivered, source, recommendations[] } }`.
-3. **Home Preview (`src/app/page.tsx`)**
-   - The "Personalized menu cards" section uses React Query (`useRecommendationsMutation`) + Axios to call the API.
-   - Displays skeletons while fetching, empty/validation states, and live cards with nutrition badges, rationale, and healthy swap copy. Inventory indicator switches colors for low/ready stock.
+3. **Landing Experience (`src/app/page.tsx`)**
+   - Rebuilt into a motion-friendly marketing hero plus story sections (Why GoodFork, Healthy swaps, Operator teaser, testimonials) so `/` stays focused on acquisition.
+   - CTA buttons route to `/onboarding` and `/menus` (the latter redirects back to onboarding unless you carry a valid `prefillEmail`).
+   - Login still lives in the final section, but the personalized recommendations UI has been moved entirely off the landing page.
+4. **Recipe deep dive (planned `/recipes/[slug]`)**
+   - Each recommendation will link to a standalone page with hero imagery, macros, AI rationale history, inventory notes, and swap suggestions for demo storytelling.
 
 ### Demo Workflow
 1. Run onboarding with any email + profile inputs.
 2. After success, click "Head to menus" (link carries `prefillEmail`).
-3. On the home page, the recommendation panel auto-fetches your personalized menus. You can also enter the same email manually and hit **Personalize** to re-query.
+3. Visit `/menus?prefillEmail=<your-email>` to auto-fetch your personalized menus (direct `/menus` visits redirect to onboarding until you have a profile).
 
 ### Testing & Linting
 - `npm run lint` before submitting PRs.

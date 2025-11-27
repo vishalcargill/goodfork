@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 
 import { apiClient } from "@/config/axios.config";
@@ -13,10 +14,11 @@ export type RecommendationsApiResponse =
       data: RecommendationResponse;
     }
   | {
-    success: false;
-    message: string;
-    fieldErrors?: Record<string, string[]>;
-  };
+      success: false;
+      message: string;
+      errorCode?: string;
+      fieldErrors?: Record<string, string[]>;
+    };
 
 async function requestRecommendations(
   payload: RecommendationRequestPayload
@@ -25,6 +27,10 @@ async function requestRecommendations(
     const { data } = await apiClient.post<RecommendationsApiResponse>("/recommendations", payload);
     return data;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      return error.response.data as RecommendationsApiResponse;
+    }
+
     throw new Error(
       error instanceof Error ? error.message : "Unable to load recommendations. Try again."
     );

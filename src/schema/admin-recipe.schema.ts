@@ -1,9 +1,14 @@
 import { z } from "zod";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { InventoryStatus } from "@/generated/prisma/client";
 
 const stringArrayField = z.array(z.string().min(1)).default([]);
 const optionalString = z.string().trim().min(1).optional().nullable();
+const jsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(() =>
+  z.union([z.string(), z.number(), z.boolean(), z.array(jsonValueSchema), z.record(z.string(), jsonValueSchema)])
+);
+const optionalJsonField = jsonValueSchema.nullable().optional();
 
 export const adminRecipeSchema = z.object({
   slug: z.string().trim().min(2),
@@ -33,8 +38,8 @@ export const adminRecipeSchema = z.object({
   dishType: z.string().trim().optional().nullable(),
   mainCategory: z.string().trim().optional().nullable(),
   subCategory: z.string().trim().optional().nullable(),
-  nutrients: z.record(z.any()).nullable().optional(),
-  timers: z.record(z.any()).nullable().optional(),
+  nutrients: optionalJsonField,
+  timers: optionalJsonField,
   inventory: z.object({
     quantity: z.number().int().min(0),
     unitLabel: z.string().trim().min(1),

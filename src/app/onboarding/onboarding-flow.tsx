@@ -158,8 +158,8 @@ export function OnboardingFlow() {
 
   const showSuccess = result?.success;
   const recommendationsHref = values.email
-    ? `/?prefillEmail=${encodeURIComponent(values.email.trim())}`
-    : "/";
+    ? `/menus?prefillEmail=${encodeURIComponent(values.email.trim())}`
+    : "/onboarding";
 
   return (
     <div className='rounded-[28px] border border-emerald-100 bg-white/95 p-6 shadow-[0_24px_65px_rgba(16,185,129,0.15)] sm:p-10'>

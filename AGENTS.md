@@ -33,3 +33,9 @@ Build an AI-powered menu personalization system that combines inventory availabi
 
 ### Hackathon Theme Reference
 Our track is **AI-Driven Menu Personalization and Nutrition Insights** from `Hackathon 2025 - Kick Off.pdf`. The goal is to deliver an AI experience that tailors nutritionally balanced menus from the live inventory while honoring historical preferences and healthy-eating guidelines. Use the PDF for any clarifications on scoring, scope boundaries, or required demo artifacts.
+
+## Admin Console Expectations
+- Admin access is locked to `ADMIN_EMAIL` (configured in `.env.local`) and enforced server-side through `requireAdminUser`/`requireAdminApiUser` in `src/lib/auth.ts`. Never expose admin entry points that skip those helpers.
+- `/admin` renders the operator console cards, while `/admin/recipes` mounts `AdminRecipeManager` (see `src/components/admin/admin-recipe-manager.tsx`) for CRUD and inventory edits. Keep new admin pages colocated under `src/app/admin`.
+- All recipe/inventory mutations must use the `/api/admin/recipes` and `/api/admin/recipes/[id]` handlers, which validate payloads with `adminRecipeSchema` and normalize nested inventory data before persisting through Prisma. Extend that schema before adding new fields.
+- The recipe manager shows a live consumer card preview, so update `RecommendationCard` props alongside any schema changes to avoid drift between operator edits and the consumer experience.

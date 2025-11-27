@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { adminRecipeSchema } from "@/schema/admin-recipe.schema";
@@ -20,13 +20,10 @@ function buildErrorResponse(error: unknown, fallback: string) {
   );
 }
 
-export async function PUT(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  const { id } = await context.params;
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireAdminApiUser();
+    const { id } = await context.params;
     await ensureRecipeExists(id);
 
     const body = await request.json();
@@ -66,18 +63,15 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  const { id } = await context.params;
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-  await requireAdminApiUser();
-  await ensureRecipeExists(id);
+    await requireAdminApiUser();
+    const { id } = await context.params;
+    await ensureRecipeExists(id);
 
-  await prisma.recipe.delete({ where: { id } });
+    await prisma.recipe.delete({ where: { id } });
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Admin recipes DELETE failed", error);
     return buildErrorResponse(error, "Unable to delete recipe right now.");

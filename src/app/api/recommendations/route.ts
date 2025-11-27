@@ -81,12 +81,31 @@ export async function POST(request: Request) {
     });
 
     console.error("Recommendations API error", error);
+
+    const status =
+      typeof error === "object" && error && "statusCode" in error
+        ? Number((error as { statusCode?: number }).statusCode ?? 500)
+        : 500;
+    const clientMessage =
+      typeof error === "object" && error && "clientMessage" in error
+        ? String((error as { clientMessage?: string }).clientMessage ?? "")
+        : "";
+    const errorCode =
+      typeof error === "object" && error && "errorCode" in error
+        ? String((error as { errorCode?: string }).errorCode ?? "")
+        : "";
+    const responseMessage =
+      clientMessage && clientMessage.trim().length > 0
+        ? clientMessage
+        : "Unable to generate recommendations right now. Try again shortly.";
+
     return NextResponse.json(
       {
         success: false,
-        message: "Unable to generate recommendations right now. Try again shortly.",
+        message: responseMessage,
+        errorCode: errorCode || undefined,
       },
-      { status: 500 }
+      { status }
     );
   }
 }

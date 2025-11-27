@@ -206,19 +206,19 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
     throw new Error("Inventory quantity must be a non-negative number.");
   }
 
-  let nutrients: Record<string, unknown> | null = null;
+  let nutrients: AdminRecipeInput["nutrients"] = null;
   if (form.nutrients.trim()) {
     try {
-      nutrients = JSON.parse(form.nutrients);
+      nutrients = JSON.parse(form.nutrients) as AdminRecipeInput["nutrients"];
     } catch {
       throw new Error("Nutrients JSON is invalid.");
     }
   }
 
-  let timers: Record<string, unknown> | null = null;
+  let timers: AdminRecipeInput["timers"] = null;
   if (form.timers.trim()) {
     try {
-      timers = JSON.parse(form.timers);
+      timers = JSON.parse(form.timers) as AdminRecipeInput["timers"];
     } catch {
       throw new Error("Timers JSON is invalid.");
     }
@@ -276,6 +276,7 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
     recipeId: form.id ?? "preview",
     title: form.title || "Recipe preview",
     description: form.description || null,
+    imageUrl: form.imageUrl.trim() || null,
     priceCents,
     priceDisplay: currencyFormatter.format(priceCents / 100),
     calories,

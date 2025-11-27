@@ -6,11 +6,7 @@ import {
   type UserProfile,
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import {
-  DATABASE_URL,
-  OPENAI_API_KEY,
-  RECOMMENDER_MODEL,
-} from "@/constants/app.constants";
+import { DATABASE_URL, OPENAI_API_KEY, RECOMMENDER_MODEL } from "@/constants/app.constants";
 import type {
   RecommendationCard,
   RecommendationResponse,
@@ -46,6 +42,8 @@ const MIN_LIMIT = 3;
 const MAX_LIMIT = 5;
 const BASE_SCORE = 62;
 const BUDGET_CUSHION_CENTS = 200;
+const INVENTORY_PLENTY_THRESHOLD = 35;
+const INVENTORY_LOW_WARNING = 12;
 
 const tasteKeywordMap: Record<string, string[]> = {
   SPICY: ["spicy", "harissa", "ginger", "chili", "szechuan"],
@@ -63,9 +61,21 @@ const preferenceTagMap: Record<string, string[]> = {
   LOW_CARB: ["LOW_CARB", "LIGHTER_CHOICE"],
 };
 
-export async function generateRecommendations(
-  input: GenerateRecommendationsInput
-): Promise<RecommendationResponse> {
+type RecommendationErrorOptions = {
+  statusCode?: number;
+  clientMessage?: string;
+  errorCode?: string;
+};
+
+function createRecommendationError(message: string, options: RecommendationErrorOptions = {}) {
+  return Object.assign(new Error(message), {
+    statusCode: options.statusCode ?? 400,
+    clientMessage: options.clientMessage ?? message,
+    errorCode: options.errorCode,
+  });
+}
+
+export async function generateRecommendations(input: GenerateRecommendationsInput): Promise<RecommendationResponse> {
   if (!DATABASE_URL) {
     throw new Error("Database is not configured.");
   }
@@ -79,13 +89,21 @@ export async function generateRecommendations(
   const profile = user.profile;
 
   if (!profile) {
-    throw new Error("User profile is required before requesting recommendations.");
+    throw createRecommendationError("User profile is required before requesting recommendations.", {
+      statusCode: 400,
+      clientMessage: "Complete onboarding before fetching menus so we can personalize your menus.",
+      errorCode: "profile_missing",
+    });
   }
 
-  const candidates = await loadCandidateRecipes(profile);
+  const candidates = await loadCandidateRecipes(profile, limit);
 
   if (candidates.length === 0) {
-    throw new Error("No inventory matches the stated allergens right now.");
+    throw createRecommendationError("No inventory matches the stated allergens right now.", {
+      statusCode: 404,
+      clientMessage: "We're out of inventory that matches your allergens right now. Check back soon!",
+      errorCode: "inventory_empty",
+    });
   }
 
   const scored = scoreCandidates(candidates, profile);
@@ -96,30 +114,28 @@ export async function generateRecommendations(
   if (!input.deterministicOnly) {
     const aiRanked = await rankWithLLM(profile, scored, limit);
     if (aiRanked?.length) {
-      finalSelection = aiRanked
-        .map((aiEntry) => {
-          const base = candidateMap.get(aiEntry.recipeId);
-          if (!base) {
-            return null;
-          }
+      const enrichedAiSelection = aiRanked.reduce<FinalCandidate[]>((acc, aiEntry) => {
+        const base = candidateMap.get(aiEntry.recipeId);
+        if (!base) {
+          return acc;
+        }
 
-          const swapRecipeId =
-            aiEntry.swapRecipeId && candidateMap.has(aiEntry.swapRecipeId)
-              ? aiEntry.swapRecipeId
-              : null;
+        const swapRecipeId =
+          aiEntry.swapRecipeId && candidateMap.has(aiEntry.swapRecipeId) ? aiEntry.swapRecipeId : null;
 
-          return {
-            ...base,
-            rankingSource: "llm" as const,
-            rationale: truncate(aiEntry.rationale ?? base.deterministicRationale),
-            healthySwapCopy:
-              truncate(aiEntry.healthySwapIdea ?? base.deterministicSwap ?? "") ||
-              base.deterministicSwap,
-            swapRecipeId,
-          };
-        })
-        .filter((entry): entry is FinalCandidate => Boolean(entry))
-        .slice(0, limit);
+        acc.push({
+          ...base,
+          rankingSource: "llm",
+          rationale: truncate(aiEntry.rationale ?? base.deterministicRationale) || "",
+          healthySwapCopy: truncate(aiEntry.healthySwapIdea ?? base.deterministicSwap ?? "") || base.deterministicSwap,
+          swapRecipeId,
+        });
+        return acc;
+      }, []);
+
+      if (enrichedAiSelection.length) {
+        finalSelection = enrichedAiSelection.slice(0, limit);
+      }
     }
   }
 
@@ -173,6 +189,7 @@ export async function generateRecommendations(
       recipeId: record.recipeId,
       title: record.recipe.title,
       description: record.recipe.description,
+      imageUrl: record.recipe.imageUrl ?? null,
       priceCents: record.recipe.priceCents,
       priceDisplay: formatCurrency(record.recipe.priceCents),
       calories: record.recipe.calories ?? null,
@@ -205,9 +222,7 @@ export async function generateRecommendations(
     userId: user.id,
     requested: limit,
     delivered: recommendations.length,
-    source: recommendations.some((rec) => rec.metadata.rankingSource === "llm")
-      ? "llm"
-      : "deterministic",
+    source: recommendations.some((rec) => rec.metadata.rankingSource === "llm") ? "llm" : "deterministic",
     recommendations,
   };
 
@@ -215,9 +230,7 @@ export async function generateRecommendations(
 }
 
 async function resolveUser(input: GenerateRecommendationsInput) {
-  const where = input.userId
-    ? { id: input.userId }
-    : { email: (input.email ?? "").toLowerCase() };
+  const where = input.userId ? { id: input.userId } : { email: (input.email ?? "").toLowerCase() };
 
   const user = await prisma.user.findFirst({
     where,
@@ -225,20 +238,25 @@ async function resolveUser(input: GenerateRecommendationsInput) {
   });
 
   if (!user) {
-    throw new Error("User not found for the provided identifier.");
+    throw createRecommendationError("User not found for the provided identifier.", {
+      statusCode: 404,
+      clientMessage:
+        "We couldn't find an onboarding profile for that email yet. Start onboarding to unlock personalized menus.",
+      errorCode: "user_not_found",
+    });
   }
 
   return user as User & { profile: UserProfile | null };
 }
 
-async function loadCandidateRecipes(profile: UserProfile) {
+async function loadCandidateRecipes(profile: UserProfile, desired: number) {
   const recipes = await prisma.recipe.findMany({
     include: { inventory: true },
   });
 
   const allergens = profile.allergens ?? [];
 
-  return recipes.filter((recipe) => {
+  const available = recipes.filter((recipe) => {
     if (!recipe.inventory || !isInventoryAvailable(recipe.inventory)) {
       return false;
     }
@@ -249,6 +267,15 @@ async function loadCandidateRecipes(profile: UserProfile) {
 
     return true;
   });
+
+  const inStock = available.filter((recipe) => recipe.inventory?.status === InventoryStatus.IN_STOCK);
+  const lowStock = available.filter((recipe) => recipe.inventory?.status === InventoryStatus.LOW_STOCK);
+
+  if (inStock.length >= desired) {
+    return inStock;
+  }
+
+  return [...inStock, ...lowStock];
 }
 
 function isInventoryAvailable(inventory: InventoryItem | null) {
@@ -283,11 +310,7 @@ function scoreCandidates(candidates: CandidateRecipe[], profile: UserProfile): S
       adjustments.push({ reason, delta });
     };
 
-    if (inventory.status === InventoryStatus.LOW_STOCK) {
-      addAdjustment("Low stock — limited availability", -4);
-    } else {
-      addAdjustment("Ready now", 4);
-    }
+    applyInventoryAvailability(inventory, addAdjustment);
 
     applyGoalHeuristics(candidate, profile, addAdjustment);
     applyDietaryPreferenceMatch(candidate, profile, addAdjustment);
@@ -422,19 +445,13 @@ function applyBudgetHeuristic(
   const diff = budget - candidate.priceCents;
 
   if (diff >= 0) {
-    push(
-      `Within budget (saves ${formatCurrency(Math.max(diff - BUDGET_CUSHION_CENTS, 0))})`,
-      6
-    );
+    push(`Within budget (saves ${formatCurrency(Math.max(diff - BUDGET_CUSHION_CENTS, 0))})`, 6);
   } else {
     push(`Over budget by ${formatCurrency(Math.abs(diff))}`, -Math.min(14, Math.round(Math.abs(diff) / 100) + 4));
   }
 }
 
-function applyMacroBalance(
-  candidate: CandidateRecipe,
-  push: (reason: string, delta: number) => void
-) {
+function applyMacroBalance(candidate: CandidateRecipe, push: (reason: string, delta: number) => void) {
   const protein = candidate.proteinGrams ?? 0;
   const carbs = candidate.carbsGrams ?? 0;
   const fat = candidate.fatGrams ?? 0;
@@ -445,6 +462,32 @@ function applyMacroBalance(
 
   if (fat >= 25) {
     push("Higher fat load", -4);
+  }
+}
+
+function applyInventoryAvailability(inventory: InventoryItem, push: (reason: string, delta: number) => void) {
+  if (inventory.status === InventoryStatus.OUT_OF_STOCK || inventory.quantity <= 0) {
+    push("Out of stock", -100);
+    return;
+  }
+
+  if (inventory.status === InventoryStatus.LOW_STOCK) {
+    if (inventory.quantity <= 4) {
+      push("Critical inventory — nearly gone", -14);
+    } else if (inventory.quantity <= INVENTORY_LOW_WARNING) {
+      push(`Low stock — ${inventory.quantity} left`, -8);
+    } else {
+      push("Limited availability", -5);
+    }
+    return;
+  }
+
+  if (inventory.quantity >= INVENTORY_PLENTY_THRESHOLD) {
+    push(`Plentiful inventory (${inventory.quantity} units)`, 10);
+  } else if (inventory.quantity >= 20) {
+    push("Healthy inventory buffer", 6);
+  } else {
+    push("Ready now", 4);
   }
 }
 
@@ -553,8 +596,8 @@ function buildDeterministicRationale(
   const highlights = recipe.healthyHighlights?.slice(0, 2).join(", ");
   const readyText =
     inventory.status === InventoryStatus.LOW_STOCK
-      ? "Low stock—grab it soon."
-      : "Ready now from current inventory.";
+      ? `Low stock—only ${inventory.quantity} ${inventory.unitLabel} left.`
+      : `Ready now with ${inventory.quantity} ${inventory.unitLabel} prepped.`;
 
   if (primaryGoal === "LEAN_MUSCLE" && recipe.proteinGrams) {
     return `Delivers ${recipe.proteinGrams}g protein with ${macrosLabel}, dialed for your lean muscle focus. ${readyText}`;

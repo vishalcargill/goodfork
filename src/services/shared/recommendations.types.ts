@@ -10,6 +10,7 @@ export type RecommendationCard = {
   recipeId: string;
   title: string;
   description: string | null;
+  imageUrl: string | null;
   priceCents: number;
   priceDisplay: string;
   calories: number | null;
