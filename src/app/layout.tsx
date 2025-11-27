@@ -4,6 +4,8 @@ import "./globals.css";
 import { Header } from "@/components/navigation/header.component";
 import { Footer } from "@/components/navigation/footer.component";
 import { AppProviders } from "@/components/providers/app-providers";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { ADMIN_EMAIL } from "@/constants/app.constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +23,21 @@ export const metadata: Metadata = {
     "GoodFork pairs inventory signals, preferences, and AI insights to deliver beautiful, personalized menus.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const currentUser = await getAuthenticatedUser();
+  const headerUser = currentUser
+    ? {
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email,
+        isAdmin: currentUser.email.toLowerCase() === ADMIN_EMAIL,
+      }
+    : null;
+
   return (
     <html lang="en">
       <body
@@ -33,7 +45,7 @@ export default function RootLayout({
       >
         <AppProviders>
           <div className="flex min-h-screen flex-col">
-            <Header />
+            <Header currentUser={headerUser} />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>

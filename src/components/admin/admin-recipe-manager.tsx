@@ -437,8 +437,8 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
   };
 
   return (
-    <div className='grid gap-8 lg:grid-cols-[320px,1fr]'>
-      <aside className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-inner'>
+    <div className='grid gap-6 lg:grid-cols-[40%_60%] lg:items-start'>
+      <aside className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-inner lg:sticky lg:top-24'>
         <div className='flex items-center justify-between gap-3 pb-4'>
           <h2 className='text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700'>Recipes</h2>
           <button
@@ -449,7 +449,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
             New
           </button>
         </div>
-        <div className='max-h-[70vh] space-y-2 overflow-auto pr-2'>
+        <div className='h-[55vh] space-y-2 overflow-y-auto pr-2 lg:h-[72vh]'>
           {recipes.length === 0 ? (
             <p className='text-sm text-slate-600'>No recipes yet — add your first one.</p>
           ) : (
@@ -512,7 +512,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
             </p>
           ) : null}
 
-          <div className='grid gap-6 lg:grid-cols-2'>
+          <div className='grid gap-6 lg:grid-cols-2 lg:max-h-[62vh] lg:overflow-y-auto lg:pr-2'>
             <div className='space-y-4'>
               <TextField label='Title' value={formState.title} onChange={(value) => handleFieldChange("title", value)} required />
               <TextField label='Slug' value={formState.slug} onChange={(value) => handleFieldChange("slug", value)} helper='Must be unique.' />

@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-r
 import { cn } from "@/lib/utils";
 import { useOnboardingSubmitMutation, type OnboardingResult } from "@/services/client/onboarding.client";
 import type { OnboardingPayload } from "@/schema/onboarding.schema";
+import { ALLERGEN_OPTIONS, BUDGET_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 
 const steps = [
   { id: "account", title: "Account basics", blurb: "So we know who to personalize for." },
@@ -18,40 +19,8 @@ const steps = [
   },
 ];
 
-const goalOptions = [
-  {
-    value: "LEAN_MUSCLE",
-    label: "Lean muscle",
-    helper: "High-protein focus",
-  },
-  {
-    value: "ENERGY",
-    label: "Sustained energy",
-    helper: "Balanced macros",
-  },
-  {
-    value: "RESET",
-    label: "Metabolic reset",
-    helper: "Lower sugar & refined carbs",
-  },
-  {
-    value: "BRAINCARE",
-    label: "Brain care",
-    helper: "Omega-3 + micronutrient dense",
-  },
-];
-
-const allergenOptions = [
-  { value: "DAIRY", label: "Dairy" },
-  { value: "EGGS", label: "Eggs" },
-  { value: "FISH", label: "Fish" },
-  { value: "SHELLFISH", label: "Shellfish" },
-  { value: "SOY", label: "Soy" },
-  { value: "TREE_NUTS", label: "Tree nuts" },
-  { value: "PEANUTS", label: "Peanuts" },
-  { value: "GLUTEN", label: "Gluten" },
-  { value: "SESAME", label: "Sesame" },
-];
+const goalOptions = GOAL_OPTIONS;
+const allergenOptions = ALLERGEN_OPTIONS;
 
 const dietOptions = [
   { value: "VEGETARIAN", label: "Vegetarian" },
@@ -69,11 +38,7 @@ const tasteOptions = [
   { value: "EXPLORER", label: "Adventurous" },
 ];
 
-const budgetOptions = [
-  { value: 1200, label: "Under $12", helper: "Light lunch range" },
-  { value: 1500, label: "$12 – $15", helper: "Balanced splurge" },
-  { value: 1800, label: "$15 – $18", helper: "Chef-driven picks" },
-];
+const budgetOptions = BUDGET_OPTIONS;
 
 type OnboardingFormValues = {
   name: string;

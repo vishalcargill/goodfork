@@ -107,12 +107,14 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - [x] Lock admin-only routes (`/admin`, `/admin/recipes`, `/api/admin/recipes`) to `ADMIN_EMAIL` via `requireAdminUser`/`requireAdminApiUser` so hackathon judges cannot trip privileged changes.
 - [x] Build the two-pane `AdminRecipeManager` UI with live recipe list, exhaustive Prisma-field form (including allergens, macros, pricing, imagery, and nested inventory edits), and a Recommendation Card preview that mirrors the consumer UI.
 - [x] Ship `GET/POST /api/admin/recipes` plus `PUT/DELETE /api/admin/recipes/[id]` to perform CRUD with `adminRecipeSchema` validation, normalized inventory payloads, and Prisma includes that keep operator edits synchronized with the personalization engine.
+- [x] Updated the recipes console to a 40/60 layout: a sticky, scrollable recipe list on the left and a taller form/preview column on the right so operators can browse inventory while editing details.
 
 ### Inventory Console (Shipped)
 - [x] `/admin/inventory` now lists every recipe with search, status filters, inline quantity/unit edits, restock date inputs, and telemetry-backed urgency banners for low/critical stock.
 - [x] Restock drawer logs quantity deltas, overrides status, and shows consumer preview copy; all edits hit `/api/admin/inventory`.
 - [x] Low-stock, restock, and sync failures emit telemetry events (`inventory.low_stock`, `inventory.restocked`, `inventory.sync_failed`) so analysts can monitor operator activity.
 - [x] Nightly feeds can be replayed via `npm run inventory:import data/inventory-sync.json` (JSON or CSV) or remotely through `/api/admin/inventory/import` with the `x-cron-secret: ${INVENTORY_SYNC_SECRET}` header. Document feed columns next to the script.
+- [x] Added a shared admin navigation pill bar on `/admin`, `/admin/recipes`, and `/admin/inventory` so operators can jump between workspaces or return to the landing view without relying on browser controls.
 
 **Operator SOP:** Export a CSV/JSON feed with columns `recipeSlug`, `quantity`, `unitLabel`, `status`, and `restockDate` (ISO). For manual edits, visit `/admin/inventory`, adjust quantity + status inline, and hit “Save row”; use the restock drawer for bulk deliveries. Cron invocations must set `INVENTORY_SYNC_SECRET` in `.env.local` and send it via the `x-cron-secret` header.
 

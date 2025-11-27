@@ -3,27 +3,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { RecommendationsDemo } from "@/components/recommendations/recommendations-demo";
+import { prisma } from "@/lib/prisma";
+import { ALLERGEN_OPTIONS, BUDGET_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 
 export const metadata: Metadata = {
   title: "GoodFork | Personalized Menus",
   description:
     "Review personalized menu cards, swap insights, and live inventory signals tailored to your onboarding profile.",
 };
-
-const sessionHighlights = [
-  {
-    label: "Active goal",
-    value: "Lean muscle + metabolic reset",
-  },
-  {
-    label: "Budget guardrail",
-    value: "$12 – $15 lunch window",
-  },
-  {
-    label: "Allergen shields",
-    value: "No dairy · No soy",
-  },
-];
 
 const kitchenPulse = [
   {
@@ -59,6 +46,44 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
     redirect("/onboarding?next=/menus");
   }
 
+  const user = await prisma.user.findUnique({
+    where: { email: prefillEmail.toLowerCase() },
+    include: { profile: true },
+  });
+
+  const profile = user?.profile ?? null;
+
+  const goalLabels = profile?.dietaryGoals?.length
+    ? GOAL_OPTIONS.filter((option) => profile.dietaryGoals?.includes(option.value)).map((option) => option.label)
+    : [];
+
+  const allergenLabels = profile?.allergens?.length
+    ? ALLERGEN_OPTIONS.filter((option) => profile.allergens?.includes(option.value)).map((option) => option.label)
+    : [];
+
+  const budgetLabel = (() => {
+    if (!profile?.budgetTargetCents) {
+      return "No budget cap";
+    }
+    const match = BUDGET_OPTIONS.find((option) => option.value === profile.budgetTargetCents);
+    return match ? match.label : `$${(profile.budgetTargetCents / 100).toFixed(2)}`;
+  })();
+
+  const sessionHighlights = [
+    {
+      label: "Active goals",
+      value: goalLabels.length ? goalLabels.join(" · ") : "Add goals in personalization",
+    },
+    {
+      label: "Budget guardrail",
+      value: budgetLabel,
+    },
+    {
+      label: "Allergen shields",
+      value: allergenLabels.length ? allergenLabels.join(" · ") : "No active shields",
+    },
+  ];
+
   return (
     <div className="relative min-h-screen bg-[#f6fff4] text-slate-900">
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-70">
@@ -78,6 +103,12 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
               We hydrate this workspace directly from onboarding so recommendations, swaps, and inventory context stay
               in sync. Keep mobile in mind—everything stacks cleanly from 360px upward.
             </p>
+            <Link
+              href="/personalization"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 underline underline-offset-4"
+            >
+              Adjust personalization settings
+            </Link>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -95,27 +126,6 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-3xl border border-emerald-100 bg-white/80 p-5 text-sm shadow-[0_12px_38px_rgba(16,185,129,0.15)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">Signed in as</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">{prefillEmail}</p>
-              <p className="mt-1 text-sm text-slate-600">
-                Update onboarding anytime to nudge macros, allergens, or budget. Toasts confirm any profile gap.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                <Link
-                  href="/onboarding"
-                  className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-600 hover:text-white"
-                >
-                  Refresh onboarding
-                </Link>
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:text-emerald-800"
-                >
-                  Back to landing
-                </Link>
-              </div>
-            </div>
             <div className="rounded-3xl border border-emerald-100 bg-gradient-to-b from-lime-50 to-white p-5 shadow-[0_12px_38px_rgba(132,169,26,0.12)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-lime-700">Kitchen pulse</p>
               <p className="mt-2 text-base font-semibold text-slate-900">Inventory signals live-sync here.</p>
