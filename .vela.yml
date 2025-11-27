@@ -7,7 +7,7 @@ steps:
     environment:
       DO_BUILD_GOODFORK_APP: 'true'
     ruleset:
-      branch: [ test-deploymen ]
+      branch: [ test-deployment ]
       event: [ push, pull_request, schedule, deployment ]
     commands:
       - npm install
