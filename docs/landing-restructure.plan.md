@@ -65,10 +65,9 @@ This document outlines the work required to separate the marketing landing page 
 ### 4. Navigation Updates
 - **Header**
   - Already simplified to Logo + Start personalization + Log in.
-  - When auth wiring lands, conditionally show “View menus” or “Admin”.
+  - When auth wiring lands, only surface “Admin” for operators—keep consumer CTAs limited to onboarding/login (no “View menus” button).
 - **Footer**
-  - Update links to include Menus and Recipes once routes ship.
-  - Add quick CTA repeating Start personalization.
+  - Strip navigation clutter; keep only logo left-aligned and a “Made with love ❤️ in Cargill” note on the right for a calm finish.
 
 ---
 
@@ -102,4 +101,3 @@ This document outlines the work required to separate the marketing landing page 
 1. Review this plan with stakeholders for sign-off.
 2. Break down each section into tickets (landing hero, menus route, recipe detail, nav update).
 3. Begin with landing skeleton + `/menus` routing before expanding into recipe detail storytelling.
-

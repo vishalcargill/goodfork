@@ -12,13 +12,6 @@ export function Header() {
         </Link>
         <div className='flex items-center gap-3'>
           <Link
-            href='/menus'
-            title='Requires completed onboarding'
-            className='rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(16,185,129,0.2)]'
-          >
-            View menus
-          </Link>
-          <Link
             href='/onboarding'
             className='rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(16,185,129,0.35)] transition hover:-translate-y-0.5'
           >
