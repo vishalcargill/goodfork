@@ -22,11 +22,12 @@ function buildErrorResponse(error: unknown, fallback: string) {
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     await requireAdminApiUser();
-    await ensureRecipeExists(params.id);
+    await ensureRecipeExists(id);
 
     const body = await request.json();
     const parsed = adminRecipeSchema.safeParse(body);
@@ -45,7 +46,7 @@ export async function PUT(
     const { recipeData, inventoryData } = normalizeRecipeData(parsed.data);
 
     const updated = await prisma.recipe.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...recipeData,
         inventory: {
@@ -67,15 +68,16 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
-    await requireAdminApiUser();
-    await ensureRecipeExists(params.id);
+  await requireAdminApiUser();
+  await ensureRecipeExists(id);
 
-    await prisma.recipe.delete({ where: { id: params.id } });
+  await prisma.recipe.delete({ where: { id } });
 
-    return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Admin recipes DELETE failed", error);
     return buildErrorResponse(error, "Unable to delete recipe right now.");
