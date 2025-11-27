@@ -15,6 +15,7 @@ export function LoginCard() {
 
   const apiResponse = loginMutation.data;
   const isSuccess = apiResponse?.success === true;
+  const successUser = isSuccess ? apiResponse.user : null;
   const fieldErrors = apiResponse?.success === false ? apiResponse.fieldErrors ?? {} : {};
   const pending = loginMutation.isPending;
 
@@ -22,17 +23,17 @@ export function LoginCard() {
     (!isSuccess && apiResponse && !apiResponse.success ? apiResponse.message : null) ??
     (loginMutation.isError ? loginMutation.error.message : null);
 
-  const successHref = isSuccess
-    ? apiResponse.user.isAdmin
+  const successHref = successUser
+    ? successUser.isAdmin
       ? "/admin"
-      : `/?prefillEmail=${encodeURIComponent(apiResponse.user.email)}`
+      : `/menus?prefillEmail=${encodeURIComponent(successUser.email)}`
     : "/onboarding";
 
   useEffect(() => {
-    if (isSuccess && apiResponse.user.isAdmin) {
+    if (successUser?.isAdmin) {
       router.replace("/admin");
     }
-  }, [apiResponse?.user.isAdmin, isSuccess, router]);
+  }, [successUser?.isAdmin, router]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,7 +65,7 @@ export function LoginCard() {
               {apiResponse.message}
             </p>
             <Link href={successHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
-              {apiResponse.user.isAdmin ? "Open admin console" : "Jump to recommendations"}
+              {successUser?.isAdmin ? "Open admin console" : "Jump to recommendations"}
               <Sparkles className='h-3.5 w-3.5' />
             </Link>
           </div>

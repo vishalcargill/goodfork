@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { adminRecipeSchema } from "@/schema/admin-recipe.schema";
@@ -20,13 +20,11 @@ function buildErrorResponse(error: unknown, fallback: string) {
   );
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireAdminApiUser();
-    await ensureRecipeExists(params.id);
+    const { id } = await context.params;
+    await ensureRecipeExists(id);
 
     const body = await request.json();
     const parsed = adminRecipeSchema.safeParse(body);
@@ -45,7 +43,7 @@ export async function PUT(
     const { recipeData, inventoryData } = normalizeRecipeData(parsed.data);
 
     const updated = await prisma.recipe.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...recipeData,
         inventory: {
@@ -66,14 +64,15 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdminApiUser();
-    await ensureRecipeExists(params.id);
+    const { id } = await context.params;
+    await ensureRecipeExists(id);
 
-    await prisma.recipe.delete({ where: { id: params.id } });
+    await prisma.recipe.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

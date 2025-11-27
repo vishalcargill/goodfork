@@ -3,16 +3,20 @@ import path from "node:path";
 import { readFile } from "node:fs/promises";
 
 import { PrismaPg } from "@prisma/adapter-pg";
-import {
-  PrismaClient,
-  InventoryStatus,
-} from "../src/generated/prisma/client";
+import { PrismaClient, InventoryStatus, Prisma } from "../src/generated/prisma/client";
 
 const DATABASE_URL = process.env.DATABASE_URL ?? "";
 
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined. Cannot import recipes.");
 }
+
+const INVENTORY_LOW_STOCK_PERCENT =
+  Number(process.env.INVENTORY_LOW_STOCK_PERCENT ?? "0.35") || 0.35;
+const INVENTORY_RESTOCK_LEAD_DAYS =
+  Number(process.env.INVENTORY_RESTOCK_LEAD_DAYS ?? "5") || 5;
+const INVENTORY_BASELINE_SERVINGS =
+  Number(process.env.INVENTORY_BASELINE_SERVINGS ?? "12") || 12;
 
 const adapter = new PrismaPg({ connectionString: DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -131,6 +135,50 @@ type KaggleRecipe = {
   maincategory?: string;
 };
 
+type InventoryComputationInput = {
+  ratingCount: number | null;
+  serves: number | null;
+  difficulty: string | null;
+};
+
+function computeInventoryDefaults({
+  ratingCount,
+  serves,
+  difficulty,
+}: InventoryComputationInput) {
+  const normalizedServings =
+    serves && serves > 0 ? serves : INVENTORY_BASELINE_SERVINGS;
+  const popularityMultiplier = ratingCount
+    ? Math.min(3.5, Math.max(1, ratingCount / 40))
+    : 1;
+  const difficultyFactor = (() => {
+    if (!difficulty) return 1;
+    const normalized = difficulty.toLowerCase();
+    if (normalized.includes("easy")) return 0.85;
+    if (normalized.includes("hard")) return 1.2;
+    return 1;
+  })();
+  const estimatedQuantity = Math.round(
+    normalizedServings * 2 * popularityMultiplier * difficultyFactor
+  );
+  const safeQuantity = Math.max(0, estimatedQuantity);
+  const lowStockThreshold = Math.max(5, Math.round(safeQuantity * INVENTORY_LOW_STOCK_PERCENT));
+
+  let status: InventoryStatus = InventoryStatus.IN_STOCK;
+  if (safeQuantity === 0) {
+    status = InventoryStatus.OUT_OF_STOCK;
+  } else if (safeQuantity <= lowStockThreshold) {
+    status = InventoryStatus.LOW_STOCK;
+  }
+
+  const restockDate =
+    status === InventoryStatus.OUT_OF_STOCK
+      ? new Date(Date.now() + INVENTORY_RESTOCK_LEAD_DAYS * 24 * 60 * 60 * 1000)
+      : null;
+
+  return { quantity: safeQuantity, status, restockDate };
+}
+
 async function main() {
   const sourceFile = process.argv[2] ?? "data/recipes.json";
   const absolutePath = path.resolve(process.cwd(), sourceFile);
@@ -206,8 +254,8 @@ async function main() {
       dishType: entry.dish_type ?? null,
       mainCategory: entry.maincategory ?? null,
       subCategory: entry.subcategory ?? null,
-      nutrients: entry.nutrients ?? null,
-      timers: entry.times ?? null,
+      nutrients: (entry.nutrients as Prisma.JsonValue | null) ?? Prisma.DbNull,
+      timers: (entry.times as Prisma.JsonValue | null) ?? Prisma.DbNull,
     };
 
     const record = await prisma.recipe.upsert({
@@ -216,22 +264,21 @@ async function main() {
       create: recipeData,
     });
 
-    const computedQuantity = ratingCount ? Math.max(5, Math.min(60, Math.round(ratingCount / 4))) : 0;
-    const status =
-      computedQuantity === 0
-        ? InventoryStatus.OUT_OF_STOCK
-        : computedQuantity < 15
-          ? InventoryStatus.LOW_STOCK
-          : InventoryStatus.IN_STOCK;
+    const { quantity, status, restockDate } = computeInventoryDefaults({
+      ratingCount: ratingCount ? Math.round(ratingCount) : null,
+      serves: serves ? Math.round(serves) : null,
+      difficulty,
+    });
 
     await prisma.inventoryItem.upsert({
       where: { recipeId: record.id },
-      update: { quantity: computedQuantity, status },
+      update: { quantity, status, restockDate },
       create: {
         recipeId: record.id,
-        quantity: computedQuantity,
+        quantity,
         unitLabel: "servings",
         status,
+        restockDate,
       },
     });
 

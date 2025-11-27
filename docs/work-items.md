@@ -42,6 +42,7 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - Onboarding flow persisting user goals/allergens/preferences/budget.
 - Recommendation API/service that merges deterministic filters with LLM reasoning.
 - Recommendation UI cards with nutrition badges, AI rationale, and healthy swap CTA plus loading/empty/error states.
+- Personalized preview enforces onboarding email validation and uses Sonner toasts for missing profiles to direct users back into onboarding without cluttering inline UI.
 - Feedback logging endpoint/table capturing accept/save/swap events.
 - Living TODO log with milestone cadence (M1–M3) and RACI assignments per milestone.
 
@@ -86,16 +87,34 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - End-of-phase demo and metric review using seeded demo user.
 
 ## Phase 2 – Insights & Operator Tools
-- Build operator inventory dashboard with edit forms, stock alerts, and recipe metadata controls.
+- Build operator inventory dashboard with edit forms, stock alerts, and recipe metadata controls (recipes console shipped; inventory console pending).
 - Add nutrition insight drawer per recommendation plus comparison sheet for swaps.
 - Implement scheduled recompute endpoint (Route Handler) and configure scheduler (document crons and required `.env.local` keys such as `RECOMPUTE_CRON_SECRET`).
 - Instrument analytics pipeline (conversion, latency, AI failures) and expose analyst-facing report page.
 - Harden error boundaries, fallback copy for AI outages, and integrate feature flags for risky features (values stored in `.env.local`).
+- Split experience shell: redesign `/` as a motion-rich hero with CTA-only header, move personalization to `/menus`, and prep `/recipes/[slug]` detail pages that hydrate from the same recommendation payloads.
+
+### Experience Refresh TODOs
+| Status | Priority | Task | Notes |
+| --- | --- | --- | --- |
+| [ ] | Must | Rebuild landing page hero + sections with Framer Motion, animated gradient backgrounds, and CTA-only header (logo + Start personalization + Log in). | Ensure scroll sections map to marketing anchors and remove data fetching from `/`. |
+| [ ] | Must | Implement `/menus` route gated by onboarding email/session that renders the recommendation list, healthy swaps, insights, and Sonner messaging. | Shared components move out of `page.tsx`; home becomes marketing-only. |
+| [ ] | Should | Add `/recipes/[slug]` detail page showing hero imagery, nutrition macros, AI rationale history, inventory status, and healthy swap suggestions. | Pull data from Prisma, reuse recommendation metadata, and surface structured copy for demos. |
 
 ## Admin Tools
-- `/admin` – operator landing page with quick links into recipes and upcoming inventory tooling (only accessible to the configured `ADMIN_EMAIL`).
-- `/admin/recipes` – password-protected console to create, edit, preview, or delete recipes with real-time recommendation card previewing.
-- `/api/admin/recipes` + `/api/admin/recipes/[id]` – CRUD endpoints wrapping Prisma with validation to keep recipe + inventory tables in sync with operator edits.
+
+### Recipes Console (Complete)
+- [x] Lock admin-only routes (`/admin`, `/admin/recipes`, `/api/admin/recipes`) to `ADMIN_EMAIL` via `requireAdminUser`/`requireAdminApiUser` so hackathon judges cannot trip privileged changes.
+- [x] Build the two-pane `AdminRecipeManager` UI with live recipe list, exhaustive Prisma-field form (including allergens, macros, pricing, imagery, and nested inventory edits), and a Recommendation Card preview that mirrors the consumer UI.
+- [x] Ship `GET/POST /api/admin/recipes` plus `PUT/DELETE /api/admin/recipes/[id]` to perform CRUD with `adminRecipeSchema` validation, normalized inventory payloads, and Prisma includes that keep operator edits synchronized with the personalization engine.
+
+### Inventory Console (Shipped)
+- [x] `/admin/inventory` now lists every recipe with search, status filters, inline quantity/unit edits, restock date inputs, and telemetry-backed urgency banners for low/critical stock.
+- [x] Restock drawer logs quantity deltas, overrides status, and shows consumer preview copy; all edits hit `/api/admin/inventory`.
+- [x] Low-stock, restock, and sync failures emit telemetry events (`inventory.low_stock`, `inventory.restocked`, `inventory.sync_failed`) so analysts can monitor operator activity.
+- [x] Nightly feeds can be replayed via `npm run inventory:import data/inventory-sync.json` (JSON or CSV) or remotely through `/api/admin/inventory/import` with the `x-cron-secret: ${INVENTORY_SYNC_SECRET}` header. Document feed columns next to the script.
+
+**Operator SOP:** Export a CSV/JSON feed with columns `recipeSlug`, `quantity`, `unitLabel`, `status`, and `restockDate` (ISO). For manual edits, visit `/admin/inventory`, adjust quantity + status inline, and hit “Save row”; use the restock drawer for bulk deliveries. Cron invocations must set `INVENTORY_SYNC_SECRET` in `.env.local` and send it via the `x-cron-secret` header.
 
 ## Phase 3 – Polish & Launch
 - Accessibility audit (WCAG AA), keyboard focus outlines, and semantic labeling for nutrition data.

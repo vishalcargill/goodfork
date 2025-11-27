@@ -16,14 +16,19 @@ GoodFork is our hackathon submission for the **AI-Driven Menu Personalization an
 1. Consumer completes onboarding (goals, allergens, taste profile) and receives a tailored menu with nutrition badges, costs, and quick actions (save, swap, share).
 2. Operator updates ingredient stock or recipe macros; recommendations instantly respect availability.
 3. Analyst reviews conversion funnel and AI quality metrics to suggest iteration.
+4. Visitor lands on the marketing-focused home page, experiences animated storytelling, and taps “Start personalization” to enter onboarding or “Log in” to resume saved menus.
+5. A returning user opens the dedicated `/menus` experience to review recommendations, request swaps, and jump into a deep-dive recipe detail page for nutrition storytelling and inventory notes.
 
 ## 5. Functional Requirements
 - **Data ingestion:** nightly sync of inventory and macros; admin CRUD for emergency edits.
+- **Inventory feeds:** `npm run inventory:import path/to/feed.(json|csv)` supports manual replays, while `/api/admin/inventory/import` ingests cron-delivered payloads signed with `INVENTORY_SYNC_SECRET`.
 - **Recommendation engine:** combine deterministic filters (allergens, availability) with LLM re-ranking and rules for macros/cost targets.
 - **Healthy swap module:** for each card, propose an alternate meal that nudges toward goals (e.g., lower sodium) while noting trade-offs.
 - **Nutrition insights:** render calorie/macro badges, allergen flags, and short AI explanation (<200 chars) on every recommendation.
 - **User profile store:** persist preferences, recent selections, and feedback for better personalization.
-- **Operator tools:** lightweight dashboard to view stock warnings, recipes needing data, and latest consumer feedback.
+- **Operator tools:** `/admin` landing locked to `ADMIN_EMAIL` plus the `/admin/recipes` console that surfaces full CRUD for recipes + inventory with schema validation, live consumer card previewing, and immediate propagation to the recommendation engine; future iterations add stock warnings and analytics.
+- **Experience shell:** marketing landing page with high polish/animation that funnels to onboarding, a dedicated `/menus` route for personalized recommendations, and `/recipes/[slug]` deep-dive pages that reuse AI rationale + macros for individual dishes.
+- **Personalized preview safety rails:** the recommendation preview form must validate onboarding emails and surface Sonner toasts (instead of inline banners) whenever a non-existent profile or profile-less user submits a request so consumers immediately know to rerun onboarding.
 - **Analytics hooks:** event stream for recommendation shown/accepted, inventory breaches, and AI reasoning quality.
 
 ## 6. Non-Functional Requirements
@@ -63,3 +68,15 @@ Design a mobile-first, beautiful interface optimized for 360–390px widths and 
 - **Historical behavior tracking:** clarify how much of historical consumption patterns and feedback need to be persisted in early phases versus inferred on the fly.
 - **Pricing depth:** confirm how detailed pricing must be (single price vs variants, discounts, taxes) to support “budget-friendly” recommendations.
 - **Stretch analytics & accessibility:** confirm which analytics/observability hooks and accessibility investments, if any, are expected during the hackathon versus deferred post-hackathon.
+
+## 12. Admin Console Deliverable (Shipped)
+- `/admin` is server-guarded via `requireAdminUser` so only the configured operator email can load the console; this landing page provides quick launches into recipes (live) and inventory (coming soon) workspaces.
+- `/admin/recipes` mounts `AdminRecipeManager`, a two-pane UX that lists all recipes, exposes every Prisma + inventory field, and renders a live Recommendation Card preview so operators immediately see consumer-facing impact.
+- `/api/admin/recipes` and `/api/admin/recipes/[id]` share `adminRecipeSchema` validation, normalize nested inventory payloads, and persist through Prisma with an include shape that keeps recommendation queries and operator edits in lockstep.
+- `/admin/inventory` now powers day-to-day stock management with search/filter chips, inline edits, restock drawer, low-stock alerts, and a live consumer preview that mirrors recommendation cards.
+- `/api/admin/inventory` handles privileged GET/PATCH/POST calls, emitting telemetry events for `inventory.low_stock` and `inventory.restocked`, while `/api/admin/inventory/import` accepts cron-fed JSON/CSV payloads signed with `INVENTORY_SYNC_SECRET`.
+
+## 13. Experience Architecture Refresh (Planned)
+- **Landing page:** evolves into a purely narrative hero with rich motion (Framer Motion for hero, scroll-linked feature reveals, animated stats, and CTA micro-interactions). Header now only carries the GoodFork logo plus “Start personalization” and “Log in” buttons to keep the CTA focus clear.
+- **Menus page:** `/menus` becomes the authenticated/home for recommendations, swaps, insights, and telemetry. It will hydrate from onboarding data (email or session) and support stateful UI without distracting marketing content.
+- **Recipe detail pages:** `/recipes/[slug]` expand a single card into full nutrition breakdowns, inventory status, swap suggestions, and AI rationale history to deepen judge storytelling.

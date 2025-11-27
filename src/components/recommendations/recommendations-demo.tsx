@@ -1,24 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlertCircle,
-  Bookmark,
-  CheckCircle2,
-  Loader2,
-  Repeat2,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { JSX, useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, Bookmark, CheckCircle2, Loader2, Repeat2, ShieldCheck, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { useFeedbackMutation } from "@/services/client/feedback.client";
 import { useRecommendationsMutation } from "@/services/client/recommendations.client";
 import type { FeedbackEventPayload } from "@/schema/feedback.schema";
-import type {
-  RecommendationCard,
-  RecommendationResponse,
-} from "@/services/shared/recommendations.types";
+import type { RecommendationCard, RecommendationResponse } from "@/services/shared/recommendations.types";
 
 type RecommendationsDemoProps = {
   prefillEmail?: string;
@@ -55,6 +45,14 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
     }
   }, [prefillEmail, mutate]);
 
+  useEffect(() => {
+    if (data && !data.success && data.errorCode === "user_not_found") {
+      toast.error("No onboarding profile found", {
+        description: data.message,
+      });
+    }
+  }, [data]);
+
   const handleFetch = () => {
     if (!email.trim()) {
       setLocalError("Enter the email used during onboarding.");
@@ -82,18 +80,18 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
     return "Awaiting personalization";
   }, [data, isPending, successPayload]);
 
+  const shouldShowInlineApiError = data && !data.success && data.errorCode !== "user_not_found";
+
   return (
     <div className='space-y-6'>
       <div className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-6 shadow-inner'>
         <div className='flex flex-col gap-4 md:flex-row md:items-end md:justify-between'>
           <div className='space-y-1'>
-            <p className='text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700'>
-              Personalized preview
-            </p>
+            <p className='text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700'>Personalized preview</p>
             <h3 className='text-xl font-semibold text-slate-900'>Fetch menus for your profile</h3>
             <p className='text-sm text-slate-600'>
-              After onboarding, drop the same email here to view 3–5 cards grounded in your saved
-              goals, allergens, and inventory.
+              After onboarding, drop the same email here to view 3–5 cards grounded in your saved goals, allergens, and
+              inventory.
             </p>
           </div>
           <div className='flex flex-col gap-2 md:flex-row md:items-center'>
@@ -146,14 +144,14 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
               {localError}
             </span>
           ) : null}
-          {data && !data.success ? (
+          {shouldShowInlineApiError ? (
             <span
               className='inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1 text-amber-800'
               role='alert'
               aria-live='assertive'
             >
               <AlertCircle className='h-3.5 w-3.5' />
-              {data.message}
+              {data?.message}
             </span>
           ) : null}
         </div>
@@ -183,8 +181,7 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
     <div className='space-y-3'>
       <div className='flex flex-wrap items-center justify-between gap-3 text-xs'>
         <p className='font-semibold uppercase tracking-[0.18em] text-emerald-700'>
-          {apiResponse.delivered} menu cards ·{" "}
-          {apiResponse.source === "llm" ? "AI ranked" : "Deterministic fallback"}
+          {apiResponse.delivered} menu cards · {apiResponse.source === "llm" ? "AI ranked" : "Deterministic fallback"}
         </p>
         <span className='rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white'>
           Session ready
@@ -207,16 +204,18 @@ type RecommendationCardProps = {
   readOnly?: boolean;
 };
 
+const FALLBACK_RECIPE_IMAGE = "/recipe-placeholder.svg";
+
 export function RecommendationCard({ card, userId, readOnly = false }: RecommendationCardProps) {
   const statusTheme = statusCopy[card.inventory.status];
   const feedbackMutation = useFeedbackMutation();
   const [lastAction, setLastAction] = useState<FeedbackAction | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<FeedbackAction | null>(null);
+  const [imageErrored, setImageErrored] = useState(false);
   const actionOrder: FeedbackAction[] = ["ACCEPT", "SAVE", "SWAP"];
-  const swapDescription = card.swapRecipe
-    ? `Swap for ${card.swapRecipe.title}`
-    : "Request a lighter pick";
+  const swapDescription = card.swapRecipe ? `Swap for ${card.swapRecipe.title}` : "Request a lighter pick";
+  const recipeImage = !card.imageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : card.imageUrl;
 
   const actionConfigs: Record<
     FeedbackAction,
@@ -282,6 +281,8 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
     );
   }
 
+  const handleImageError = () => setImageErrored(true);
+
   return (
     <article className='group flex h-full flex-col justify-between rounded-3xl border border-emerald-100 bg-white p-5 shadow-[0_14px_36px_rgba(16,185,129,0.18)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_20px_56px_rgba(16,185,129,0.25)]'>
       <div className='flex items-start justify-between gap-3'>
@@ -293,6 +294,16 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
         <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", statusTheme.badge)}>
           {statusTheme.label}
         </span>
+      </div>
+
+      <div className='mt-4 overflow-hidden rounded-2xl border border-emerald-50 bg-emerald-50/50'>
+        <img
+          src={recipeImage}
+          alt={card.title}
+          className='h-40 w-full object-cover'
+          loading='lazy'
+          onError={handleImageError}
+        />
       </div>
 
       <div className='mt-4 space-y-2 text-sm text-slate-700'>
@@ -333,13 +344,14 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
           </div>
         ) : null}
 
-        <div className='flex flex-col gap-2 pt-1 text-sm sm:flex-row sm:flex-wrap' role='group' aria-label='Feedback actions'>
+        <div
+          className='flex flex-col gap-2 pt-1 text-sm sm:flex-row sm:flex-wrap'
+          role='group'
+          aria-label='Feedback actions'
+        >
           {actionOrder.map((action) => {
             const config = actionConfigs[action];
-            const note =
-              action === "SWAP"
-                ? card.swapRecipe?.title ?? card.healthySwapCopy ?? undefined
-                : undefined;
+            const note = action === "SWAP" ? card.swapRecipe?.title ?? card.healthySwapCopy ?? undefined : undefined;
             const descriptionId = `${card.recommendationId}-${action}-desc`;
 
             return (
@@ -354,11 +366,7 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
                   config.className
                 )}
               >
-                {pendingAction === action && isPending ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                ) : (
-                  config.icon
-                )}
+                {pendingAction === action && isPending ? <Loader2 className='h-4 w-4 animate-spin' /> : config.icon}
                 <div className='flex-1 text-xs font-normal leading-tight'>
                   <p className='text-sm font-semibold'>{config.label}</p>
                   <p id={descriptionId} className='text-[11px] text-slate-600'>

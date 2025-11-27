@@ -34,8 +34,8 @@ export function normalizeRecipeData(input: AdminRecipeInput) {
     dishType: recipe.dishType ?? null,
     mainCategory: recipe.mainCategory ?? null,
     subCategory: recipe.subCategory ?? null,
-    nutrients: recipe.nutrients ?? null,
-    timers: recipe.timers ?? null,
+    nutrients: recipe.nutrients ?? undefined,
+    timers: recipe.timers ?? undefined,
   };
 
   const inventoryData = {
