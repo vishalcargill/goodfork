@@ -52,7 +52,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className='grid gap-10 rounded-[36px] border border-emerald-100 bg-white/85 p-8 shadow-[0_30px_90px_rgba(16,185,129,0.12)] backdrop-blur lg:grid-cols-[1.1fr_0.9fr] lg:items-center'>
+        <section
+          id='login'
+          className='grid gap-10 rounded-[36px] border border-emerald-100 bg-white/85 p-8 shadow-[0_30px_90px_rgba(16,185,129,0.12)] backdrop-blur lg:grid-cols-[1.1fr_0.9fr] lg:items-center'
+        >
           <div className='space-y-4'>
             <p className='text-xs font-semibold uppercase tracking-[0.25em] text-emerald-600'>Already onboarded?</p>
             <h2 className='text-3xl font-semibold text-slate-900'>Hop back in without the fluff.</h2>
