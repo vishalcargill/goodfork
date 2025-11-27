@@ -1,7 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import { JSX, useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Bookmark, CheckCircle2, Loader2, Repeat2, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Bookmark,
+  CheckCircle2,
+  Loader2,
+  Repeat2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -173,22 +184,93 @@ type RecommendationsListProps = {
 };
 
 function RecommendationsList({ apiResponse }: RecommendationsListProps) {
-  if (!apiResponse.recommendations.length) {
+  const cards = apiResponse.recommendations;
+  const [cardsPerView, setCardsPerView] = useState(3);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  useEffect(() => {
+    const determineCardsPerView = () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const width = window.innerWidth;
+
+      if (width < 640) {
+        setCardsPerView(1);
+      } else if (width < 1024) {
+        setCardsPerView(2);
+      } else {
+        setCardsPerView(3);
+      }
+    };
+
+    determineCardsPerView();
+    window.addEventListener("resize", determineCardsPerView);
+
+    return () => window.removeEventListener("resize", determineCardsPerView);
+  }, []);
+
+  if (!cards.length) {
     return <EmptyRecommendations />;
   }
 
+  const totalPages = Math.max(1, Math.ceil(cards.length / cardsPerView));
+  const safePageIndex = Math.min(pageIndex, totalPages - 1);
+  const startIndex = safePageIndex * cardsPerView;
+  const visibleCards = cards.slice(startIndex, startIndex + cardsPerView);
+  const showingStart = startIndex + 1;
+  const showingEnd = startIndex + visibleCards.length;
+  const canGoPrev = safePageIndex > 0;
+  const canGoNext = safePageIndex < totalPages - 1;
+
+  const handlePrev = () => {
+    if (canGoPrev) {
+      setPageIndex((prev) => Math.max(prev - 1, 0));
+    }
+  };
+
+  const handleNext = () => {
+    if (canGoNext) {
+      setPageIndex((prev) => Math.min(prev + 1, totalPages - 1));
+    }
+  };
+
   return (
-    <div className='space-y-3'>
-      <div className='flex flex-wrap items-center justify-between gap-3 text-xs'>
-        <p className='font-semibold uppercase tracking-[0.18em] text-emerald-700'>
-          {apiResponse.delivered} menu cards · {apiResponse.source === "llm" ? "AI ranked" : "Deterministic fallback"}
-        </p>
-        <span className='rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white'>
-          Session ready
-        </span>
+    <div className='space-y-4'>
+      <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+        <div className='space-y-1 text-xs'>
+          <p className='font-semibold uppercase tracking-[0.18em] text-emerald-700'>
+            {apiResponse.delivered} menu cards · {apiResponse.source === "llm" ? "AI ranked" : "Deterministic fallback"}
+          </p>
+          <p className='text-[11px] text-slate-500'>
+            Showing {showingStart}-{showingEnd} of {cards.length} · {cardsPerView} per view
+          </p>
+        </div>
+        <div className='flex items-center gap-2'>
+          <button
+            type='button'
+            onClick={handlePrev}
+            disabled={!canGoPrev}
+            className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <ArrowLeft className='h-4 w-4' />
+            Previous
+          </button>
+          <button
+            type='button'
+            onClick={handleNext}
+            disabled={!canGoNext}
+            className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            Next
+            <ArrowRight className='h-4 w-4' />
+          </button>
+        </div>
       </div>
-      <div className='grid gap-4 md:grid-cols-3'>
-        {apiResponse.recommendations.map((card) => (
+
+      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+        {visibleCards.map((card) => (
           <RecommendationCard key={card.recommendationId} card={card} userId={apiResponse.userId} />
         ))}
       </div>
@@ -216,6 +298,15 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
   const actionOrder: FeedbackAction[] = ["ACCEPT", "SAVE", "SWAP"];
   const swapDescription = card.swapRecipe ? `Swap for ${card.swapRecipe.title}` : "Request a lighter pick";
   const recipeImage = !card.imageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : card.imageUrl;
+  const macroBadges = [
+    card.calories !== null ? `${card.calories} kcal` : null,
+    typeof card.proteinGrams === "number" ? `${card.proteinGrams}g protein` : null,
+    typeof card.carbsGrams === "number" ? `${card.carbsGrams}g carbs` : null,
+    typeof card.fatGrams === "number" ? `${card.fatGrams}g fat` : null,
+  ].filter((badge): badge is string => Boolean(badge));
+  const adjustmentChips = card.metadata.adjustments.slice(0, 3);
+  const highlightChips = card.healthyHighlights.slice(0, 3);
+  const tagChips = card.tags.slice(0, 4);
 
   const actionConfigs: Record<
     FeedbackAction,
@@ -284,7 +375,7 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
   const handleImageError = () => setImageErrored(true);
 
   return (
-    <article className='group flex h-full flex-col justify-between rounded-3xl border border-emerald-100 bg-white p-5 shadow-[0_14px_36px_rgba(16,185,129,0.18)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_20px_56px_rgba(16,185,129,0.25)]'>
+    <article className='group flex h-full flex-col justify-between rounded-[26px] border border-emerald-100 bg-white p-5 shadow-[0_14px_36px_rgba(16,185,129,0.18)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_20px_56px_rgba(16,185,129,0.25)]'>
       <div className='flex items-start justify-between gap-3'>
         <div>
           <p className='text-xs font-semibold uppercase tracking-[0.14em] text-slate-500'>#{card.recipeId.slice(-4)}</p>
@@ -297,41 +388,86 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
       </div>
 
       <div className='mt-4 overflow-hidden rounded-2xl border border-emerald-50 bg-emerald-50/50'>
-        <img
+        <Image
           src={recipeImage}
           alt={card.title}
+          width={400}
+          height={200}
+          sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
           className='h-40 w-full object-cover'
-          loading='lazy'
           onError={handleImageError}
+          unoptimized
         />
       </div>
 
-      <div className='mt-4 space-y-2 text-sm text-slate-700'>
-        {card.calories ? <p>{card.calories} kcal</p> : null}
-        {card.macrosLabel ? <p className='text-xs text-slate-500'>{card.macrosLabel}</p> : null}
-        <p>{card.rationale}</p>
+      {macroBadges.length ? (
+        <div className='mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-700'>
+          {macroBadges.map((badge) => (
+            <span
+              key={`${card.recommendationId}-${badge}`}
+              className='rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs'
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <div className='mt-4 space-y-3 text-sm text-slate-700'>
+        {card.macrosLabel ? <p className='text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>{card.macrosLabel}</p> : null}
+        <p className='text-[13px] leading-relaxed text-slate-600'>{card.rationale}</p>
+        {adjustmentChips.length ? (
+          <div className='flex flex-wrap gap-2 text-[11px] text-slate-600'>
+            {adjustmentChips.map((adjustment, index) => (
+              <span
+                key={`${card.recommendationId}-adjustment-${index}`}
+                className='rounded-full border border-slate-200 bg-slate-50 px-3 py-1'
+              >
+                {adjustment.reason}
+                <span className='ml-1 font-semibold text-slate-900'>
+                  {adjustment.delta > 0 ? `+${adjustment.delta}` : adjustment.delta}
+                </span>
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {highlightChips.length ? (
+          <div className='flex flex-wrap gap-2 text-[11px] text-emerald-700'>
+            {highlightChips.map((highlight) => (
+              <span
+                key={`${card.recommendationId}-highlight-${highlight}`}
+                className='rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1'
+              >
+                {highlight}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {tagChips.length ? (
+          <div className='flex flex-wrap gap-2 text-[11px] text-slate-500'>
+            {tagChips.map((tag) => (
+              <span key={`${card.recommendationId}-tag-${tag}`} className='rounded-full border border-slate-100 bg-white px-3 py-1'>
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {card.allergens.length ? (
+          <div className='flex flex-wrap items-center gap-2 text-[11px] text-rose-700'>
+            <span className='font-semibold uppercase tracking-[0.2em]'>Allergens</span>
+            {card.allergens.map((allergen) => (
+              <span
+                key={`${card.recommendationId}-allergen-${allergen}`}
+                className='rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-rose-700'
+              >
+                {allergen}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className='mt-4 space-y-4'>
-        <div className='rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-xs text-slate-600'>
-          <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500'>
-            Personalization signals
-          </p>
-          <ul className='mt-2 space-y-1'>
-            {card.metadata.adjustments.slice(0, 3).map((adjustment, index) => (
-              <li key={`${card.recommendationId}-adj-${index}`} className='flex items-start gap-2'>
-                <span className='mt-1 inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500' />
-                <span>
-                  {adjustment.reason}
-                  <span className='ml-1 font-semibold text-slate-900'>
-                    {adjustment.delta > 0 ? `+${adjustment.delta}` : adjustment.delta}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         {card.healthySwapCopy ? (
           <div className='rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800'>
             <p className='text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600'>Healthy swap</p>
@@ -406,7 +542,7 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
 
 function RecommendationsSkeleton() {
   return (
-    <div className='grid gap-4 md:grid-cols-3'>
+    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={`skeleton-${index}`}
