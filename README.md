@@ -38,6 +38,22 @@ npm run db:seed
 
 Seeds provision the `admin@cargill.com` account plus three flagship recipes + inventory states so the recommendation engine can hydrate.
 
+### Docker Dev Stack
+Run the entire stack with Docker if you can’t (or don’t want to) manage Postgres manually. This extends the "Local Database Setup" flow documented in `docs/work-items.md`.
+
+1. Copy `.env.local.example` → `.env.local` and update secrets. For Docker Compose, set `DATABASE_URL="postgresql://postgres:postgres@postgres:5432/goodfork_dev?schema=public"`.
+2. Build and start services:
+   ```bash
+   docker compose up -d postgres
+   docker compose run --rm web npx prisma migrate deploy
+   docker compose run --rm web npm run db:seed # optional
+   docker compose up -d web
+   ```
+3. Visit `http://localhost:3000`. Logs stream via `docker compose logs -f web`.
+4. Stop services with `docker compose down` (data persists because the Postgres container mounts the `goodfork_pgdata` volume). Run `docker compose down -v` only if you want to wipe the DB.
+
+`docker/postgres/init.sql` installs the `pgvector` extension automatically, so embeddings work inside containers the same way they do locally. If you need a clean start, delete the named volume (`docker volume rm goodfork_pgdata`) and rerun the migration + seed commands.
+
 ### Core Scripts
 | Script | Description |
 | --- | --- |
