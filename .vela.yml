@@ -1,5 +1,9 @@
 version: "1"
-
+secrets:
+  - name: VELA_DATABASE_URL
+    key: VishalGrover/goodfork/VELA_DATABASE_URL
+    engine: native
+    type: repo
 steps:
   # build goodfork app
   - name: build-goodfork-app
