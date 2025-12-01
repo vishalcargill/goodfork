@@ -1,14 +1,16 @@
+
 kind: kubernetes
 app: goodfork
 type: web
 team: training
-#docker_image: goodfork-app
-#docker_tag: latest
+docker_image: goodfork-app
+internal: true
 replicas: 2
 container_port: 3000
 healthcheck:
   path: /health
   port: 3000
+revisionHistoryLimit: 10
 dns:
   zone: cglcloud
   name: goodfork
