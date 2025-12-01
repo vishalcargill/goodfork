@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
-import { adminRecipeSchema } from "@/schema/admin-recipe.schema";
-import { requireAdminApiUser } from "@/lib/auth";
-import { normalizeRecipeData, recipeInclude } from "@/app/api/admin/recipes/recipe-utils";
+// All DB-dependent logic stubbed for deployment
 
-// DB access stubbed for deployment: always returns static error
+export async function GET() {
   return NextResponse.json(
     {
       success: false,
@@ -15,7 +12,7 @@ import { normalizeRecipeData, recipeInclude } from "@/app/api/admin/recipes/reci
   );
 }
 
-// DB access stubbed for deployment: always returns static error
+export async function POST(request: Request) {
   return NextResponse.json(
     {
       success: false,
@@ -23,4 +20,5 @@ import { normalizeRecipeData, recipeInclude } from "@/app/api/admin/recipes/reci
     },
     { status: 501 }
   );
+}
 }
