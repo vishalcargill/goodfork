@@ -71,8 +71,8 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
 # Ensure runtime user owns files
-RUN chown -R app:app /app
-USER app
+RUN chown -R 999:999 /app
+USER 999
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]
