@@ -1,7 +1,7 @@
 # -------------------------
 # Base Image (Debian Slim - No Go)
 # -------------------------
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 WORKDIR /app
 
 # Install essential system packages for build tools, Prisma, and Next.js
@@ -23,7 +23,7 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 
 # Install ALL deps (includes devDependencies)
-RUN npm install hono@4.10.2 glob@10.5.0 cross-spawn@7.0.5 brace-expansion@2.0.2 && npm install
+RUN npm ci
 
 # -------------------------
 # Builder Layer
@@ -41,7 +41,7 @@ RUN npm run build
 # -------------------------
 # Runner Layer (Final Image)
 # -------------------------
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
