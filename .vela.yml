@@ -1,3 +1,4 @@
+
 version: "1"
 secrets:
   - name: VELA_DATABASE_URL
@@ -5,6 +6,18 @@ secrets:
     engine: native
     type: repo
 steps:
+  # docker build step
+  - name: docker build
+    image: docker-utilities.binrepo.cglcloud.in/enablementtools/docker-plugin:3-stable
+    ruleset:
+      if:
+        branch: [ test-deployment ]
+        event: [ push ]
+    parameters:
+      repo: "goodfork-app"
+      skip_existing: true
+      tags: "tutorial-${VELA_BUILD_COMMIT:0:7}"
+
   # build goodfork app
   - name: build-goodfork-app
     image: node:20-alpine
