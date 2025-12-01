@@ -55,9 +55,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN useradd --uid 999 --user-group --system --shell /bin/bash app
-
 COPY package.json package-lock.json ./
 
 # Copy built node_modules
@@ -70,10 +67,5 @@ RUN npm prune --omit=dev
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
-# Set permissions for /app
-RUN chown -R 999:999 /app
-
 EXPOSE 3000
-# Run as non-root user
-USER 999
 CMD ["npm", "run", "start"]
