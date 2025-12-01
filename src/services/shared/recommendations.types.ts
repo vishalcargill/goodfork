@@ -8,6 +8,7 @@ export type ScoreAdjustment = {
 export type RecommendationCard = {
   recommendationId: string;
   recipeId: string;
+  slug: string;
   title: string;
   description: string | null;
   imageUrl: string | null;

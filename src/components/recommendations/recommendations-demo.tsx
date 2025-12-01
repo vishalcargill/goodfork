@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
@@ -387,18 +388,23 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
         </span>
       </div>
 
-      <div className='mt-4 overflow-hidden rounded-2xl border border-emerald-50 bg-emerald-50/50'>
+      <Link
+        href={`/recipes/${card.slug}`}
+        prefetch={false}
+        className='mt-4 block overflow-hidden rounded-2xl border border-emerald-50 bg-emerald-50/50'
+        aria-label={`Open ${card.title} recipe detail`}
+      >
         <Image
           src={recipeImage}
           alt={card.title}
           width={400}
           height={200}
           sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-          className='h-40 w-full object-cover'
+          className='h-40 w-full object-cover transition duration-150 group-hover:scale-[1.02]'
           onError={handleImageError}
           unoptimized
         />
-      </div>
+      </Link>
 
       {macroBadges.length ? (
         <div className='mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-700'>
@@ -465,6 +471,15 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
             ))}
           </div>
         ) : null}
+        <Link
+          href={`/recipes/${card.slug}`}
+          prefetch={false}
+          className='inline-flex items-center gap-2 rounded-2xl border border-emerald-200 px-4 py-2 text-[13px] font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900'
+          aria-label={`View full detail for ${card.title}`}
+        >
+          <Sparkles className='h-4 w-4 text-emerald-600' aria-hidden='true' />
+          View recipe detail
+        </Link>
       </div>
 
       <div className='mt-4 space-y-4'>

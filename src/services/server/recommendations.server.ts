@@ -6,7 +6,13 @@ import {
   type UserProfile,
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { DATABASE_URL, OPENAI_API_KEY, RECOMMENDER_MODEL } from "@/constants/app.constants";
+import {
+  DATABASE_URL,
+  ENABLE_AI_RANKING,
+  OPENAI_API_KEY,
+  OPENAI_BASE_URL,
+  RECOMMENDER_MODEL,
+} from "@/constants/app.constants";
 import type {
   RecommendationCard,
   RecommendationResponse,
@@ -111,7 +117,7 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
 
   let finalSelection: FinalCandidate[] | null = null;
 
-  if (!input.deterministicOnly) {
+  if (!input.deterministicOnly && ENABLE_AI_RANKING && OPENAI_API_KEY && RECOMMENDER_MODEL) {
     const aiRanked = await rankWithLLM(profile, scored, limit);
     if (aiRanked?.length) {
       const enrichedAiSelection = aiRanked.reduce<FinalCandidate[]>((acc, aiEntry) => {
@@ -187,6 +193,7 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
     return {
       recommendationId: record.id,
       recipeId: record.recipeId,
+      slug: record.recipe.slug,
       title: record.recipe.title,
       description: record.recipe.description,
       imageUrl: record.recipe.imageUrl ?? null,
@@ -503,7 +510,7 @@ async function rankWithLLM(
   candidates: ScoredCandidate[],
   limit: number
 ): Promise<AiRankingResponse | null> {
-  if (!OPENAI_API_KEY) {
+  if (!OPENAI_API_KEY || !ENABLE_AI_RANKING) {
     return null;
   }
 
@@ -530,7 +537,8 @@ async function rankWithLLM(
       })),
     };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const normalizedBase = OPENAI_BASE_URL.replace(/\/$/, "");
+    const response = await fetch(`${normalizedBase}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

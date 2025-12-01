@@ -63,6 +63,7 @@ Run the entire stack with Docker if you can’t (or don’t want to) manage Post
 | `npm run prisma:migrate` | Apply Prisma migrations (dev). |
 | `npm run prisma:generate` | Rebuild Prisma client (`src/generated/prisma`). |
 | `npm run db:seed` | Seed demo users + inventory. |
+| `npm run admin:create -- admin@example.com "Admin Name"` | Upsert the admin account using the provided email/name (password defaults to `admin@123` unless `ADMIN_PASSWORD` is set). |
 | `npm run recipes:import -- data/recipes.json` | Load the Kaggle dataset into the `Recipe` + `InventoryItem` tables. |
 | `npm run recipes:embed -- 50` | Generate embeddings for up to 50 recipes missing the configured vector version. |
 

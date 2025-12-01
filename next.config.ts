@@ -2,13 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  experimental: {
-    // Tree-shake large “barrel” packages like icon libs
-    // so only the icons you use are bundled.
-    optimizePackageImports: ["@phosphor-icons/react"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.immediate.co.uk" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "cdn.pixabay.com" },
+    ],
   },
-  // If you later serve remote images, add Images config here.
-  // images: { remotePatterns: [{ protocol: "https", hostname: "..." }] },
 };
 
 export default nextConfig;
