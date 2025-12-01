@@ -2,7 +2,8 @@ kind: kubernetes
 app: goodfork
 type: web
 team: training
-docker_image: goodfork-app:latest
+docker_image: goodfork-app
+docker_tag: latest
 replicas: 2
 container_port: 3000
 healthcheck:
