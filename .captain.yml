@@ -14,3 +14,106 @@ revisionHistoryLimit: 10
 dns:
   zone: cglcloud
   name: goodfork
+depends_on:
+  dev:
+    fqdn:
+      - address: "api.openai.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "fonts.googleapis.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "fonts.gstatic.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "lottie.host"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "www.bbcgoodfood.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "images.immediate.co.uk"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "images.unsplash.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "cdn.pixabay.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+  stage:
+    fqdn:
+      - address: "api.openai.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "fonts.googleapis.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "fonts.gstatic.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "lottie.host"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "www.bbcgoodfood.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "images.immediate.co.uk"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "images.unsplash.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "cdn.pixabay.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+  prod:
+    fqdn:
+      - address: "api.openai.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "fonts.googleapis.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "fonts.gstatic.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "lottie.host"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "www.bbcgoodfood.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "images.immediate.co.uk"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "images.unsplash.com"
+        protocol: "tcp"
+        ports:
+          - "443"
+      - address: "cdn.pixabay.com"
+        protocol: "tcp"
+        ports:
+          - "443"
