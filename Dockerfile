@@ -55,6 +55,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root runtime user to satisfy runAsNonRoot policies
+RUN useradd --uid 999 --user-group --system --shell /bin/bash app
+
 COPY package.json package-lock.json ./
 
 # Copy built node_modules
@@ -66,6 +69,10 @@ RUN npm prune --omit=dev
 # Copy final build outputs
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+
+# Ensure runtime user owns files
+RUN chown -R app:app /app
+USER app
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]
