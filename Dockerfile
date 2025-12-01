@@ -4,7 +4,6 @@
 FROM node:20-slim AS base
 WORKDIR /app
 
-# Install required packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -14,11 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -------------------------
 FROM base AS deps
 
-# Copy lockfile & manifest (required for npm ci)
 COPY package.json package-lock.json ./
 
-# Deterministic install (fixes Sysdig CVEs)
-RUN npm ci --omit=dev
+# Install ALL deps (including devDeps)
+RUN npm ci
 
 # -------------------------
 # Builder Layer
@@ -26,32 +24,28 @@ RUN npm ci --omit=dev
 FROM base AS builder
 ENV NODE_ENV=production
 
-# Copy manifest and lockfile again
 COPY package.json package-lock.json ./
-
-# Copy node_modules from deps layer
 COPY --from=deps /app/node_modules ./node_modules
-
-# Copy all source files
 COPY . .
 
-# Build Next.js
 RUN npm run build
 
 # -------------------------
-# Runner Layer (Final image)
+# Runner Layer (Final Image)
 # -------------------------
 FROM base AS runner
 ENV NODE_ENV=production
 
-# Copy runtime node_modules
+# Copy application dependencies (full)
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy Next.js build
+# ⚠ Remove devDependencies now (safe because build is already done)
+RUN npm prune --omit=dev
+
+# Copy build output & static assets
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
-# Copy only what is needed at runtime
 COPY package.json package-lock.json ./
 
 EXPOSE 3000
