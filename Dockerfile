@@ -12,7 +12,7 @@ RUN apk update && apk add --upgrade \
 # -------------------------
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
 # -------------------------
 # Builder Layer
