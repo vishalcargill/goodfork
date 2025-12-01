@@ -29,7 +29,6 @@ type RecipeFormState = {
   proteinGrams: string;
   carbsGrams: string;
   fatGrams: string;
-  priceCents: string;
   tags: string;
   allergens: string;
   healthyHighlights: string;
@@ -53,11 +52,6 @@ type RecipeFormState = {
   inventoryRestockDate: string;
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
-
 const INITIAL_FORM: RecipeFormState = {
   id: null,
   slug: "",
@@ -71,7 +65,6 @@ const INITIAL_FORM: RecipeFormState = {
   proteinGrams: "",
   carbsGrams: "",
   fatGrams: "",
-  priceCents: "",
   tags: "",
   allergens: "",
   healthyHighlights: "",
@@ -138,7 +131,6 @@ function mapRecipeToForm(recipe: RecipeWithInventory): RecipeFormState {
     proteinGrams: recipe.proteinGrams?.toString() ?? "",
     carbsGrams: recipe.carbsGrams?.toString() ?? "",
     fatGrams: recipe.fatGrams?.toString() ?? "",
-    priceCents: recipe.priceCents.toString(),
     tags: joinList(recipe.tags),
     allergens: joinList(recipe.allergens),
     healthyHighlights: joinList(recipe.healthyHighlights),
@@ -196,11 +188,6 @@ function parseOptionalFloat(value: string) {
 }
 
 function buildPayload(form: RecipeFormState): AdminRecipeInput {
-  const price = parseOptionalInt(form.priceCents);
-  if (price === null || price < 0) {
-    throw new Error("Price (cents) must be a non-negative number.");
-  }
-
   const quantity = parseOptionalInt(form.inventoryQuantity);
   if (quantity === null || quantity < 0) {
     throw new Error("Inventory quantity must be a non-negative number.");
@@ -236,7 +223,6 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
     proteinGrams: parseOptionalInt(form.proteinGrams),
     carbsGrams: parseOptionalInt(form.carbsGrams),
     fatGrams: parseOptionalInt(form.fatGrams),
-    priceCents: price,
     tags: splitList(form.tags),
     allergens: splitList(form.allergens),
     healthyHighlights: splitList(form.healthyHighlights),
@@ -264,7 +250,6 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
 }
 
 function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
-  const priceCents = parseOptionalInt(form.priceCents) ?? 0;
   const quantity = parseOptionalInt(form.inventoryQuantity) ?? 0;
   const calories = parseOptionalInt(form.calories);
   const protein = parseOptionalInt(form.proteinGrams);
@@ -278,8 +263,6 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
     title: form.title || "Recipe preview",
     description: form.description || null,
     imageUrl: form.imageUrl.trim() || null,
-    priceCents,
-    priceDisplay: currencyFormatter.format(priceCents / 100),
     calories,
     proteinGrams: protein,
     carbsGrams: carbs,
@@ -523,10 +506,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
               <TextField label='Image URL' value={formState.imageUrl} onChange={(value) => handleFieldChange("imageUrl", value)} />
               <TextareaField label='Description' value={formState.description} onChange={(value) => handleFieldChange("description", value)} rows={4} />
               <TextField label='Cuisine' value={formState.cuisine} onChange={(value) => handleFieldChange("cuisine", value)} />
-              <div className='grid grid-cols-2 gap-3'>
-                <TextField label='Price (cents)' value={formState.priceCents} onChange={(value) => handleFieldChange("priceCents", value)} required />
-                <TextField label='Serves' value={formState.serves} onChange={(value) => handleFieldChange("serves", value)} />
-              </div>
+              <TextField label='Serves' value={formState.serves} onChange={(value) => handleFieldChange("serves", value)} />
               <div className='grid grid-cols-2 gap-3'>
                 <TextField label='Difficulty' value={formState.difficulty} onChange={(value) => handleFieldChange("difficulty", value)} />
                 <TextField label='Dish Type' value={formState.dishType} onChange={(value) => handleFieldChange("dishType", value)} />

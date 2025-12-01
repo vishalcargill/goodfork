@@ -99,6 +99,7 @@ function ProfileMenu({ user }: ProfileMenuProps) {
 
   const personalizationUrl = `/personalization`;
   const menusUrl = `/menus?prefillEmail=${encodeURIComponent(user.email)}`;
+  const goalAlignmentUrl = `/goal-alignment`;
 
   return (
     <div className='relative' ref={menuRef}>
@@ -132,6 +133,13 @@ function ProfileMenu({ user }: ProfileMenuProps) {
               Personalization settings
             </Link>
             <Link
+              href={goalAlignmentUrl}
+              className='block rounded-2xl border border-emerald-100 px-4 py-3 font-semibold text-emerald-700 transition hover:border-emerald-200 hover:bg-emerald-50'
+              onClick={() => setOpen(false)}
+            >
+              Goal alignment
+            </Link>
+            <Link
               href={menusUrl}
               className='block rounded-2xl border border-slate-100 px-4 py-3 font-semibold text-slate-800 transition hover:border-emerald-200 hover:bg-emerald-50'
               onClick={() => setOpen(false)}
@@ -139,7 +147,7 @@ function ProfileMenu({ user }: ProfileMenuProps) {
               My menus
             </Link>
           </div>
-          <p className='mt-3 text-xs text-slate-400'>Update your goals, allergens, budget, or password anytime.</p>
+          <p className='mt-3 text-xs text-slate-400'>Update your goals, allergens, or password anytime.</p>
         </div>
       ) : null}
     </div>

@@ -26,7 +26,7 @@ GoodFork is our hackathon submission for the **AI-Driven Menu Personalization an
 - **Healthy swap module:** for each card, propose an alternate meal that nudges toward goals (e.g., lower sodium) while noting trade-offs.
 - **Nutrition insights:** render calorie/macro badges, allergen flags, and short AI explanation (<200 chars) on every recommendation.
 - **User profile store:** persist preferences, recent selections, and feedback for better personalization.
-- **Personalization settings:** authenticated non-admin users can visit `/personalization` (linked through the profile icon in the header) to adjust goals, allergen shields, budget guardrails, and reset their password; operator/admin accounts stay scoped to `/admin`.
+- **Personalization settings:** authenticated non-admin users can visit `/personalization` (linked through the profile icon in the header) to adjust goals, allergen shields, and reset their password; operator/admin accounts stay scoped to `/admin`.
 - **Operator tools:** `/admin` landing locked to `ADMIN_EMAIL` plus the `/admin/recipes` console that surfaces full CRUD for recipes + inventory with schema validation, live consumer card previewing, and immediate propagation to the recommendation engine; future iterations add stock warnings and analytics.
 - **Experience shell:** marketing landing page with high polish/animation that funnels to onboarding, a dedicated `/menus` route for personalized recommendations, and `/recipes/[slug]` deep-dive pages that reuse AI rationale + macros for individual dishes.
 - **Personalized preview safety rails:** the recommendation preview form must validate onboarding emails and surface Sonner toasts (instead of inline banners) whenever a non-existent profile or profile-less user submits a request so consumers immediately know to rerun onboarding.
@@ -67,7 +67,7 @@ Design a mobile-first, beautiful interface optimized for 360–390px widths and 
 - **Inventory model:** finalize whether inventory is tracked at ingredient, recipe, or menu-item level, and whether any location dimension is needed even in a single-tenant setup.
 - **Auth edges:** decide on password reset flow, email verification requirements, and session strategy for the simple sign up / login experience.
 - **Historical behavior tracking:** clarify how much of historical consumption patterns and feedback need to be persisted in early phases versus inferred on the fly.
-- **Pricing depth:** confirm how detailed pricing must be (single price vs variants, discounts, taxes) to support “budget-friendly” recommendations.
+- **Pricing depth:** confirm how detailed pricing must be (single price vs variants, discounts, taxes) to keep menu context accurate.
 - **Stretch analytics & accessibility:** confirm which analytics/observability hooks and accessibility investments, if any, are expected during the hackathon versus deferred post-hackathon.
 
 ## 12. Admin Console Deliverable (Shipped)

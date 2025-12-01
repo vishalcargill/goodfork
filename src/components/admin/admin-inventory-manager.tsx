@@ -17,7 +17,6 @@ type RecipePreviewFields = Pick<
   | "title"
   | "description"
   | "imageUrl"
-  | "priceCents"
   | "calories"
   | "proteinGrams"
   | "carbsGrams"
@@ -66,11 +65,6 @@ const statusMeta: Record<
     delta: -12,
   },
 };
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
 
 type DrawerState = {
   open: boolean;
@@ -643,9 +637,6 @@ function InventoryRow({
           Score impact:{" "}
           <span className='text-slate-900'>{statusTheme.delta > 0 ? `+${statusTheme.delta}` : statusTheme.delta}</span>
         </span>
-        <span className='inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600'>
-          Portion value: {currencyFormatter.format(item.recipe.priceCents / 100)}
-        </span>
       </div>
     </article>
   );
@@ -799,8 +790,6 @@ function buildPreviewCard(item: InventoryRecord): RecommendationCardType {
     title: item.recipe.title,
     description: item.recipe.description,
     imageUrl: item.recipe.imageUrl,
-    priceCents: item.recipe.priceCents,
-    priceDisplay: currencyFormatter.format(item.recipe.priceCents / 100),
     calories: item.recipe.calories,
     proteinGrams: item.recipe.proteinGrams,
     carbsGrams: item.recipe.carbsGrams,

@@ -8,7 +8,7 @@ import { ADMIN_EMAIL } from "@/constants/app.constants";
 
 export const metadata: Metadata = {
   title: "GoodFork | Personalization Settings",
-  description: "Fine-tune your goals, budget guardrails, allergen shields, and password for personalized menus.",
+  description: "Fine-tune your goals, allergen shields, and password for personalized menus.",
 };
 
 export default async function PersonalizationPage() {
@@ -37,8 +37,7 @@ export default async function PersonalizationPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Personalization</p>
           <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Update your nutrition shields.</h1>
           <p className="text-sm text-slate-600 sm:text-base">
-            Refresh your goals, budget guardrail, allergen shields, or password anytime—menus update instantly for
-            logged-in devices.
+            Refresh your goals, allergen shields, or password anytime—menus update instantly for logged-in devices.
           </p>
         </header>
 

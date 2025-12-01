@@ -20,24 +20,13 @@ export type UserProfileModel = runtime.Types.Result.DefaultSelection<Prisma.$Use
 
 export type AggregateUserProfile = {
   _count: UserProfileCountAggregateOutputType | null
-  _avg: UserProfileAvgAggregateOutputType | null
-  _sum: UserProfileSumAggregateOutputType | null
   _min: UserProfileMinAggregateOutputType | null
   _max: UserProfileMaxAggregateOutputType | null
-}
-
-export type UserProfileAvgAggregateOutputType = {
-  budgetTargetCents: number | null
-}
-
-export type UserProfileSumAggregateOutputType = {
-  budgetTargetCents: number | null
 }
 
 export type UserProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  budgetTargetCents: number | null
   lifestyleNotes: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -46,7 +35,6 @@ export type UserProfileMinAggregateOutputType = {
 export type UserProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  budgetTargetCents: number | null
   lifestyleNotes: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -59,7 +47,6 @@ export type UserProfileCountAggregateOutputType = {
   allergens: number
   dietaryPreferences: number
   tastePreferences: number
-  budgetTargetCents: number
   lifestyleNotes: number
   createdAt: number
   updatedAt: number
@@ -67,18 +54,9 @@ export type UserProfileCountAggregateOutputType = {
 }
 
 
-export type UserProfileAvgAggregateInputType = {
-  budgetTargetCents?: true
-}
-
-export type UserProfileSumAggregateInputType = {
-  budgetTargetCents?: true
-}
-
 export type UserProfileMinAggregateInputType = {
   id?: true
   userId?: true
-  budgetTargetCents?: true
   lifestyleNotes?: true
   createdAt?: true
   updatedAt?: true
@@ -87,7 +65,6 @@ export type UserProfileMinAggregateInputType = {
 export type UserProfileMaxAggregateInputType = {
   id?: true
   userId?: true
-  budgetTargetCents?: true
   lifestyleNotes?: true
   createdAt?: true
   updatedAt?: true
@@ -100,7 +77,6 @@ export type UserProfileCountAggregateInputType = {
   allergens?: true
   dietaryPreferences?: true
   tastePreferences?: true
-  budgetTargetCents?: true
   lifestyleNotes?: true
   createdAt?: true
   updatedAt?: true
@@ -145,18 +121,6 @@ export type UserProfileAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
-   * Select which fields to average
-  **/
-  _avg?: UserProfileAvgAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
-   * Select which fields to sum
-  **/
-  _sum?: UserProfileSumAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserProfileMinAggregateInputType
@@ -187,8 +151,6 @@ export type UserProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: UserProfileCountAggregateInputType | true
-  _avg?: UserProfileAvgAggregateInputType
-  _sum?: UserProfileSumAggregateInputType
   _min?: UserProfileMinAggregateInputType
   _max?: UserProfileMaxAggregateInputType
 }
@@ -200,13 +162,10 @@ export type UserProfileGroupByOutputType = {
   allergens: string[]
   dietaryPreferences: string[]
   tastePreferences: string[]
-  budgetTargetCents: number | null
   lifestyleNotes: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserProfileCountAggregateOutputType | null
-  _avg: UserProfileAvgAggregateOutputType | null
-  _sum: UserProfileSumAggregateOutputType | null
   _min: UserProfileMinAggregateOutputType | null
   _max: UserProfileMaxAggregateOutputType | null
 }
@@ -236,7 +195,6 @@ export type UserProfileWhereInput = {
   allergens?: Prisma.StringNullableListFilter<"UserProfile">
   dietaryPreferences?: Prisma.StringNullableListFilter<"UserProfile">
   tastePreferences?: Prisma.StringNullableListFilter<"UserProfile">
-  budgetTargetCents?: Prisma.IntNullableFilter<"UserProfile"> | number | null
   lifestyleNotes?: Prisma.StringNullableFilter<"UserProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UserProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserProfile"> | Date | string
@@ -250,7 +208,6 @@ export type UserProfileOrderByWithRelationInput = {
   allergens?: Prisma.SortOrder
   dietaryPreferences?: Prisma.SortOrder
   tastePreferences?: Prisma.SortOrder
-  budgetTargetCents?: Prisma.SortOrderInput | Prisma.SortOrder
   lifestyleNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -267,7 +224,6 @@ export type UserProfileWhereUniqueInput = Prisma.AtLeast<{
   allergens?: Prisma.StringNullableListFilter<"UserProfile">
   dietaryPreferences?: Prisma.StringNullableListFilter<"UserProfile">
   tastePreferences?: Prisma.StringNullableListFilter<"UserProfile">
-  budgetTargetCents?: Prisma.IntNullableFilter<"UserProfile"> | number | null
   lifestyleNotes?: Prisma.StringNullableFilter<"UserProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UserProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserProfile"> | Date | string
@@ -281,15 +237,12 @@ export type UserProfileOrderByWithAggregationInput = {
   allergens?: Prisma.SortOrder
   dietaryPreferences?: Prisma.SortOrder
   tastePreferences?: Prisma.SortOrder
-  budgetTargetCents?: Prisma.SortOrderInput | Prisma.SortOrder
   lifestyleNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserProfileCountOrderByAggregateInput
-  _avg?: Prisma.UserProfileAvgOrderByAggregateInput
   _max?: Prisma.UserProfileMaxOrderByAggregateInput
   _min?: Prisma.UserProfileMinOrderByAggregateInput
-  _sum?: Prisma.UserProfileSumOrderByAggregateInput
 }
 
 export type UserProfileScalarWhereWithAggregatesInput = {
@@ -302,7 +255,6 @@ export type UserProfileScalarWhereWithAggregatesInput = {
   allergens?: Prisma.StringNullableListFilter<"UserProfile">
   dietaryPreferences?: Prisma.StringNullableListFilter<"UserProfile">
   tastePreferences?: Prisma.StringNullableListFilter<"UserProfile">
-  budgetTargetCents?: Prisma.IntNullableWithAggregatesFilter<"UserProfile"> | number | null
   lifestyleNotes?: Prisma.StringNullableWithAggregatesFilter<"UserProfile"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
@@ -314,7 +266,6 @@ export type UserProfileCreateInput = {
   allergens?: Prisma.UserProfileCreateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileCreatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileCreatetastePreferencesInput | string[]
-  budgetTargetCents?: number | null
   lifestyleNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -328,7 +279,6 @@ export type UserProfileUncheckedCreateInput = {
   allergens?: Prisma.UserProfileCreateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileCreatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileCreatetastePreferencesInput | string[]
-  budgetTargetCents?: number | null
   lifestyleNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -340,7 +290,6 @@ export type UserProfileUpdateInput = {
   allergens?: Prisma.UserProfileUpdateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileUpdatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileUpdatetastePreferencesInput | string[]
-  budgetTargetCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lifestyleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -354,7 +303,6 @@ export type UserProfileUncheckedUpdateInput = {
   allergens?: Prisma.UserProfileUpdateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileUpdatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileUpdatetastePreferencesInput | string[]
-  budgetTargetCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lifestyleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -367,7 +315,6 @@ export type UserProfileCreateManyInput = {
   allergens?: Prisma.UserProfileCreateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileCreatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileCreatetastePreferencesInput | string[]
-  budgetTargetCents?: number | null
   lifestyleNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -379,7 +326,6 @@ export type UserProfileUpdateManyMutationInput = {
   allergens?: Prisma.UserProfileUpdateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileUpdatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileUpdatetastePreferencesInput | string[]
-  budgetTargetCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lifestyleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -392,7 +338,6 @@ export type UserProfileUncheckedUpdateManyInput = {
   allergens?: Prisma.UserProfileUpdateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileUpdatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileUpdatetastePreferencesInput | string[]
-  budgetTargetCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lifestyleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -418,20 +363,14 @@ export type UserProfileCountOrderByAggregateInput = {
   allergens?: Prisma.SortOrder
   dietaryPreferences?: Prisma.SortOrder
   tastePreferences?: Prisma.SortOrder
-  budgetTargetCents?: Prisma.SortOrder
   lifestyleNotes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserProfileAvgOrderByAggregateInput = {
-  budgetTargetCents?: Prisma.SortOrder
-}
-
 export type UserProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  budgetTargetCents?: Prisma.SortOrder
   lifestyleNotes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -440,14 +379,9 @@ export type UserProfileMaxOrderByAggregateInput = {
 export type UserProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  budgetTargetCents?: Prisma.SortOrder
   lifestyleNotes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type UserProfileSumOrderByAggregateInput = {
-  budgetTargetCents?: Prisma.SortOrder
 }
 
 export type UserProfileCreateNestedOneWithoutUserInput = {
@@ -518,14 +452,6 @@ export type UserProfileUpdatetastePreferencesInput = {
   push?: string | string[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
@@ -536,7 +462,6 @@ export type UserProfileCreateWithoutUserInput = {
   allergens?: Prisma.UserProfileCreateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileCreatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileCreatetastePreferencesInput | string[]
-  budgetTargetCents?: number | null
   lifestyleNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -548,7 +473,6 @@ export type UserProfileUncheckedCreateWithoutUserInput = {
   allergens?: Prisma.UserProfileCreateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileCreatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileCreatetastePreferencesInput | string[]
-  budgetTargetCents?: number | null
   lifestyleNotes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -576,7 +500,6 @@ export type UserProfileUpdateWithoutUserInput = {
   allergens?: Prisma.UserProfileUpdateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileUpdatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileUpdatetastePreferencesInput | string[]
-  budgetTargetCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lifestyleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -588,7 +511,6 @@ export type UserProfileUncheckedUpdateWithoutUserInput = {
   allergens?: Prisma.UserProfileUpdateallergensInput | string[]
   dietaryPreferences?: Prisma.UserProfileUpdatedietaryPreferencesInput | string[]
   tastePreferences?: Prisma.UserProfileUpdatetastePreferencesInput | string[]
-  budgetTargetCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lifestyleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -603,7 +525,6 @@ export type UserProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   allergens?: boolean
   dietaryPreferences?: boolean
   tastePreferences?: boolean
-  budgetTargetCents?: boolean
   lifestyleNotes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -617,7 +538,6 @@ export type UserProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   allergens?: boolean
   dietaryPreferences?: boolean
   tastePreferences?: boolean
-  budgetTargetCents?: boolean
   lifestyleNotes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -631,7 +551,6 @@ export type UserProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   allergens?: boolean
   dietaryPreferences?: boolean
   tastePreferences?: boolean
-  budgetTargetCents?: boolean
   lifestyleNotes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -645,13 +564,12 @@ export type UserProfileSelectScalar = {
   allergens?: boolean
   dietaryPreferences?: boolean
   tastePreferences?: boolean
-  budgetTargetCents?: boolean
   lifestyleNotes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dietaryGoals" | "allergens" | "dietaryPreferences" | "tastePreferences" | "budgetTargetCents" | "lifestyleNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["userProfile"]>
+export type UserProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dietaryGoals" | "allergens" | "dietaryPreferences" | "tastePreferences" | "lifestyleNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["userProfile"]>
 export type UserProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -674,7 +592,6 @@ export type $UserProfilePayload<ExtArgs extends runtime.Types.Extensions.Interna
     allergens: string[]
     dietaryPreferences: string[]
     tastePreferences: string[]
-    budgetTargetCents: number | null
     lifestyleNotes: string | null
     createdAt: Date
     updatedAt: Date
@@ -1108,7 +1025,6 @@ export interface UserProfileFieldRefs {
   readonly allergens: Prisma.FieldRef<"UserProfile", 'String[]'>
   readonly dietaryPreferences: Prisma.FieldRef<"UserProfile", 'String[]'>
   readonly tastePreferences: Prisma.FieldRef<"UserProfile", 'String[]'>
-  readonly budgetTargetCents: Prisma.FieldRef<"UserProfile", 'Int'>
   readonly lifestyleNotes: Prisma.FieldRef<"UserProfile", 'String'>
   readonly createdAt: Prisma.FieldRef<"UserProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserProfile", 'DateTime'>

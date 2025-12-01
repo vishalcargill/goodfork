@@ -1,5 +1,9 @@
+import { redirect } from "next/navigation";
+
 import { LoginCard } from "@/components/auth/login-card";
 import { HeroIllustration } from "@/components/landing/hero-illustration";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { ADMIN_EMAIL } from "@/constants/app.constants";
 
 const vibeNotes = [
   {
@@ -8,7 +12,7 @@ const vibeNotes = [
   },
   {
     title: "Goal-first prompts",
-    description: "Lean muscle, metabolic reset, or budget saves—we translate each pick into macros instantly.",
+    description: "Lean muscle, metabolic reset, or balanced energy—we translate each pick into macros instantly.",
   },
   {
     title: "Swap-ready data",
@@ -16,7 +20,14 @@ const vibeNotes = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const currentUser = await getAuthenticatedUser();
+
+  if (currentUser) {
+    const isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL;
+    redirect(isAdmin ? "/admin" : "/menus");
+  }
+
   return (
     <div className='relative min-h-screen overflow-hidden bg-[#f6fff4] text-slate-900'>
       <div className='pointer-events-none absolute inset-0 -z-10'>

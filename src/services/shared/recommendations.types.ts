@@ -12,8 +12,6 @@ export type RecommendationCard = {
   title: string;
   description: string | null;
   imageUrl: string | null;
-  priceCents: number;
-  priceDisplay: string;
   calories: number | null;
   proteinGrams: number | null;
   carbsGrams: number | null;

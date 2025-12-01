@@ -47,7 +47,6 @@ type FinalCandidate = ScoredCandidate & {
 const MIN_LIMIT = 3;
 const MAX_LIMIT = 5;
 const BASE_SCORE = 62;
-const BUDGET_CUSHION_CENTS = 200;
 const INVENTORY_PLENTY_THRESHOLD = 35;
 const INVENTORY_LOW_WARNING = 12;
 
@@ -197,8 +196,6 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       title: record.recipe.title,
       description: record.recipe.description,
       imageUrl: record.recipe.imageUrl ?? null,
-      priceCents: record.recipe.priceCents,
-      priceDisplay: formatCurrency(record.recipe.priceCents),
       calories: record.recipe.calories ?? null,
       proteinGrams: record.recipe.proteinGrams ?? null,
       carbsGrams: record.recipe.carbsGrams ?? null,
@@ -322,7 +319,6 @@ function scoreCandidates(candidates: CandidateRecipe[], profile: UserProfile): S
     applyGoalHeuristics(candidate, profile, addAdjustment);
     applyDietaryPreferenceMatch(candidate, profile, addAdjustment);
     applyTasteMatch(candidate, profile, addAdjustment);
-    applyBudgetHeuristic(candidate, profile, addAdjustment);
     applyMacroBalance(candidate, addAdjustment);
 
     const macrosLabel = buildMacrosLabel(candidate);
@@ -439,25 +435,6 @@ function applyTasteMatch(
   });
 }
 
-function applyBudgetHeuristic(
-  candidate: CandidateRecipe,
-  profile: UserProfile,
-  push: (reason: string, delta: number) => void
-) {
-  if (!profile.budgetTargetCents) {
-    return;
-  }
-
-  const budget = profile.budgetTargetCents + BUDGET_CUSHION_CENTS;
-  const diff = budget - candidate.priceCents;
-
-  if (diff >= 0) {
-    push(`Within budget (saves ${formatCurrency(Math.max(diff - BUDGET_CUSHION_CENTS, 0))})`, 6);
-  } else {
-    push(`Over budget by ${formatCurrency(Math.abs(diff))}`, -Math.min(14, Math.round(Math.abs(diff) / 100) + 4));
-  }
-}
-
 function applyMacroBalance(candidate: CandidateRecipe, push: (reason: string, delta: number) => void) {
   const protein = candidate.proteinGrams ?? 0;
   const carbs = candidate.carbsGrams ?? 0;
@@ -521,13 +498,11 @@ async function rankWithLLM(
         allergens: profile.allergens,
         diet: profile.dietaryPreferences,
         tastes: profile.tastePreferences,
-        budgetTargetCents: profile.budgetTargetCents,
       },
       limit,
       candidates: candidates.map((candidate) => ({
         recipeId: candidate.id,
         title: candidate.title,
-        priceCents: candidate.priceCents,
         macrosLabel: candidate.macrosLabel,
         tags: candidate.tags,
         highlights: candidate.healthyHighlights,
@@ -684,9 +659,4 @@ function safeJsonParse<T>(value: string): T | null {
   } catch {
     return null;
   }
-}
-
-function formatCurrency(cents: number) {
-  const dollars = cents / 100;
-  return dollars.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }

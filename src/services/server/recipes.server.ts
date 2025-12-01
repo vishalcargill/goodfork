@@ -34,16 +34,22 @@ export type RecipeDetailPayload = {
   macroStats: MacroStat[];
   macrosLabel: string;
   timeStats: TimeStat[];
-  priceDisplay: string;
   aiInsights: RecipeInsight[];
   nutritionEntries: NutritionEntry[];
   recommendationStats: {
     totalServed: number;
     lastServedAt: Date | null;
   };
+  recommendationContext: {
+    recommendationId: string;
+    userId: string;
+  } | null;
 };
 
-export async function getRecipeDetailBySlug(slug: string): Promise<RecipeDetailPayload | null> {
+export async function getRecipeDetailBySlug(
+  slug: string,
+  options?: { userId?: string; recommendationId?: string }
+): Promise<RecipeDetailPayload | null> {
   const recipe = await prisma.recipe.findUnique({
     where: { slug },
     include: {
@@ -60,6 +66,11 @@ export async function getRecipeDetailBySlug(slug: string): Promise<RecipeDetailP
     return null;
   }
 
+  const recommendationContext = await resolveRecommendationContext({
+    recipeId: recipe.id,
+    userId: options?.userId,
+    recommendationId: options?.recommendationId,
+  });
   const totalServed = await prisma.recommendation.count({ where: { recipeId: recipe.id } });
   const macroStats = buildMacroStats(recipe);
   const macrosLabel = macroStats.map((entry) => entry.value).join(" · ");
@@ -72,14 +83,53 @@ export async function getRecipeDetailBySlug(slug: string): Promise<RecipeDetailP
     macroStats,
     macrosLabel,
     timeStats,
-    priceDisplay: formatCurrency(recipe.priceCents ?? 0),
     aiInsights,
     nutritionEntries,
     recommendationStats: {
       totalServed,
       lastServedAt: recipe.recommendations[0]?.createdAt ?? null,
     },
+    recommendationContext,
   };
+}
+
+async function resolveRecommendationContext(params: {
+  recipeId: string;
+  userId?: string;
+  recommendationId?: string;
+}): Promise<{ recommendationId: string; userId: string } | null> {
+  const { recipeId, userId, recommendationId } = params;
+
+  if (recommendationId) {
+    const existing = await prisma.recommendation.findFirst({
+      where: {
+        id: recommendationId,
+        recipeId,
+        ...(userId ? { userId } : {}),
+      },
+      select: { id: true, userId: true },
+    });
+
+    if (existing) {
+      return { recommendationId: existing.id, userId: existing.userId };
+    }
+  }
+
+  if (!userId) {
+    return null;
+  }
+
+  const latestForUser = await prisma.recommendation.findFirst({
+    where: { recipeId, userId },
+    select: { id: true, userId: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!latestForUser) {
+    return null;
+  }
+
+  return { recommendationId: latestForUser.id, userId: latestForUser.userId };
 }
 
 function buildMacroStats(recipe: Recipe): MacroStat[] {
@@ -336,8 +386,4 @@ function buildDeterministicInsights(
   }
 
   return insights.slice(0, 4);
-}
-
-function formatCurrency(cents: number) {
-  return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 }

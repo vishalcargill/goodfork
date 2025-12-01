@@ -7,15 +7,15 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-r
 import { cn } from "@/lib/utils";
 import { useOnboardingSubmitMutation, type OnboardingResult } from "@/services/client/onboarding.client";
 import type { OnboardingPayload } from "@/schema/onboarding.schema";
-import { ALLERGEN_OPTIONS, BUDGET_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
+import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 
 const steps = [
   { id: "account", title: "Account basics", blurb: "So we know who to personalize for." },
   { id: "goals", title: "Goals & allergens", blurb: "Dial in health targets and safety flags." },
   {
     id: "nutrition",
-    title: "Diet & budget",
-    blurb: "Fine-tune dietary styles, taste, and budget band.",
+    title: "Diet & taste",
+    blurb: "Fine-tune dietary styles and flavor preferences.",
   },
 ];
 
@@ -38,8 +38,6 @@ const tasteOptions = [
   { value: "EXPLORER", label: "Adventurous" },
 ];
 
-const budgetOptions = BUDGET_OPTIONS;
-
 type OnboardingFormValues = {
   name: string;
   email: string;
@@ -48,7 +46,6 @@ type OnboardingFormValues = {
   allergens: string[];
   dietaryPreferences: string[];
   tastePreferences: string[];
-  budgetTargetCents: number | null;
   lifestyleNotes: string;
 };
 
@@ -60,7 +57,6 @@ const initialValues: OnboardingFormValues = {
   allergens: [],
   dietaryPreferences: [],
   tastePreferences: [],
-  budgetTargetCents: 1500,
   lifestyleNotes: "",
 };
 
@@ -105,7 +101,6 @@ export function OnboardingFlow() {
     const payload: OnboardingPayload = {
       ...values,
       lifestyleNotes: values.lifestyleNotes.trim() ? values.lifestyleNotes.trim() : null,
-      budgetTargetCents: values.budgetTargetCents ?? null,
     };
 
     setResult(null);
@@ -322,34 +317,6 @@ export function OnboardingFlow() {
                         );
                       })}
                     </div>
-                  </div>
-                  <div className='space-y-3' role='group' aria-label='Budget band'>
-                    <p className='text-sm font-semibold text-slate-900'>Budget band</p>
-                    <div className='grid gap-3 sm:grid-cols-3'>
-                      {budgetOptions.map((band) => {
-                        const active = values.budgetTargetCents === band.value;
-                        return (
-                          <button
-                            key={band.value}
-                            type='button'
-                            onClick={() => updateField("budgetTargetCents", band.value)}
-                            className={cn(
-                              "rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition",
-                              active
-                                ? "border-emerald-400 bg-white text-emerald-800 shadow-[0_12px_30px_rgba(16,185,129,0.18)]"
-                                : "border-emerald-100 bg-white text-slate-700 hover:border-emerald-300"
-                            )}
-                            aria-pressed={active}
-                          >
-                            <p>{band.label}</p>
-                            <p className='text-xs font-normal text-slate-500'>{band.helper}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {fieldError("budgetTargetCents") && (
-                      <p className='text-xs text-rose-600'>{fieldError("budgetTargetCents")}</p>
-                    )}
                   </div>
                   <label className='block space-y-2 text-sm font-medium text-slate-800'>
                     Lifestyle notes

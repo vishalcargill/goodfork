@@ -1061,7 +1061,6 @@ export const UserProfileScalarFieldEnum = {
   allergens: 'allergens',
   dietaryPreferences: 'dietaryPreferences',
   tastePreferences: 'tastePreferences',
-  budgetTargetCents: 'budgetTargetCents',
   lifestyleNotes: 'lifestyleNotes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

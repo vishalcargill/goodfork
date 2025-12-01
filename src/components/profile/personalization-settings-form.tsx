@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, Lock, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import { Loader2, Lock, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { useProfileSettingsMutation, type ProfileApiResponse } from "@/services/client/profile.client";
 import type { UserProfile } from "@/generated/prisma/client";
 import type { ProfileSettingsPayload } from "@/schema/profile-settings.schema";
-import { ALLERGEN_OPTIONS, BUDGET_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
+import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 
 type PersonalizationSettingsFormProps = {
   user: {
@@ -24,7 +24,6 @@ type FieldErrors = Record<string, string[]>;
 export function PersonalizationSettingsForm({ user, profile }: PersonalizationSettingsFormProps) {
   const [goals, setGoals] = useState<string[]>(profile?.dietaryGoals ?? []);
   const [allergens, setAllergens] = useState<string[]>(profile?.allergens ?? []);
-  const [budget, setBudget] = useState<number | null>(profile?.budgetTargetCents ?? 1500);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -44,17 +43,6 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
       .join(" · ");
   }, [allergens]);
 
-  const budgetSummary = useMemo(() => {
-    if (!budget) {
-      return "No budget cap";
-    }
-    const match = BUDGET_OPTIONS.find((option) => option.value === budget);
-    if (match) {
-      return match.label;
-    }
-    return `$${(budget / 100).toFixed(2)}`;
-  }, [budget]);
-
   const toggleGoal = (value: string) => {
     setGoals((prev) => (prev.includes(value) ? prev.filter((entry) => entry !== value) : [...prev, value]));
   };
@@ -68,7 +56,6 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
     const payload: ProfileSettingsPayload = {
       dietaryGoals: goals,
       allergens,
-      budgetTargetCents: budget ?? null,
       password: password || undefined,
       confirmPassword: confirmPassword || undefined,
     };
@@ -98,7 +85,6 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
 
   const goalError = fieldErrors.dietaryGoals?.[0];
   const allergenError = fieldErrors.allergens?.[0];
-  const budgetError = fieldErrors.budgetTargetCents?.[0];
   const passwordError = fieldErrors.password?.[0];
   const confirmPasswordError = fieldErrors.confirmPassword?.[0];
 
@@ -108,14 +94,10 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
     <div className='rounded-[28px] border border-emerald-100 bg-white/95 p-6 shadow-[0_24px_60px_rgba(16,185,129,0.12)]'>
       <div className='space-y-3 rounded-3xl border border-emerald-50 bg-emerald-50/50 p-5'>
         <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700'>Live shields</p>
-        <div className='grid gap-3 sm:grid-cols-3'>
+        <div className='grid gap-3 sm:grid-cols-2'>
           <div className='rounded-2xl border border-emerald-100 bg-white/80 p-4'>
             <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Goals</p>
             <p className='mt-2 text-sm font-semibold text-slate-900'>{goalSummary}</p>
-          </div>
-          <div className='rounded-2xl border border-emerald-100 bg-white/80 p-4'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Budget</p>
-            <p className='mt-2 text-sm font-semibold text-slate-900'>{budgetSummary}</p>
           </div>
           <div className='rounded-2xl border border-emerald-100 bg-white/80 p-4'>
             <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Allergen shields</p>
@@ -157,50 +139,6 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
           </div>
           {goalError ? (
             <p className='mt-2 text-sm text-rose-600'>{goalError}</p>
-          ) : null}
-        </section>
-
-        <section>
-          <div className='flex items-center justify-between'>
-            <h2 className='text-lg font-semibold text-slate-900'>Budget guardrail</h2>
-            <span className='inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-3 py-1 text-xs font-semibold text-slate-700'>
-              <Wallet className='h-3.5 w-3.5 text-emerald-600' />
-              Optional
-            </span>
-          </div>
-          <p className='mt-1 text-sm text-slate-600'>We&apos;ll keep menu prices inside your preferred window.</p>
-          <div className='mt-4 grid gap-3 sm:grid-cols-3'>
-            {BUDGET_OPTIONS.map((option) => (
-              <button
-                type='button'
-                key={option.value}
-                onClick={() => setBudget(option.value)}
-                className={cn(
-                  "rounded-3xl border px-4 py-3 text-left shadow-sm transition",
-                  budget === option.value
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-                    : "border-emerald-100 bg-white text-slate-800 hover:border-emerald-200"
-                )}
-              >
-                <p className='text-sm font-semibold'>{option.label}</p>
-                <p className='text-xs text-slate-500'>{option.helper}</p>
-              </button>
-            ))}
-            <button
-              type='button'
-              onClick={() => setBudget(null)}
-              className={cn(
-                "rounded-3xl border px-4 py-3 text-left text-sm font-semibold shadow-sm transition",
-                budget === null
-                  ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-                  : "border-emerald-100 bg-white text-slate-700 hover:border-emerald-200"
-              )}
-            >
-              No budget cap
-            </button>
-          </div>
-          {budgetError ? (
-            <p className='mt-2 text-sm text-rose-600'>{budgetError}</p>
           ) : null}
         </section>
 

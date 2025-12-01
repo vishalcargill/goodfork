@@ -27,7 +27,6 @@ model UserProfile {
   allergens          String[] @default([])
   dietaryPreferences String[] @default([])
   tastePreferences   String[] @default([])
-  budgetTargetCents  Int?
   lifestyleNotes     String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt

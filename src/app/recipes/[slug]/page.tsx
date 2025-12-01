@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { FeedbackActions } from "@/components/feedback/feedback-actions";
 import { RecipeInsightsTabs } from "@/components/recipes/recipe-insights-tabs";
 import { cn } from "@/lib/utils";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { getRecipeDetailBySlug } from "@/services/server/recipes.server";
 import type { InventoryStatus } from "@/generated/prisma/client";
 
 type RecipeDetailPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const inventoryThemes: Record<InventoryStatus, { badge: string; label: string; copy: string }> = {
@@ -41,20 +44,27 @@ export async function generateMetadata({ params }: RecipeDetailPageProps): Promi
 
   return {
     title: `${detail.recipe.title} | GoodFork Recipe Detail`,
-    description:
-      detail.recipe.description ?? "Full nutrition context, inventory state, and insights for this recipe.",
+    description: detail.recipe.description ?? "Full nutrition context, inventory state, and insights for this recipe.",
   };
 }
 
-export default async function RecipeDetailPage({ params }: RecipeDetailPageProps) {
+export default async function RecipeDetailPage({ params, searchParams }: RecipeDetailPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const currentUser = await getAuthenticatedUser();
+  const queryUserId = typeof resolvedSearchParams?.userId === "string" ? resolvedSearchParams.userId : undefined;
+  const recommendationId =
+    typeof resolvedSearchParams?.recommendationId === "string" ? resolvedSearchParams.recommendationId : undefined;
+  const userId = queryUserId ?? currentUser?.id;
+
   const { slug } = await params;
-  const detail = await getRecipeDetailBySlug(slug);
+  const detail = await getRecipeDetailBySlug(slug, { userId, recommendationId });
 
   if (!detail) {
     notFound();
   }
 
-  const { recipe, macroStats, timeStats, priceDisplay, aiInsights, nutritionEntries, recommendationStats } = detail;
+  const { recipe, macroStats, timeStats, aiInsights, nutritionEntries, recommendationStats, recommendationContext } =
+    detail;
   const inventory = recipe.inventory;
   const inventoryTheme = inventory ? inventoryThemes[inventory.status] : null;
   const highlightGroups = [
@@ -63,6 +73,11 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     { title: "Healthy highlights", values: recipe.healthyHighlights },
   ];
   const isRemoteImage = recipe.imageUrl?.startsWith("http");
+  const fallbackContext = recommendationId && userId ? { recommendationId, userId } : null;
+  const activeContext = recommendationContext ?? fallbackContext;
+  const hasFeedbackContext = Boolean(activeContext);
+  const feedbackRecommendationId = activeContext?.recommendationId;
+  const feedbackUserId = activeContext?.userId ?? userId;
 
   const metadataPills = [
     { label: "Cuisine", value: recipe.cuisine ?? "Chef's pick" },
@@ -70,7 +85,6 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     { label: "Serves", value: recipe.serves ? `${recipe.serves} person${recipe.serves > 1 ? "s" : ""}` : "Flexible" },
     { label: "Difficulty", value: recipe.difficulty ?? "Approachable" },
     ...timeStats,
-    { label: "Price", value: priceDisplay },
   ];
 
   const ratingLabel = recipe.averageRating
@@ -91,20 +105,27 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
         <div className='absolute bottom-[-5%] left-[30%] h-80 w-80 rounded-full bg-cyan-100 blur-[160px]' />
       </div>
 
-      <div className='mx-auto flex max-w-5xl flex-col gap-10 px-4 py-10 sm:px-6'>
-        <header className='grid gap-6 rounded-[32px] border border-emerald-100 bg-white/95 p-6 shadow-[0_20px_60px_rgba(16,185,129,0.15)] backdrop-blur lg:grid-cols-[1.3fr_1fr]'>
+      <div className='mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10 sm:px-8'>
+        <header className='grid gap-6 rounded-[32px] border border-emerald-100 bg-white/95 p-6 shadow-[0_20px_60px_rgba(16,185,129,0.15)] backdrop-blur lg:grid-cols-[1.35fr_1fr]'>
           <div className='space-y-5'>
             <span className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700'>
               Recipe detail
             </span>
             <div className='space-y-3'>
               <h1 className='text-3xl font-semibold text-slate-900 sm:text-4xl'>{recipe.title}</h1>
-              <p className='text-sm text-slate-600'>{recipe.description ?? "Operators are still adding the story for this dish."}</p>
+              <p className='text-sm text-slate-600'>
+                {recipe.description ?? "Operators are still adding the story for this dish."}
+              </p>
             </div>
 
             <div className='flex flex-wrap items-center gap-3'>
               {inventoryTheme ? (
-                <span className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold", inventoryTheme.badge)}>
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
+                    inventoryTheme.badge
+                  )}
+                >
                   {inventoryTheme.label}
                 </span>
               ) : (
@@ -121,21 +142,39 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               <div className='flex flex-wrap gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 text-slate-800'>
                 {macroStats.map((macro) => (
                   <div key={macro.key}>
-                    <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>{macro.label}</p>
+                    <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>
+                      {macro.label}
+                    </p>
                     <p className='text-lg font-semibold text-slate-900'>{macro.value}</p>
                   </div>
                 ))}
               </div>
             ) : null}
 
-            <dl className='grid gap-3 sm:grid-cols-2'>
+            <dl className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
               {metadataPills.map((pill) => (
-                <div key={`${pill.label}-${pill.value}`} className='rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-slate-600'>
-                  <dt className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>{pill.label}</dt>
+                <div
+                  key={`${pill.label}-${pill.value}`}
+                  className='rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-slate-600'
+                >
+                  <dt className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>
+                    {pill.label}
+                  </dt>
                   <dd className='mt-1 text-base font-semibold text-slate-900'>{pill.value}</dd>
                 </div>
               ))}
             </dl>
+
+            <div className='rounded-2xl border border-emerald-100 bg-white/70 p-4 shadow-[0_12px_32px_rgba(16,185,129,0.12)]'>
+              <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+                <FeedbackActions
+                  recommendationId={feedbackRecommendationId}
+                  userId={feedbackUserId}
+                  layout='inline'
+                  disabledHint='Open this recipe from your personalized menu cards to record Accept or Swap.'
+                />
+              </div>
+            </div>
 
             {inventoryTheme ? (
               <p className='text-sm text-slate-600'>{inventoryTheme.copy}</p>
@@ -200,7 +239,9 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                 ))}
               </ul>
             ) : (
-              <p className='mt-3 text-sm text-slate-600'>Ingredient list coming soon—operators are still mapping raw inventory.</p>
+              <p className='mt-3 text-sm text-slate-600'>
+                Ingredient list coming soon—operators are still mapping raw inventory.
+              </p>
             )}
           </div>
 
@@ -229,14 +270,20 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
             {inventory ? (
               <div className='mt-4 space-y-3 text-sm text-slate-700'>
                 <p>
-                  <span className='font-semibold text-slate-900'>Quantity:</span> {inventory.quantity} {inventory.unitLabel}
+                  <span className='font-semibold text-slate-900'>Quantity:</span> {inventory.quantity}{" "}
+                  {inventory.unitLabel}
                 </p>
                 {inventory.restockDate ? (
                   <p>
-                    <span className='font-semibold text-slate-900'>Next restock:</span> {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(inventory.restockDate))}
+                    <span className='font-semibold text-slate-900'>Next restock:</span>{" "}
+                    {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
+                      new Date(inventory.restockDate)
+                    )}
                   </p>
                 ) : null}
-                <p className='text-xs text-slate-500'>Status updates here fan out to personalization + admin workspaces instantly.</p>
+                <p className='text-xs text-slate-500'>
+                  Status updates here fan out to personalization + admin workspaces instantly.
+                </p>
               </div>
             ) : (
               <p className='mt-3 text-sm text-slate-600'>Inventory record not attached yet.</p>
@@ -244,15 +291,20 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </div>
 
           <div className='rounded-[28px] border border-emerald-100 bg-white/90 p-6 shadow-[0_20px_50px_rgba(16,185,129,0.12)]'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Recommendation telemetry</p>
+            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>
+              Recommendation telemetry
+            </p>
             <div className='mt-4 space-y-3 text-sm text-slate-700'>
               <p>
-                <span className='font-semibold text-slate-900'>Sessions served:</span> {recommendationStats.totalServed.toLocaleString()}
+                <span className='font-semibold text-slate-900'>Sessions served:</span>{" "}
+                {recommendationStats.totalServed.toLocaleString()}
               </p>
               <p>
                 <span className='font-semibold text-slate-900'>Last recommended:</span> {lastRecommendedLabel}
               </p>
-              <p className='text-xs text-slate-500'>Pulls from the live recommendations table so ops + analysts can cite demo usage.</p>
+              <p className='text-xs text-slate-500'>
+                Pulls from the live recommendations table so ops + analysts can cite demo usage.
+              </p>
             </div>
           </div>
         </section>

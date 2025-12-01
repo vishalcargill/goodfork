@@ -24,7 +24,7 @@ Create a local Postgres database called `goodfork_dev` (e.g., `createdb goodfork
 
 ## High-Level Design (HLD) — GoodFork
 ### Objectives & Scope
-Build an AI-powered menu personalization system that combines inventory availability, user goals/allergens/preferences, historical consumption patterns, healthy eating standards, and budget targets. Every request should return 3–5 menu recommendations, each with a concise AI rationale plus an optional "healthy swap" suggestion.
+Build an AI-powered menu personalization system that combines inventory availability, user goals/allergens/preferences, historical consumption patterns, and healthy eating standards. Every request should return 3–5 menu recommendations, each with a concise AI rationale plus an optional "healthy swap" suggestion.
 
 ### Users & Personas
 - **Consumers** receive personalized menus and contextual nutrition notes inside the UI.

@@ -39,7 +39,7 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - **Out of scope:** operator dashboards, multi-tenant support, payments, location-specific inventory, and automated nightly ingest.
 
 ### Deliverables
-- Onboarding flow persisting user goals/allergens/preferences/budget.
+- Onboarding flow persisting user goals/allergens/preferences.
 - Recommendation API/service that merges deterministic filters with LLM reasoning.
 - Recommendation UI cards with nutrition badges, AI rationale, and healthy swap CTA plus loading/empty/error states.
 - Personalized preview enforces onboarding email validation and uses Sonner toasts for missing profiles to direct users back into onboarding without cluttering inline UI.

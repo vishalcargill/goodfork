@@ -17,7 +17,6 @@ export default async function AdminInventoryPage() {
           title: true,
           description: true,
           imageUrl: true,
-          priceCents: true,
           calories: true,
           proteinGrams: true,
           carbsGrams: true,

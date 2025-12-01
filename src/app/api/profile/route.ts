@@ -47,7 +47,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    const { dietaryGoals, allergens, budgetTargetCents = null, password } = parsed.data;
+    const { dietaryGoals, allergens, password } = parsed.data;
     const existingProfile = await prisma.userProfile.findUnique({ where: { userId: user.id } });
 
     const profile = await prisma.userProfile.upsert({
@@ -55,7 +55,6 @@ export async function PUT(request: Request) {
       update: {
         dietaryGoals,
         allergens,
-        budgetTargetCents: budgetTargetCents ?? null,
       },
       create: {
         userId: user.id,
@@ -63,7 +62,6 @@ export async function PUT(request: Request) {
         allergens,
         dietaryPreferences: existingProfile?.dietaryPreferences ?? [],
         tastePreferences: existingProfile?.tastePreferences ?? [],
-        budgetTargetCents: budgetTargetCents ?? null,
         lifestyleNotes: existingProfile?.lifestyleNotes ?? null,
       },
     });

@@ -4,7 +4,7 @@
 This record captures the technical architecture for the GoodFork AI-driven menu personalization experience described in `docs/PRD.md`. It summarizes the in-scope goals, personas, critical components, and integration paths so implementation decisions, tradeoffs, and dependencies remain explicit during the hackathon build.
 
 ## 2. Objectives & Non-Goals
-- Deliver 3–5 nutritionally balanced meal recommendations per request by blending live inventory, user goals/allergens/preferences, historical behavior, healthy-eating guardrails, and budget targets.
+- Deliver 3–5 nutritionally balanced meal recommendations per request by blending live inventory, user goals/allergens/preferences, historical behavior, and healthy-eating guardrails.
 - Provide lightweight AI rationales plus “healthy swap” suggestions when inventory is constrained.
 - Keep operator tooling focused on inventory and recipe management; defer payments, multi-language, and advanced analytics dashboards beyond MVP.
 
@@ -92,7 +92,7 @@ flowchart LR
 | AI Services | Provide semantic retrieval, reranking, and narrative generation for recommendation rationales and healthy swaps. | OpenAI `text-embedding-3-large`, `gpt-4.1-mini`, `gpt-4.1` |
 
 ## 6. Data & Integration Notes
-- **Deterministic filters:** Allergen exclusions, inventory availability, nutritional guardrails, and budget caps run before AI scoring to guarantee safety.
+- **Deterministic filters:** Allergen exclusions, inventory availability, and nutritional guardrails run before AI scoring to guarantee safety.
 - **LLM orchestration:** Embeddings power similarity search for candidate meals; the reranker scores shortlists; the generative model crafts rationales and “healthy swap” guidance, falling back to deterministic copy on failure.
 - **Inventory fidelity:** Operator CRUD plus nightly ingest keep ingredient quantities current; recommendations degrade gracefully if stock data is stale.
 - **Telemetry:** Each request logs requestId, latency, success/failure, and AI response summaries so analysts can validate conversion funnels post-MVP.
@@ -106,6 +106,4 @@ flowchart LR
 1. Finalize whether inventory is modeled strictly at the ingredient level or if recipe-level buffering is needed for multi-location readiness.
 2. Decide on password reset, email verification, and session strategy to support simple-yet-secure authentication.
 3. Determine depth of historical meal tracking required for early personalization versus inferred, transient signals.
-4. Clarify pricing granularity (single SKU vs. variants/discounts/taxes) to ensure “budget-friendly” targeting remains credible.
-
 This ADR should be revisited whenever the PRD, database schema, or AI integration strategy materially changes.

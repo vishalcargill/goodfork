@@ -32,9 +32,3 @@ export const ALLERGEN_OPTIONS = [
   { value: "GLUTEN", label: "Gluten" },
   { value: "SESAME", label: "Sesame" },
 ] as const;
-
-export const BUDGET_OPTIONS = [
-  { value: 1200, label: "Under $12", helper: "Light lunch range" },
-  { value: 1500, label: "$12 – $15", helper: "Balanced splurge" },
-  { value: 1800, label: "$15 – $18", helper: "Chef-driven picks" },
-] as const;

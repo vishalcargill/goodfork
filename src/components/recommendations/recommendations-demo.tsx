@@ -2,24 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { JSX, useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  Bookmark,
-  CheckCircle2,
-  Loader2,
-  Repeat2,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
+import { FeedbackActions } from "@/components/feedback/feedback-actions";
 import { cn } from "@/lib/utils";
-import { useFeedbackMutation } from "@/services/client/feedback.client";
 import { useRecommendationsMutation } from "@/services/client/recommendations.client";
-import type { FeedbackEventPayload } from "@/schema/feedback.schema";
 import type { RecommendationCard, RecommendationResponse } from "@/services/shared/recommendations.types";
 
 type RecommendationsDemoProps = {
@@ -42,8 +31,6 @@ const statusCopy = {
 } as const;
 
 export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) {
-  const [email, setEmail] = useState(() => prefillEmail ?? "");
-  const [localError, setLocalError] = useState<string | null>(null);
   const recommendationsMutation = useRecommendationsMutation();
   const prefetchedEmailRef = useRef<string | null>(null);
 
@@ -51,11 +38,14 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
   const successPayload = data && data.success ? data.data : null;
 
   useEffect(() => {
-    if (prefillEmail && prefetchedEmailRef.current !== prefillEmail) {
-      prefetchedEmailRef.current = prefillEmail;
-      mutate({ email: prefillEmail });
+    if (!prefillEmail || prefetchedEmailRef.current === prefillEmail) {
+      return;
     }
-  }, [prefillEmail, mutate]);
+
+    prefetchedEmailRef.current = prefillEmail;
+    reset();
+    mutate({ email: prefillEmail });
+  }, [prefillEmail, mutate, reset]);
 
   useEffect(() => {
     if (data && !data.success && data.errorCode === "user_not_found") {
@@ -65,110 +55,8 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
     }
   }, [data]);
 
-  const handleFetch = () => {
-    if (!email.trim()) {
-      setLocalError("Enter the email used during onboarding.");
-      return;
-    }
-
-    setLocalError(null);
-    reset();
-    mutate({ email: email.trim() });
-  };
-
-  const statusLabel = useMemo(() => {
-    if (isPending) {
-      return "Scoring menus…";
-    }
-
-    if (successPayload) {
-      return successPayload.source === "llm" ? "LLM rerank applied" : "Deterministic fallback";
-    }
-
-    if (data && !data.success) {
-      return "Unable to personalize yet";
-    }
-
-    return "Awaiting personalization";
-  }, [data, isPending, successPayload]);
-
-  const shouldShowInlineApiError = data && !data.success && data.errorCode !== "user_not_found";
-
   return (
     <div className='space-y-6'>
-      <div className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-6 shadow-inner'>
-        <div className='flex flex-col gap-4 md:flex-row md:items-end md:justify-between'>
-          <div className='space-y-1'>
-            <p className='text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700'>Personalized preview</p>
-            <h3 className='text-xl font-semibold text-slate-900'>Fetch menus for your profile</h3>
-            <p className='text-sm text-slate-600'>
-              After onboarding, drop the same email here to view 3–5 cards grounded in your saved goals, allergens, and
-              inventory.
-            </p>
-          </div>
-          <div className='flex flex-col gap-2 md:flex-row md:items-center'>
-            <label className='flex-1 text-xs font-semibold text-slate-500'>
-              Onboarding email
-              <input
-                type='email'
-                value={email}
-                placeholder='you@goodfork.com'
-                onChange={(event) => setEmail(event.target.value)}
-                className='mt-2 w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
-              />
-            </label>
-            <button
-              type='button'
-              onClick={handleFetch}
-              disabled={isPending}
-              className='inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                  Fetching
-                </>
-              ) : (
-                <>
-                  <Sparkles className='h-4 w-4' />
-                  Personalize
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-        <div className='mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-emerald-700'>
-          <span
-            className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-4 py-1'
-            role='status'
-            aria-live='polite'
-          >
-            <ShieldCheck className='h-3.5 w-3.5 text-emerald-500' />
-            {statusLabel}
-          </span>
-          {localError ? (
-            <span
-              className='inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-1 text-rose-700'
-              role='alert'
-              aria-live='assertive'
-            >
-              <AlertCircle className='h-3.5 w-3.5' />
-              {localError}
-            </span>
-          ) : null}
-          {shouldShowInlineApiError ? (
-            <span
-              className='inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1 text-amber-800'
-              role='alert'
-              aria-live='assertive'
-            >
-              <AlertCircle className='h-3.5 w-3.5' />
-              {data?.message}
-            </span>
-          ) : null}
-        </div>
-      </div>
-
       {isPending ? (
         <RecommendationsSkeleton />
       ) : successPayload ? (
@@ -279,8 +167,6 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
   );
 }
 
-type FeedbackAction = FeedbackEventPayload["action"];
-
 type RecommendationCardProps = {
   card: RecommendationCard;
   userId: string;
@@ -289,16 +175,17 @@ type RecommendationCardProps = {
 
 const FALLBACK_RECIPE_IMAGE = "/recipe-placeholder.svg";
 
-export function RecommendationCard({ card, userId, readOnly = false }: RecommendationCardProps) {
+export function RecommendationCard({ card, userId, readOnly }: RecommendationCardProps) {
   const statusTheme = statusCopy[card.inventory.status];
-  const feedbackMutation = useFeedbackMutation();
-  const [lastAction, setLastAction] = useState<FeedbackAction | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [pendingAction, setPendingAction] = useState<FeedbackAction | null>(null);
   const [imageErrored, setImageErrored] = useState(false);
-  const actionOrder: FeedbackAction[] = ["ACCEPT", "SAVE", "SWAP"];
-  const swapDescription = card.swapRecipe ? `Swap for ${card.swapRecipe.title}` : "Request a lighter pick";
   const recipeImage = !card.imageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : card.imageUrl;
+  const detailHref =
+    !readOnly && userId
+      ? `/recipes/${card.slug}?${new URLSearchParams({
+          recommendationId: card.recommendationId,
+          userId,
+        }).toString()}`
+      : `/recipes/${card.slug}`;
   const macroBadges = [
     card.calories !== null ? `${card.calories} kcal` : null,
     typeof card.proteinGrams === "number" ? `${card.proteinGrams}g protein` : null,
@@ -309,125 +196,72 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
   const highlightChips = card.healthyHighlights.slice(0, 3);
   const tagChips = card.tags.slice(0, 4);
 
-  const actionConfigs: Record<
-    FeedbackAction,
-    { label: string; description: string; className: string; icon: JSX.Element }
-  > = {
-    ACCEPT: {
-      label: "Accept",
-      description: "Add to today's plate",
-      className: "border-emerald-200 bg-emerald-50 text-emerald-900",
-      icon: <CheckCircle2 className='h-4 w-4 text-emerald-600' />,
-    },
-    SAVE: {
-      label: "Save",
-      description: "Shortlist to revisit later",
-      className: "border-slate-200 bg-white text-slate-900",
-      icon: <Bookmark className='h-4 w-4 text-slate-500' />,
-    },
-    SWAP: {
-      label: "Request swap",
-      description: swapDescription,
-      className: "border-amber-200 bg-amber-50 text-amber-900",
-      icon: <Repeat2 className='h-4 w-4 text-amber-600' />,
-    },
-  };
-
-  const successCopy: Record<FeedbackAction, string> = {
-    ACCEPT: "Locked in — we'll prioritize this in your next visit.",
-    SAVE: "Saved to your shortlist. We'll nudge you when inventory changes.",
-    SWAP: "Swap request logged. Expect lighter picks next time.",
-  };
-
-  const isPending = feedbackMutation.isPending;
-  const actionsDisabled = readOnly || isPending;
-
-  function handleAction(action: FeedbackAction, note?: string | null) {
-    if (actionsDisabled) {
-      return;
-    }
-
-    setErrorMessage(null);
-    setPendingAction(action);
-
-    const trimmedNote = note && note.trim().length >= 2 ? note.trim() : undefined;
-
-    feedbackMutation.mutate(
-      {
-        recommendationId: card.recommendationId,
-        userId,
-        action,
-        ...(trimmedNote ? { notes: trimmedNote } : {}),
-      },
-      {
-        onSuccess: () => {
-          setLastAction(action);
-        },
-        onError: (error) => {
-          setErrorMessage(error.message || "Unable to capture that signal. Try again.");
-        },
-        onSettled: () => {
-          setPendingAction(null);
-        },
-      }
-    );
-  }
-
   const handleImageError = () => setImageErrored(true);
 
   return (
-    <article className='group flex h-full flex-col justify-between rounded-[26px] border border-emerald-100 bg-white p-5 shadow-[0_14px_36px_rgba(16,185,129,0.18)] transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-[0_20px_56px_rgba(16,185,129,0.25)]'>
-      <div className='flex items-start justify-between gap-3'>
-        <div>
-          <p className='text-xs font-semibold uppercase tracking-[0.14em] text-slate-500'>#{card.recipeId.slice(-4)}</p>
-          <h4 className='text-lg font-semibold text-slate-900'>{card.title}</h4>
-          <p className='text-sm text-emerald-700'>{card.priceDisplay}</p>
+    <article className='group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-emerald-100 bg-[#f8fff4] shadow-[0_14px_40px_rgba(16,185,129,0.12)] transition hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(16,185,129,0.2)]'>
+      <div className='flex h-full flex-col gap-4 p-5 pb-6'>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='space-y-1'>
+            <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700'>
+              #{card.recipeId.slice(-4)}
+            </p>
+            <h4 className='text-lg font-semibold leading-snug text-slate-900'>{card.title}</h4>
+          </div>
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold shadow-inner shadow-emerald-50",
+              statusTheme.badge
+            )}
+          >
+            {statusTheme.label}
+          </span>
         </div>
-        <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", statusTheme.badge)}>
-          {statusTheme.label}
-        </span>
-      </div>
 
-      <Link
-        href={`/recipes/${card.slug}`}
-        prefetch={false}
-        className='mt-4 block overflow-hidden rounded-2xl border border-emerald-50 bg-emerald-50/50'
-        aria-label={`Open ${card.title} recipe detail`}
-      >
-        <Image
-          src={recipeImage}
-          alt={card.title}
-          width={400}
-          height={200}
-          sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-          className='h-40 w-full object-cover transition duration-150 group-hover:scale-[1.02]'
-          onError={handleImageError}
-          unoptimized
-        />
-      </Link>
+        <Link
+          href={detailHref}
+          prefetch={false}
+          className='relative block overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50'
+          aria-label={`Open ${card.title} recipe detail`}
+        >
+          <Image
+            src={recipeImage}
+            alt={card.title}
+            width={400}
+            height={200}
+            sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+            className='h-44 w-full object-cover transition duration-300 group-hover:scale-[1.03]'
+            onError={handleImageError}
+            unoptimized
+          />
+        </Link>
 
-      {macroBadges.length ? (
-        <div className='mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-700'>
-          {macroBadges.map((badge) => (
-            <span
-              key={`${card.recommendationId}-${badge}`}
-              className='rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs'
-            >
-              {badge}
-            </span>
-          ))}
+        {macroBadges.length ? (
+          <div className='flex flex-wrap gap-2 text-[12px] font-semibold text-emerald-900'>
+            {macroBadges.map((badge) => (
+              <span
+                key={`${card.recommendationId}-${badge}`}
+                className='inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 shadow-inner shadow-emerald-50'
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className='space-y-3 text-sm text-slate-700'>
+          {card.macrosLabel ? (
+            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700'>{card.macrosLabel}</p>
+          ) : null}
+          <p className='text-[13px] leading-relaxed text-slate-600'>{card.rationale}</p>
         </div>
-      ) : null}
 
-      <div className='mt-4 space-y-3 text-sm text-slate-700'>
-        {card.macrosLabel ? <p className='text-xs font-semibold uppercase tracking-[0.2em] text-slate-500'>{card.macrosLabel}</p> : null}
-        <p className='text-[13px] leading-relaxed text-slate-600'>{card.rationale}</p>
         {adjustmentChips.length ? (
           <div className='flex flex-wrap gap-2 text-[11px] text-slate-600'>
             {adjustmentChips.map((adjustment, index) => (
               <span
                 key={`${card.recommendationId}-adjustment-${index}`}
-                className='rounded-full border border-slate-200 bg-slate-50 px-3 py-1'
+                className='inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-medium'
               >
                 {adjustment.reason}
                 <span className='ml-1 font-semibold text-slate-900'>
@@ -437,27 +271,33 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
             ))}
           </div>
         ) : null}
+
         {highlightChips.length ? (
           <div className='flex flex-wrap gap-2 text-[11px] text-emerald-700'>
             {highlightChips.map((highlight) => (
               <span
                 key={`${card.recommendationId}-highlight-${highlight}`}
-                className='rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1'
+                className='inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold'
               >
                 {highlight}
               </span>
             ))}
           </div>
         ) : null}
+
         {tagChips.length ? (
           <div className='flex flex-wrap gap-2 text-[11px] text-slate-500'>
             {tagChips.map((tag) => (
-              <span key={`${card.recommendationId}-tag-${tag}`} className='rounded-full border border-slate-100 bg-white px-3 py-1'>
+              <span
+                key={`${card.recommendationId}-tag-${tag}`}
+                className='inline-flex items-center rounded-full border border-slate-100 bg-white px-3 py-1 font-semibold'
+              >
                 {tag}
               </span>
             ))}
           </div>
         ) : null}
+
         {card.allergens.length ? (
           <div className='flex flex-wrap items-center gap-2 text-[11px] text-rose-700'>
             <span className='font-semibold uppercase tracking-[0.2em]'>Allergens</span>
@@ -471,83 +311,10 @@ export function RecommendationCard({ card, userId, readOnly = false }: Recommend
             ))}
           </div>
         ) : null}
-        <Link
-          href={`/recipes/${card.slug}`}
-          prefetch={false}
-          className='inline-flex items-center gap-2 rounded-2xl border border-emerald-200 px-4 py-2 text-[13px] font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900'
-          aria-label={`View full detail for ${card.title}`}
-        >
-          <Sparkles className='h-4 w-4 text-emerald-600' aria-hidden='true' />
-          View recipe detail
-        </Link>
-      </div>
 
-      <div className='mt-4 space-y-4'>
-        {card.healthySwapCopy ? (
-          <div className='rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800'>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600'>Healthy swap</p>
-            <p>{card.healthySwapCopy}</p>
-            {card.swapRecipe ? (
-              <p className='mt-1 text-xs text-emerald-700'>
-                Alt: <span className='font-semibold'>{card.swapRecipe.title}</span>
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div
-          className='flex flex-col gap-2 pt-1 text-sm sm:flex-row sm:flex-wrap'
-          role='group'
-          aria-label='Feedback actions'
-        >
-          {actionOrder.map((action) => {
-            const config = actionConfigs[action];
-            const note = action === "SWAP" ? card.swapRecipe?.title ?? card.healthySwapCopy ?? undefined : undefined;
-            const descriptionId = `${card.recommendationId}-${action}-desc`;
-
-            return (
-              <button
-                key={`${card.recommendationId}-${action}`}
-                type='button'
-                onClick={() => handleAction(action, note)}
-                disabled={readOnly || isPending}
-                aria-describedby={descriptionId}
-                className={cn(
-                  "flex w-full min-w-0 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[150px] sm:flex-1",
-                  config.className
-                )}
-              >
-                {pendingAction === action && isPending ? <Loader2 className='h-4 w-4 animate-spin' /> : config.icon}
-                <div className='flex-1 text-xs font-normal leading-tight'>
-                  <p className='text-sm font-semibold'>{config.label}</p>
-                  <p id={descriptionId} className='text-[11px] text-slate-600'>
-                    {config.description}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {lastAction ? (
-          <div
-            className='flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-2 text-sm text-emerald-800'
-            role='status'
-            aria-live='polite'
-          >
-            <CheckCircle2 className='h-4 w-4 text-emerald-600' />
-            <span>{successCopy[lastAction]}</span>
-          </div>
-        ) : null}
-
-        {errorMessage ? (
-          <div
-            className='flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700'
-            role='alert'
-            aria-live='assertive'
-          >
-            <AlertCircle className='h-4 w-4' />
-            <span>{errorMessage}</span>
+        {!readOnly ? (
+          <div className='mt-auto space-y-3 border-t border-emerald-100 pt-4'>
+            <FeedbackActions recommendationId={card.recommendationId} userId={userId} layout='inline' />
           </div>
         ) : null}
       </div>
@@ -561,15 +328,30 @@ function RecommendationsSkeleton() {
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={`skeleton-${index}`}
-          className='h-64 animate-pulse rounded-3xl border border-emerald-100 bg-white/70 p-5'
+          className='flex h-full animate-pulse flex-col rounded-[24px] border border-emerald-100 bg-white/80 p-5 shadow-sm'
         >
-          <div className='h-5 w-28 rounded-full bg-emerald-100' />
-          <div className='mt-4 space-y-3'>
-            <div className='h-4 w-2/3 rounded-full bg-emerald-50' />
-            <div className='h-4 w-1/2 rounded-full bg-emerald-50' />
-            <div className='h-3 w-1/3 rounded-full bg-emerald-50' />
+          <div className='flex items-start justify-between gap-3'>
+            <div className='space-y-2'>
+              <div className='h-3 w-16 rounded-full bg-emerald-100' />
+              <div className='h-4 w-32 rounded-full bg-emerald-50' />
+            </div>
+            <div className='h-6 w-20 rounded-full bg-emerald-100' />
           </div>
-          <div className='mt-6 h-20 rounded-2xl bg-emerald-50/70' />
+          <div className='mt-3 h-40 rounded-2xl bg-emerald-50' />
+          <div className='mt-3 flex flex-wrap gap-2'>
+            <div className='h-6 w-20 rounded-full bg-emerald-50' />
+            <div className='h-6 w-24 rounded-full bg-emerald-50' />
+            <div className='h-6 w-24 rounded-full bg-emerald-50' />
+          </div>
+          <div className='mt-3 space-y-2'>
+            <div className='h-3 w-1/2 rounded-full bg-emerald-50' />
+            <div className='h-3 w-full rounded-full bg-emerald-50' />
+            <div className='h-3 w-5/6 rounded-full bg-emerald-50' />
+          </div>
+          <div className='mt-auto flex flex-col gap-2 border-t border-emerald-100 pt-4'>
+            <div className='h-10 w-full rounded-full bg-emerald-100' />
+            <div className='h-10 w-full rounded-full bg-emerald-50' />
+          </div>
         </div>
       ))}
     </div>
