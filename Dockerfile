@@ -6,8 +6,8 @@ WORKDIR /app
 RUN apk update && apk add --upgrade busybox=1.37.0-r20 busybox-binsh=1.37.0-r20 ssl_client=1.37.0-r20
 
 FROM base AS deps
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json ./
+RUN npm install
 
 FROM base AS builder
 ENV NODE_ENV=production
