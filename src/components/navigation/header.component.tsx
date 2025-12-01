@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, UserRound } from "lucide-react";
+import { toast } from "sonner";
 
 import { Logo } from "@/components/common/logo.component";
 import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
@@ -62,7 +63,9 @@ type ProfileMenuProps = {
 
 function ProfileMenu({ user }: ProfileMenuProps) {
   const [open, setOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -100,6 +103,24 @@ function ProfileMenu({ user }: ProfileMenuProps) {
   const personalizationUrl = `/personalization`;
   const menusUrl = `/menus?prefillEmail=${encodeURIComponent(user.email)}`;
   const goalAlignmentUrl = `/goal-alignment`;
+
+  async function handleLogout() {
+    try {
+      setIsLoggingOut(true);
+      const response = await fetch("/api/logout", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Failed to log out.");
+      }
+      setOpen(false);
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed", error);
+      toast.error("Unable to log out. Try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
     <div className='relative' ref={menuRef}>
@@ -146,6 +167,14 @@ function ProfileMenu({ user }: ProfileMenuProps) {
             >
               My menus
             </Link>
+            <button
+              type='button'
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className='block w-full rounded-2xl border border-rose-100 px-4 py-3 font-semibold text-rose-700 transition hover:border-rose-200 hover:bg-rose-50 disabled:opacity-70'
+            >
+              {isLoggingOut ? "Logging out…" : "Log out"}
+            </button>
           </div>
           <p className='mt-3 text-xs text-slate-400'>Update your goals, allergens, or password anytime.</p>
         </div>
