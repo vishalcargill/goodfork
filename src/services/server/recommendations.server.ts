@@ -12,6 +12,7 @@ import {
   OPENAI_API_KEY,
   OPENAI_BASE_URL,
   RECOMMENDER_MODEL,
+  REQUIRE_AI_RANKING,
 } from "@/constants/app.constants";
 import type {
   RecommendationCard,
@@ -146,6 +147,14 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
   }
 
   if (!finalSelection?.length) {
+    if (!input.deterministicOnly && REQUIRE_AI_RANKING) {
+      throw createRecommendationError("AI ranking is required to deliver menus right now.", {
+        statusCode: 503,
+        clientMessage: "LLM rankings are warming up. Try again in a moment for fresh menus.",
+        errorCode: "llm_required",
+      });
+    }
+
     finalSelection = scored
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)

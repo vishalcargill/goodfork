@@ -49,7 +49,6 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
 
   const { isPending, data, reset, mutate } = recommendationsMutation;
   const successPayload = data && data.success ? data.data : null;
-
   useEffect(() => {
     if (prefillEmail && prefetchedEmailRef.current !== prefillEmail) {
       prefetchedEmailRef.current = prefillEmail;
