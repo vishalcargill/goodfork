@@ -7,16 +7,22 @@ declare global {
   var prisma: InstanceType<typeof PrismaClient> | undefined;
 }
 
-if (!DATABASE_URL) {
-  throw new Error("DATABASE_URL is not configured. Check your env vars.");
-}
-
-const adapter = new PrismaPg({ connectionString: DATABASE_URL });
-
-const prismaClient = globalThis.prisma ?? new PrismaClient({ adapter });
+const prismaClient =
+  DATABASE_URL && !globalThis.prisma
+    ? new PrismaClient({ adapter: new PrismaPg({ connectionString: DATABASE_URL }) })
+    : globalThis.prisma;
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.prisma = prismaClient;
 }
 
-export const prisma = prismaClient;
+export const prisma =
+  prismaClient ??
+  (new Proxy(
+    {},
+    {
+      get() {
+        throw new Error("Prisma client unavailable: DATABASE_URL not configured.");
+      },
+    },
+  ) as unknown as PrismaClient);
