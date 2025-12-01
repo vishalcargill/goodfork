@@ -16,7 +16,7 @@ steps:
     parameters:
       repo: "goodfork-app"
       skip_existing: true
-      tags: "tutorial-${VELA_BUILD_COMMIT:0:7}"
+      tags: "${VELA_BUILD_COMMIT:0:7}"
 
   # build goodfork app
   - name: build-goodfork-app
