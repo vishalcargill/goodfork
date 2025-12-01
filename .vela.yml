@@ -41,3 +41,4 @@ steps:
       run_apply: true
       edge_auth: false
       version: "${VELA_BUILD_COMMIT:0:7}"
+      nocache: true  

@@ -1,28 +1,41 @@
-# Dockerfile for GoodFork (Node.js/Next.js)
-
 FROM node:20-alpine AS base
 WORKDIR /app
-# Upgrade busybox and related OS packages
-RUN apk update && apk add --upgrade busybox=1.37.0-r20 busybox-binsh=1.37.0-r20 ssl_client=1.37.0-r20
 
+# Upgrade OS packages
+RUN apk update && apk add --upgrade \
+    busybox=1.37.0-r20 \
+    busybox-binsh=1.37.0-r20 \
+    ssl_client=1.37.0-r20
+
+# -------------------------
+# Dependencies Layer
+# -------------------------
 FROM base AS deps
-COPY package.json ./
-# Do not copy package-lock.json, always run npm install for latest dependencies
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
+# -------------------------
+# Builder Layer
+# -------------------------
 FROM base AS builder
 ENV NODE_ENV=production
-COPY package.json ./
-RUN npm install
+
+COPY package.json package-lock.json ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
+# -------------------------
+# Runner Layer
+# -------------------------
 FROM base AS runner
 ENV NODE_ENV=production
+
+# Bring node_modules and build output
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
+
 EXPOSE 3000
 CMD ["npm", "run", "start"]
