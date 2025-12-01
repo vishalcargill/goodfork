@@ -8,7 +8,7 @@ internal: true
 replicas: 2
 container_port: 3000
 healthcheck:
-  path: /health
+  path: /api/health
   port: 3000
 revisionHistoryLimit: 10
 dns:
