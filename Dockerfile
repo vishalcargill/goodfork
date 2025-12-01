@@ -7,6 +7,7 @@ RUN apk update && apk add --upgrade busybox=1.37.0-r20 busybox-binsh=1.37.0-r20 
 
 FROM base AS deps
 COPY package.json ./
+# Do not copy package-lock.json, always run npm install for latest dependencies
 RUN npm install
 
 FROM base AS builder
