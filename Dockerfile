@@ -23,7 +23,7 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 
 # Install ALL deps (includes devDependencies)
-RUN npm ci
+RUN npm install
 
 # -------------------------
 # Builder Layer
