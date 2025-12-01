@@ -23,7 +23,7 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 
 # Install ALL deps (includes devDependencies)
-RUN npm install
+RUN npm install hono@4.10.2 glob@10.5.0 cross-spawn@7.0.5 brace-expansion@2.0.2 && npm install
 
 # -------------------------
 # Builder Layer
