@@ -4,6 +4,9 @@
 
 FROM node:20-slim AS base
 WORKDIR /app
+# Create a non-root user with UID 999
+RUN useradd --uid 999 --user-group --system --shell /bin/bash app
+USER 999
 
 # Install essential system packages for build tools, Prisma, and Next.js
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -42,10 +45,7 @@ COPY . .
 # Build Next.js app
 RUN npm run build
 
-# -------------------------
-# Runner Layer (Final Image)
-# -------------------------
-FROM node:22-slim AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -54,6 +54,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     openssl \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd --uid 999 --user-group --system --shell /bin/bash app
 
 COPY package.json package-lock.json ./
 
@@ -67,5 +70,10 @@ RUN npm prune --omit=dev
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
+# Set permissions for /app
+RUN chown -R 999:999 /app
+
 EXPOSE 3000
+# Run as non-root user
+USER 999
 CMD ["npm", "run", "start"]
