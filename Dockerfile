@@ -1,6 +1,9 @@
 # Dockerfile for GoodFork (Node.js/Next.js)
+
 FROM node:20-alpine AS base
 WORKDIR /app
+# Upgrade busybox and related OS packages
+RUN apk update && apk add --upgrade busybox=1.37.0-r20 busybox-binsh=1.37.0-r20 ssl_client=1.37.0-r20
 
 FROM base AS deps
 COPY package.json package-lock.json* ./

@@ -35,7 +35,11 @@
     "react-dom": "19.2.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.1.13"
+    "zod": "^4.1.13",
+    "hono": "4.10.2",
+    "glob": "10.5.0",
+    "cross-spawn": "7.0.5",
+    "brace-expansion": "2.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
