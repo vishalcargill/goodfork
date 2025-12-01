@@ -274,6 +274,7 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
   return {
     recommendationId: "preview",
     recipeId: form.id ?? "preview",
+    slug: form.slug || "preview-recipe",
     title: form.title || "Recipe preview",
     description: form.description || null,
     imageUrl: form.imageUrl.trim() || null,

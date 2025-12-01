@@ -795,6 +795,7 @@ function buildPreviewCard(item: InventoryRecord): RecommendationCardType {
   return {
     recommendationId: `inventory-preview-${item.recipeId}`,
     recipeId: item.recipeId,
+    slug: item.recipe.slug,
     title: item.recipe.title,
     description: item.recipe.description,
     imageUrl: item.recipe.imageUrl,

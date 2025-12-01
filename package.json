@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "echo DATABASE_URL=$VELA_DATABASE_URL >> .env.local && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
@@ -13,7 +13,8 @@
     "db:seed": "prisma db seed",
     "recipes:import": "tsx scripts/import-recipes.ts",
     "recipes:embed": "tsx scripts/generate-recipe-embeddings.ts",
-    "inventory:import": "tsx scripts/import-inventory.ts"
+    "inventory:import": "tsx scripts/import-inventory.ts",
+    "admin:create": "tsx scripts/create-admin-user.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
