@@ -1,7 +1,8 @@
 # -------------------------
 # Base Image (Debian Slim - No Go)
 # -------------------------
-FROM node:22-slim AS base
+
+FROM node:20-slim AS base
 WORKDIR /app
 
 # Install essential system packages for build tools, Prisma, and Next.js
@@ -14,6 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user with UID 999
+RUN useradd --uid 999 --user-group --system --shell /bin/bash app
 
 # -------------------------
 # Dependencies Layer
