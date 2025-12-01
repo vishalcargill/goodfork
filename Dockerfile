@@ -11,6 +11,8 @@ RUN npm install
 
 FROM base AS builder
 ENV NODE_ENV=production
+COPY package.json ./
+RUN npm install
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
