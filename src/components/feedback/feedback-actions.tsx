@@ -70,7 +70,7 @@ export function FeedbackActions({
     <div
       className={cn(
         "flex w-full gap-2",
-        layout === "inline" ? "flex-col sm:flex-row sm:items-center sm:justify-center gap-40" : "flex-col",
+        layout === "inline" ? "flex-col sm:flex-row sm:items-center sm:justify-end" : "flex-col",
         className
       )}
     >

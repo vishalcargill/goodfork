@@ -31,7 +31,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const currentUser = await getAuthenticatedUser();
-  const fallbackUser = getOnboardingFallbackUser();
+  const fallbackUser = await getOnboardingFallbackUser();
   const headerUser =
     currentUser != null
       ? {
@@ -66,12 +66,9 @@ type FallbackUser = {
   isAdmin: boolean;
 };
 
-function getOnboardingFallbackUser(): FallbackUser | null {
-  const cookieStore = cookies();
-  const cookie =
-    typeof (cookieStore as any).get === "function"
-      ? (cookieStore as any).get(ONBOARDING_PROFILE_COOKIE)
-      : null;
+async function getOnboardingFallbackUser(): Promise<FallbackUser | null> {
+  const cookieStore = await cookies();
+  const cookie = cookieStore.get(ONBOARDING_PROFILE_COOKIE);
   const payload = parseOnboardingCookie(cookie?.value ?? null);
 
   if (!payload) {
