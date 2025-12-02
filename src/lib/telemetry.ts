@@ -1,4 +1,5 @@
 import type { InventoryStatus } from "@/generated/prisma/client";
+import type { RecommendationDataSource } from "@/constants/data-sources";
 import type { RecommendationResponse } from "@/services/shared/recommendations.types";
 
 type RecommendationSource = RecommendationResponse["source"];
@@ -15,6 +16,7 @@ type RecommendationRequestedEvent = {
   limit?: number;
   deterministicOnly?: boolean;
   sessionId?: string | null;
+  dataSource?: RecommendationDataSource;
 };
 
 type RecommendationSucceededEvent = {
@@ -27,6 +29,7 @@ type RecommendationSucceededEvent = {
   deterministicFallback: boolean;
   latencyMs: number;
   sessionId?: string | null;
+  dataSource?: RecommendationDataSource;
 };
 
 type RecommendationFailedEvent = {
@@ -36,6 +39,7 @@ type RecommendationFailedEvent = {
   reason: string;
   latencyMs?: number;
   sessionId?: string | null;
+  dataSource?: RecommendationDataSource;
 };
 
 type InventoryLowStockEvent = {

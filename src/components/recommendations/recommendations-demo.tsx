@@ -2,17 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { FeedbackActions } from "@/components/feedback/feedback-actions";
+import {
+  DEFAULT_RECOMMENDATION_DATA_SOURCE,
+  RECOMMENDATION_DATA_SOURCES,
+  type RecommendationDataSource,
+  normalizeRecommendationSource,
+} from "@/constants/data-sources";
 import { cn } from "@/lib/utils";
 import { useRecommendationsMutation } from "@/services/client/recommendations.client";
 import type { RecommendationCard, RecommendationResponse } from "@/services/shared/recommendations.types";
 
 type RecommendationsDemoProps = {
-  prefillEmail?: string;
+  activeEmail: string;
+  initialSource?: RecommendationDataSource;
 };
 
 const statusCopy = {
@@ -30,21 +38,68 @@ const statusCopy = {
   },
 } as const;
 
-export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) {
+const SOURCE_LABELS: Record<RecommendationDataSource, string> = {
+  backend: "Backend (Prisma)",
+  supabase: "Supabase MCP",
+};
+
+const SOURCE_DESCRIPTIONS: Record<RecommendationDataSource, string> = {
+  backend: "Direct from Prisma + inventory data.",
+  supabase: "Supabase MCP connector (parity check).",
+};
+
+function SourceToggle({
+  value,
+  onChange,
+}: {
+  value: RecommendationDataSource;
+  onChange: (next: RecommendationDataSource) => void;
+}) {
+  return (
+    <div className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white p-1 text-xs font-semibold shadow-[0_10px_28px_rgba(15,23,42,0.08)]'>
+      {RECOMMENDATION_DATA_SOURCES.map((option) => {
+        const isActive = option === value;
+        return (
+          <button
+            key={option}
+            type='button'
+            onClick={() => onChange(option)}
+            className={cn(
+              "rounded-full px-3 py-1 transition",
+              isActive
+                ? "bg-emerald-600 text-white shadow-[0_8px_24px_rgba(16,185,129,0.35)]"
+                : "text-slate-700 hover:bg-emerald-50"
+            )}
+          >
+            {SOURCE_LABELS[option]}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function RecommendationsDemo({
+  activeEmail,
+  initialSource = DEFAULT_RECOMMENDATION_DATA_SOURCE,
+}: RecommendationsDemoProps) {
   const recommendationsMutation = useRecommendationsMutation();
   const prefetchedEmailRef = useRef<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [source, setSource] = useState<RecommendationDataSource>(initialSource);
 
   const { isPending, data, reset, mutate } = recommendationsMutation;
   const successPayload = data && data.success ? data.data : null;
   useEffect(() => {
-    if (!prefillEmail || prefetchedEmailRef.current === prefillEmail) {
+    if (!activeEmail || prefetchedEmailRef.current === activeEmail) {
       return;
     }
 
-    prefetchedEmailRef.current = prefillEmail;
+    prefetchedEmailRef.current = activeEmail;
     reset();
-    mutate({ email: prefillEmail });
-  }, [prefillEmail, mutate, reset]);
+    mutate({ email: activeEmail, source });
+  }, [activeEmail, mutate, reset, source]);
 
   useEffect(() => {
     if (data && !data.success && data.errorCode === "user_not_found") {
@@ -54,8 +109,58 @@ export function RecommendationsDemo({ prefillEmail }: RecommendationsDemoProps) 
     }
   }, [data]);
 
+  useEffect(() => {
+    if (!searchParams) {
+      return;
+    }
+
+    const paramValue = searchParams.get("source");
+    const normalized = normalizeRecommendationSource(paramValue);
+
+    if (normalized !== source) {
+      setSource(normalized);
+    }
+  }, [searchParams, source]);
+
+  const handleSourceChange = (nextSource: RecommendationDataSource) => {
+    if (nextSource === source) {
+      return;
+    }
+
+    setSource(nextSource);
+    toast.success("Updated data source ", {
+      description: SOURCE_LABELS[nextSource],
+      position: "top-center",
+    });
+
+    const nextParams = new URLSearchParams(searchParams?.toString());
+    nextParams.set("source", nextSource);
+    if (activeEmail) {
+      nextParams.set("prefillEmail", activeEmail);
+    }
+
+    router.replace(`/menus?${nextParams.toString()}`, { scroll: false });
+
+    if (activeEmail) {
+      reset();
+      mutate({ email: activeEmail, source: nextSource });
+    }
+  };
+
+  const sourceDescription = useMemo(() => SOURCE_DESCRIPTIONS[source], [source]);
+
   return (
     <div className='space-y-6'>
+      <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+        <div className='space-y-1 text-sm'>
+          <p className='text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700'>Data source</p>
+          <p className='text-slate-600'>
+            {SOURCE_LABELS[source]} · {sourceDescription}
+          </p>
+        </div>
+        <SourceToggle value={source} onChange={handleSourceChange} />
+      </div>
+
       {isPending ? (
         <RecommendationsSkeleton />
       ) : successPayload ? (

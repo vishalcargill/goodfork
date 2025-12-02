@@ -20,7 +20,7 @@ import type {
   ScoreAdjustment,
 } from "@/services/shared/recommendations.types";
 
-type GenerateRecommendationsInput = {
+export type GenerateRecommendationsInput = {
   userId?: string;
   email?: string;
   limit?: number;

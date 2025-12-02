@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { trackTelemetry } from "@/lib/telemetry";
 import { recommendationRequestSchema } from "@/schema/recommendations.schema";
 import { generateRecommendations } from "@/services/server/recommendations.server";
+import { generateRecommendationsViaSupabaseMcp } from "@/services/server/supabase-recommendations.server";
+import { DEFAULT_RECOMMENDATION_DATA_SOURCE } from "@/constants/data-sources";
 
 type RecommendationIdentifier = {
   userId?: string;
@@ -15,6 +17,7 @@ export async function POST(request: Request) {
   const requestedAt = performance.now();
   let identifier: RecommendationIdentifier = {};
   let sessionId: string | null = null;
+  let requestedSource = DEFAULT_RECOMMENDATION_DATA_SOURCE;
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
@@ -31,6 +34,7 @@ export async function POST(request: Request) {
         requestId,
         identifier,
         reason: "validation_error",
+        dataSource: requestedSource,
       });
 
       return NextResponse.json({
@@ -40,6 +44,8 @@ export async function POST(request: Request) {
       });
     }
 
+    requestedSource = parsed.data.source ?? DEFAULT_RECOMMENDATION_DATA_SOURCE;
+
     trackTelemetry({
       type: "recommendation.requested",
       requestId,
@@ -47,9 +53,19 @@ export async function POST(request: Request) {
       limit: parsed.data.limit,
       deterministicOnly: parsed.data.deterministicOnly,
       sessionId: parsed.data.sessionId ?? null,
+      dataSource: requestedSource,
     });
 
-    const data = await generateRecommendations(parsed.data);
+    const { source, ...generateInput } = parsed.data;
+    let data = null;
+
+    if (requestedSource === "supabase") {
+      data = await generateRecommendationsViaSupabaseMcp(generateInput);
+    }
+
+    if (!data) {
+      data = await generateRecommendations(generateInput);
+    }
     const latencyMs = Math.round(performance.now() - requestedAt);
 
     trackTelemetry({
@@ -62,6 +78,7 @@ export async function POST(request: Request) {
       deterministicFallback: data.source === "deterministic",
       latencyMs,
       sessionId: parsed.data.sessionId ?? null,
+      dataSource: requestedSource,
     });
 
     return NextResponse.json({
@@ -78,6 +95,7 @@ export async function POST(request: Request) {
       reason: error instanceof Error ? error.message : "unknown_error",
       latencyMs,
       sessionId,
+      dataSource: requestedSource,
     });
 
     console.error("Recommendations API error", error);
