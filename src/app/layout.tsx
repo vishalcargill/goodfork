@@ -68,7 +68,10 @@ type FallbackUser = {
 
 function getOnboardingFallbackUser(): FallbackUser | null {
   const cookieStore = cookies();
-  const cookie = cookieStore.get?.(ONBOARDING_PROFILE_COOKIE);
+  const cookie =
+    typeof (cookieStore as any).get === "function"
+      ? (cookieStore as any).get(ONBOARDING_PROFILE_COOKIE)
+      : null;
   const payload = parseOnboardingCookie(cookie?.value ?? null);
 
   if (!payload) {
