@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -71,6 +72,7 @@ export function OnboardingFlow() {
   const [result, setResult] = useState<OnboardingResult | null>(null);
   const onboardingMutation = useOnboardingSubmitMutation();
   const isPending = onboardingMutation.isPending;
+  const router = useRouter();
 
   const accountComplete =
     values.name.trim().length >= 2 && values.email.trim().length > 0 && values.password.trim().length >= 8;
@@ -105,7 +107,10 @@ export function OnboardingFlow() {
 
     setResult(null);
     onboardingMutation.mutate(payload, {
-      onSuccess: (data) => setResult(data),
+      onSuccess: (data) => {
+        setResult(data);
+        router.refresh();
+      },
       onError: () =>
         setResult({
           success: false,
@@ -409,7 +414,11 @@ export function OnboardingFlow() {
               <CheckCircle2 className='h-4 w-4' />
               {result?.message}
             </p>
-            <Link href={recommendationsHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
+            <Link
+              href={recommendationsHref}
+              prefetch={false}
+              className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'
+            >
               Head to menus
               <ArrowRight className='h-3.5 w-3.5' />
             </Link>
