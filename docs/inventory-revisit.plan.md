@@ -56,10 +56,10 @@
 - Surface expiry warnings and suggest recipes that use soon-to-expire items.
 
 ## Task List
-- [ ] Schema: add Ingredient, RecipeIngredient, PantryItem; generate migration; run `npm run prisma:generate`.
-- [ ] Seed: normalize `data/recipes.json`; rewrite `prisma/seed.ts` for ingredients + pantry.
-- [ ] Services: update recommendation service for ingredient availability and shortfall scoring.
-- [ ] APIs: replace admin inventory routes with user-scoped pantry routes + validation.
-- [ ] UI: build pantry manager UI; update menus/recommendations to show cookable/needs-X state and swaps.
-- [ ] Telemetry: log pantry changes and blocked recipes; add expiry-based nudges.
-- [ ] Docs: update `docs/PRD.md`/`docs/work-items.md` to reflect personal pantry model and new feed format.
+- [x] Schema: add Ingredient, RecipeIngredient, PantryItem; generate migration; run `npm run prisma:generate`.
+- [x] Seed: normalize `prisma/seed.ts` with structured ingredients + pantry demo user.
+- [x] Services: update recommendation service for ingredient availability and shortfall scoring.
+- [x] APIs: add user-scoped pantry routes with validation (`/api/pantry`, `/restock`, `/consume`).
+- [x] UI: build pantry manager UI; update menus/recommendations to show cookable/needs-X state and swaps.
+- [x] Telemetry: log pantry restock/consume/missing events and add expiry-based nudges in UI.
+- [x] Docs: update `docs/PRD.md`/`docs/work-items.md` to reflect personal pantry model and new feed format.

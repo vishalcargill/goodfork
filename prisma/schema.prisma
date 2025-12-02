@@ -18,6 +18,7 @@ model User {
   recommendations Recommendation[]
   profile         UserProfile?
   sessions        UserSession[]
+  pantryItems     PantryItem[]
 }
 
 model UserProfile {
@@ -70,6 +71,7 @@ model Recipe {
   healthySwapFor    Recommendation[] @relation("HealthySwap")
   recommendations   Recommendation[]
   embeddings        RecipeEmbedding[]
+  recipeIngredients RecipeIngredient[]
 }
 
 model InventoryItem {
@@ -82,6 +84,50 @@ model InventoryItem {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   recipe      Recipe          @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model Ingredient {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  defaultUnit  String   @default("unit")
+  allergens    String[] @default([])
+  tags         String[] @default([])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  recipes      RecipeIngredient[]
+  pantryItems  PantryItem[]
+}
+
+model RecipeIngredient {
+  id                 String     @id @default(cuid())
+  recipeId           String
+  ingredientId       String
+  quantityPerServing Decimal    @db.Decimal(10, 2)
+  unitLabel          String?
+  notes              String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  recipe             Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient         Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, ingredientId])
+}
+
+model PantryItem {
+  id           String          @id @default(cuid())
+  userId       String
+  ingredientId String
+  quantity     Decimal         @db.Decimal(10, 2)
+  unitLabel    String          @default("unit")
+  status       InventoryStatus @default(IN_STOCK)
+  expiresOn    DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient      @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ingredientId])
 }
 
 model Recommendation {

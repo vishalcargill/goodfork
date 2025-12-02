@@ -17,15 +17,15 @@ type RecommendationsDemoProps = {
 
 const statusCopy = {
   IN_STOCK: {
-    label: "Ready now",
+    label: "Cookable now",
     badge: "bg-emerald-100 text-emerald-800 border-emerald-200",
   },
   LOW_STOCK: {
-    label: "Low stock",
+    label: "Needs quick top-up",
     badge: "bg-amber-100 text-amber-900 border-amber-200",
   },
   OUT_OF_STOCK: {
-    label: "Out of stock",
+    label: "Missing pantry items",
     badge: "bg-rose-100 text-rose-800 border-rose-200",
   },
 } as const;
@@ -175,7 +175,25 @@ type RecommendationCardProps = {
 const FALLBACK_RECIPE_IMAGE = "/recipe-placeholder.svg";
 
 export function RecommendationCard({ card, userId, readOnly }: RecommendationCardProps) {
-  const statusTheme = statusCopy[card.inventory.status];
+  const pantry = card.pantry ?? {
+    status: "IN_STOCK" as keyof typeof statusCopy,
+    cookableServings: 2,
+    missingIngredients: [],
+    lowStockIngredients: [],
+    operatorStatus: "IN_STOCK" as keyof typeof statusCopy,
+    operatorMissingIngredients: [],
+    operatorLowStockIngredients: [],
+  };
+  const personalStatus = pantry.status as keyof typeof statusCopy;
+  const operatorStatus = (pantry.operatorStatus as keyof typeof statusCopy) ?? "IN_STOCK";
+  const badgeState = operatorStatus === "IN_STOCK" ? personalStatus : operatorStatus;
+  const statusTheme = statusCopy[badgeState] ?? statusCopy.IN_STOCK;
+  const badgeLabel =
+    operatorStatus === "OUT_OF_STOCK"
+      ? "Kitchen out"
+      : operatorStatus === "LOW_STOCK"
+      ? "Kitchen low"
+      : statusCopy[personalStatus]?.label ?? statusCopy.IN_STOCK.label;
   const [imageErrored, setImageErrored] = useState(false);
   const recipeImage = !card.imageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : card.imageUrl;
   const detailHref =
@@ -213,7 +231,7 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
               statusTheme.badge
             )}
           >
-            {statusTheme.label}
+            {badgeLabel}
           </span>
         </div>
 
@@ -310,6 +328,36 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
             ))}
           </div>
         ) : null}
+
+        <div className='rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-slate-700'>
+          <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Pantry readiness</p>
+          {operatorStatus === "OUT_OF_STOCK" ? (
+            <p className='mt-2 text-rose-700'>
+              Kitchen shortfall: {pantry.operatorMissingIngredients.map((gap) => gap.ingredient).join(", ") || "core ingredients"}
+            </p>
+          ) : operatorStatus === "LOW_STOCK" ? (
+            <p className='mt-2 text-amber-700'>
+              Kitchen low on {pantry.operatorLowStockIngredients.map((gap) => gap.ingredient).slice(0, 2).join(", ")}.
+            </p>
+          ) : null}
+          {pantry.status === "OUT_OF_STOCK" || pantry.cookableServings <= 0 ? (
+            <p className='mt-2 text-rose-700'>
+              Missing:{" "}
+              {pantry.missingIngredients.length
+                ? pantry.missingIngredients.map((gap) => gap.ingredient).join(", ")
+                : "core ingredients"}
+            </p>
+          ) : (
+            <p className='mt-2 text-emerald-700'>
+              Enough for {pantry.cookableServings} serving{pantry.cookableServings === 1 ? "" : "s"} with your pantry.
+            </p>
+          )}
+          {pantry.lowStockIngredients.length ? (
+            <p className='mt-1 text-xs text-amber-700'>
+              Low stock: {pantry.lowStockIngredients.map((gap) => gap.ingredient).slice(0, 2).join(", ")}
+            </p>
+          ) : null}
+        </div>
 
         {!readOnly ? (
           <div className='mt-auto space-y-3 border-t border-emerald-100 pt-4'>

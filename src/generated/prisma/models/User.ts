@@ -194,6 +194,7 @@ export type UserWhereInput = {
   recommendations?: Prisma.RecommendationListRelationFilter
   profile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
   sessions?: Prisma.UserSessionListRelationFilter
+  pantryItems?: Prisma.PantryItemListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -207,6 +208,7 @@ export type UserOrderByWithRelationInput = {
   recommendations?: Prisma.RecommendationOrderByRelationAggregateInput
   profile?: Prisma.UserProfileOrderByWithRelationInput
   sessions?: Prisma.UserSessionOrderByRelationAggregateInput
+  pantryItems?: Prisma.PantryItemOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -223,6 +225,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   recommendations?: Prisma.RecommendationListRelationFilter
   profile?: Prisma.XOR<Prisma.UserProfileNullableScalarRelationFilter, Prisma.UserProfileWhereInput> | null
   sessions?: Prisma.UserSessionListRelationFilter
+  pantryItems?: Prisma.PantryItemListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -260,6 +263,7 @@ export type UserCreateInput = {
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -273,6 +277,7 @@ export type UserUncheckedCreateInput = {
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -286,6 +291,7 @@ export type UserUpdateInput = {
   recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -299,6 +305,7 @@ export type UserUncheckedUpdateInput = {
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -382,6 +389,20 @@ export type UserUpdateOneRequiredWithoutProfileNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProfileInput, Prisma.UserUpdateWithoutProfileInput>, Prisma.UserUncheckedUpdateWithoutProfileInput>
 }
 
+export type UserCreateNestedOneWithoutPantryItemsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPantryItemsInput, Prisma.UserUncheckedCreateWithoutPantryItemsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPantryItemsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPantryItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPantryItemsInput, Prisma.UserUncheckedCreateWithoutPantryItemsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPantryItemsInput
+  upsert?: Prisma.UserUpsertWithoutPantryItemsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPantryItemsInput, Prisma.UserUpdateWithoutPantryItemsInput>, Prisma.UserUncheckedUpdateWithoutPantryItemsInput>
+}
+
 export type UserCreateNestedOneWithoutRecommendationsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRecommendationsInput, Prisma.UserUncheckedCreateWithoutRecommendationsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRecommendationsInput
@@ -434,6 +455,7 @@ export type UserCreateWithoutProfileInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -446,6 +468,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -474,6 +497,7 @@ export type UserUpdateWithoutProfileInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -485,6 +509,75 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPantryItemsInput = {
+  id?: string
+  name: string
+  email: string
+  passwordHash: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPantryItemsInput = {
+  id?: string
+  name: string
+  email: string
+  passwordHash: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
+  recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPantryItemsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPantryItemsInput, Prisma.UserUncheckedCreateWithoutPantryItemsInput>
+}
+
+export type UserUpsertWithoutPantryItemsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPantryItemsInput, Prisma.UserUncheckedUpdateWithoutPantryItemsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPantryItemsInput, Prisma.UserUncheckedCreateWithoutPantryItemsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPantryItemsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPantryItemsInput, Prisma.UserUncheckedUpdateWithoutPantryItemsInput>
+}
+
+export type UserUpdateWithoutPantryItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPantryItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
+  recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -498,6 +591,7 @@ export type UserCreateWithoutRecommendationsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecommendationsInput = {
@@ -510,6 +604,7 @@ export type UserUncheckedCreateWithoutRecommendationsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecommendationsInput = {
@@ -538,6 +633,7 @@ export type UserUpdateWithoutRecommendationsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecommendationsInput = {
@@ -550,6 +646,7 @@ export type UserUncheckedUpdateWithoutRecommendationsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFeedbackInput = {
@@ -562,6 +659,7 @@ export type UserCreateWithoutFeedbackInput = {
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFeedbackInput = {
@@ -574,6 +672,7 @@ export type UserUncheckedCreateWithoutFeedbackInput = {
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+  pantryItems?: Prisma.PantryItemUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFeedbackInput = {
@@ -602,6 +701,7 @@ export type UserUpdateWithoutFeedbackInput = {
   recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFeedbackInput = {
@@ -614,6 +714,7 @@ export type UserUncheckedUpdateWithoutFeedbackInput = {
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -626,6 +727,7 @@ export type UserCreateWithoutSessionsInput = {
   feedback?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileCreateNestedOneWithoutUserInput
+  pantryItems?: Prisma.PantryItemCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -638,6 +740,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   feedback?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.UserProfileUncheckedCreateNestedOneWithoutUserInput
+  pantryItems?: Prisma.PantryItemUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -666,6 +769,7 @@ export type UserUpdateWithoutSessionsInput = {
   feedback?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   recommendations?: Prisma.RecommendationUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUpdateOneWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -678,6 +782,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   feedback?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.UserProfileUncheckedUpdateOneWithoutUserNestedInput
+  pantryItems?: Prisma.PantryItemUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -689,12 +794,14 @@ export type UserCountOutputType = {
   feedback: number
   recommendations: number
   sessions: number
+  pantryItems: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   feedback?: boolean | UserCountOutputTypeCountFeedbackArgs
   recommendations?: boolean | UserCountOutputTypeCountRecommendationsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  pantryItems?: boolean | UserCountOutputTypeCountPantryItemsArgs
 }
 
 /**
@@ -728,6 +835,13 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.UserSessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPantryItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PantryItemWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -740,6 +854,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   recommendations?: boolean | Prisma.User$recommendationsArgs<ExtArgs>
   profile?: boolean | Prisma.User$profileArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  pantryItems?: boolean | Prisma.User$pantryItemsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -776,6 +891,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   recommendations?: boolean | Prisma.User$recommendationsArgs<ExtArgs>
   profile?: boolean | Prisma.User$profileArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  pantryItems?: boolean | Prisma.User$pantryItemsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -788,6 +904,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     recommendations: Prisma.$RecommendationPayload<ExtArgs>[]
     profile: Prisma.$UserProfilePayload<ExtArgs> | null
     sessions: Prisma.$UserSessionPayload<ExtArgs>[]
+    pantryItems: Prisma.$PantryItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1194,6 +1311,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   recommendations<T extends Prisma.User$recommendationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recommendationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecommendationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   profile<T extends Prisma.User$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$profileArgs<ExtArgs>>): Prisma.Prisma__UserProfileClient<runtime.Types.Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pantryItems<T extends Prisma.User$pantryItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pantryItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PantryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1705,6 +1823,30 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.UserSessionScalarFieldEnum | Prisma.UserSessionScalarFieldEnum[]
+}
+
+/**
+ * User.pantryItems
+ */
+export type User$pantryItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PantryItem
+   */
+  select?: Prisma.PantryItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PantryItem
+   */
+  omit?: Prisma.PantryItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PantryItemInclude<ExtArgs> | null
+  where?: Prisma.PantryItemWhereInput
+  orderBy?: Prisma.PantryItemOrderByWithRelationInput | Prisma.PantryItemOrderByWithRelationInput[]
+  cursor?: Prisma.PantryItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PantryItemScalarFieldEnum | Prisma.PantryItemScalarFieldEnum[]
 }
 
 /**

@@ -546,22 +546,22 @@ function InventoryRow({
 
       <p className='mt-3 text-sm text-slate-600'>{statusTheme.copy}</p>
 
-      <div className='mt-4 grid gap-3 lg:grid-cols-4'>
+      <div className='mt-4 grid gap-4 lg:grid-cols-4'>
         <label className='text-xs font-semibold uppercase tracking-[0.14em] text-slate-500'>
           Quantity · Unit
-          <div className='mt-2 flex gap-2'>
+          <div className='mt-2 grid gap-2 sm:grid-cols-2'>
             <input
               type='number'
               min={0}
               value={item.quantity}
               onChange={(event) => onQuantityChange(item.recipeId, event.target.value)}
-              className='w-24 rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
             />
             <input
               type='text'
               value={item.unitLabel}
               onChange={(event) => onUnitLabelChange(item.recipeId, event.target.value)}
-              className='flex-1 rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
             />
           </div>
         </label>
@@ -798,11 +798,7 @@ function buildPreviewCard(item: InventoryRecord): RecommendationCardType {
     tags: item.recipe.tags ?? [],
     healthyHighlights: item.recipe.healthyHighlights ?? [],
     allergens: item.recipe.allergens ?? [],
-    inventory: {
-      status: item.status,
-      quantity: item.quantity,
-      unitLabel: item.unitLabel,
-    },
+    pantry: buildInventoryPreviewPantry(item.status, item.quantity, item.unitLabel),
     rationale:
       item.status === "OUT_OF_STOCK"
         ? "Currently hidden while operators replenish ingredients."
@@ -819,6 +815,30 @@ function buildPreviewCard(item: InventoryRecord): RecommendationCardType {
       baseScore: 64,
       adjustments,
     },
+  };
+}
+
+function buildInventoryPreviewPantry(
+  status: InventoryStatus,
+  quantity: number,
+  unitLabel: string
+): RecommendationCardType["pantry"] {
+  const safeQuantity = Math.max(0, quantity);
+  const safeStatus = status as RecommendationCardType["pantry"]["status"];
+  const cookableServings =
+    safeStatus === "OUT_OF_STOCK" ? 0 : Math.max(1, Math.min(3, safeQuantity || 1));
+  const placeholder = {
+    ingredient: "Pantry staple",
+    unitLabel,
+    requiredQuantity: 1,
+    availableQuantity: safeQuantity,
+  };
+
+  return {
+    status: safeStatus,
+    cookableServings,
+    missingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    lowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
   };
 }
 

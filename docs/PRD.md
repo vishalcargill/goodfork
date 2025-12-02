@@ -22,6 +22,7 @@ GoodFork is our hackathon submission for the **AI-Driven Menu Personalization an
 ## 5. Functional Requirements
 - **Data ingestion:** nightly sync of inventory and macros; admin CRUD for emergency edits.
 - **Inventory feeds:** `npm run inventory:import path/to/feed.(json|csv)` supports manual replays, while `/api/admin/inventory/import` ingests cron-delivered payloads signed with `INVENTORY_SYNC_SECRET`.
+- **Personal pantry:** authenticated non-admins can visit `/pantry` to restock or consume ingredients, add items by slug/unit, and the recommendation service uses the same structured `Ingredient` + `RecipeIngredient` data to compute cookable servings and shortfall messaging.
 - **Recommendation engine:** combine deterministic filters (allergens, availability) with LLM re-ranking and rules for macros/cost targets.
 - **Healthy swap module:** for each card, propose an alternate meal that nudges toward goals (e.g., lower sodium) while noting trade-offs.
 - **Nutrition insights:** render calorie/macro badges, allergen flags, and short AI explanation (<200 chars) on every recommendation.
@@ -81,3 +82,4 @@ Design a mobile-first, beautiful interface optimized for 360–390px widths and 
 - **Landing page:** evolves into a purely narrative hero with rich motion (Framer Motion for hero, scroll-linked feature reveals, animated stats, and CTA micro-interactions). Header now only carries the GoodFork logo plus “Start personalization” and “Log in” buttons to keep the CTA focus clear.
 - **Menus page:** `/menus` becomes the authenticated/home for recommendations, swaps, insights, and telemetry. It will hydrate from onboarding data (email or session) and support stateful UI without distracting marketing content. The redundant “Signed in as” card has been removed from the header so the layout focuses on actionable signals like Kitchen Pulse + recommendation controls while onboarding links live elsewhere.
 - **Recipe detail pages:** `/recipes/[slug]` expand a single card into full nutrition breakdowns, inventory status, swap suggestions, and AI rationale history to deepen judge storytelling.
+- **Pantry manager:** `/pantry` surfaces the ingredient-level pantry with restock/consume shortcuts and hooks into recommendation scoring so users immediately see cookable counts and shortfalls.

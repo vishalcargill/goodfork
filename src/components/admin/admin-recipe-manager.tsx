@@ -255,6 +255,7 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
   const protein = parseOptionalInt(form.proteinGrams);
   const carbs = parseOptionalInt(form.carbsGrams);
   const fat = parseOptionalInt(form.fatGrams);
+  const unitLabel = form.inventoryUnitLabel || "unit";
 
   return {
     recommendationId: "preview",
@@ -271,11 +272,7 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
     tags: splitList(form.tags),
     healthyHighlights: splitList(form.healthyHighlights),
     allergens: splitList(form.allergens),
-    inventory: {
-      status: form.inventoryStatus,
-      quantity,
-      unitLabel: form.inventoryUnitLabel || "unit",
-    },
+    pantry: buildPreviewPantry(form.inventoryStatus, quantity, unitLabel),
     rationale:
       form.description.trim() ||
       "Preview how AI rationale will render here once the recommendation service ranks this recipe.",
@@ -286,6 +283,30 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
       baseScore: 80,
       adjustments: [],
     },
+  };
+}
+
+function buildPreviewPantry(
+  status: InventoryStatus,
+  quantity: number,
+  unitLabel: string
+): RecommendationCardType["pantry"] {
+  const safeQuantity = Math.max(0, quantity);
+  const safeStatus = status as RecommendationCardType["pantry"]["status"];
+  const cookableServings =
+    safeStatus === "OUT_OF_STOCK" ? 0 : Math.max(1, Math.min(3, safeQuantity || 1));
+  const placeholder = {
+    ingredient: "Pantry staple",
+    unitLabel,
+    requiredQuantity: 1,
+    availableQuantity: safeQuantity,
+  };
+
+  return {
+    status: safeStatus,
+    cookableServings,
+    missingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    lowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
   };
 }
 
