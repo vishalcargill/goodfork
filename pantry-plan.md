@@ -79,3 +79,9 @@ This document captures the next iteration of our inventory architecture: a unifi
 5. **Docs & Seeds:** Update PRD/work-items, provide updated seed instructions, and include a demo script referencing pantry scenarios.
 
 With this plan, operators and consumers work against the same ingredient source of truth, and recommendations become truly inventory-aware down to the egg. Let me know if you’d like me to start implementing Phase 1 (admin pantry migration + UI). 
+
+## Ingredient Catalog Seed (data/recipes.json)
+- Script: `scripts/generated/ingredient-pantry-seed.sql` (auto-generated from `data/recipes.json`) upserts 754 normalized `Ingredient` rows and seeds a pantry entry for each ingredient tied to the `system+pantry@goodfork.com` user.
+- Prereqs: run `npm run db:seed` (or otherwise ensure the `system+pantry@goodfork.com` user exists) before applying the SQL so the pantry insert succeeds; the script no-ops on the pantry step if that user is missing.
+- Usage: `psql "$DATABASE_URL" -f scripts/generated/ingredient-pantry-seed.sql` (requires the `pgcrypto` extension—`CREATE EXTENSION IF NOT EXISTS "pgcrypto";` is included at the top of the script).
+- Customization: change the email inside the SQL script (search for `system+pantry@goodfork.com`) if you’d rather pre-seed a different account; rerun `npx tsx scripts/generate-ingredient-pantry-sql.ts` whenever `data/recipes.json` changes to regenerate the SQL payload with fresh ingredients.
