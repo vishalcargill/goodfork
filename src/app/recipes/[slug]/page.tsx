@@ -75,7 +75,6 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
   const isRemoteImage = recipe.imageUrl?.startsWith("http");
   const fallbackContext = recommendationId && userId ? { recommendationId, userId } : null;
   const activeContext = recommendationContext ?? fallbackContext;
-  const hasFeedbackContext = Boolean(activeContext);
   const feedbackRecommendationId = activeContext?.recommendationId;
   const feedbackUserId = activeContext?.userId ?? userId;
 

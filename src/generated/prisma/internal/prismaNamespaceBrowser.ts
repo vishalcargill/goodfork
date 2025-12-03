@@ -55,6 +55,9 @@ export const ModelName = {
   UserProfile: 'UserProfile',
   Recipe: 'Recipe',
   InventoryItem: 'InventoryItem',
+  Ingredient: 'Ingredient',
+  RecipeIngredient: 'RecipeIngredient',
+  PantryItem: 'PantryItem',
   Recommendation: 'Recommendation',
   Feedback: 'Feedback',
   UserSession: 'UserSession',
@@ -154,6 +157,49 @@ export const InventoryItemScalarFieldEnum = {
 } as const
 
 export type InventoryItemScalarFieldEnum = (typeof InventoryItemScalarFieldEnum)[keyof typeof InventoryItemScalarFieldEnum]
+
+
+export const IngredientScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  defaultUnit: 'defaultUnit',
+  allergens: 'allergens',
+  tags: 'tags',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type IngredientScalarFieldEnum = (typeof IngredientScalarFieldEnum)[keyof typeof IngredientScalarFieldEnum]
+
+
+export const RecipeIngredientScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  ingredientId: 'ingredientId',
+  quantityPerServing: 'quantityPerServing',
+  unitLabel: 'unitLabel',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeIngredientScalarFieldEnum = (typeof RecipeIngredientScalarFieldEnum)[keyof typeof RecipeIngredientScalarFieldEnum]
+
+
+export const PantryItemScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  ingredientId: 'ingredientId',
+  quantity: 'quantity',
+  unitLabel: 'unitLabel',
+  status: 'status',
+  expiresOn: 'expiresOn',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PantryItemScalarFieldEnum = (typeof PantryItemScalarFieldEnum)[keyof typeof PantryItemScalarFieldEnum]
 
 
 export const RecommendationScalarFieldEnum = {

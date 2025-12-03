@@ -94,6 +94,13 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - Harden error boundaries, fallback copy for AI outages, and integrate feature flags for risky features (values stored in `.env.local`).
 - Split experience shell: redesign `/` as a motion-rich hero with CTA-only header, move personalization to `/menus`, and prep `/recipes/[slug]` detail pages that hydrate from the same recommendation payloads.
 
+### Personal Pantry (Complete)
+- Ingredient catalog + join tables modeled in Prisma (`Ingredient`, `RecipeIngredient`, `PantryItem`) with new migration + seeds.
+- Seeded a demo consumer pantry plus structured recipe ingredients so recommendations know cookable servings.
+- `/api/pantry`, `/api/pantry/restock`, `/api/pantry/consume` power the new `/pantry` UI with restock/consume actions.
+- Recommendation scoring and menu cards now surface pantry readiness, cookable servings, and missing ingredient callouts.
+- Admin inventory workspace now ships a shared pantry tab (backed by the same API + telemetry) so operators manage ingredient stock that immediately gates consumer menus and the profile dropdown pantry link routes to the same manager.
+
 ### Experience Refresh TODOs
 | Status | Priority | Task | Notes |
 | --- | --- | --- | --- |

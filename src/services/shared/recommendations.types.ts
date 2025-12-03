@@ -5,6 +5,14 @@ export type ScoreAdjustment = {
   delta: number;
 };
 
+export type PantryGap = {
+  ingredient: string;
+  unitLabel: string;
+  requiredQuantity: number;
+  availableQuantity: number;
+  status?: InventoryStatus;
+};
+
 export type RecommendationCard = {
   recommendationId: string;
   recipeId: string;
@@ -20,10 +28,14 @@ export type RecommendationCard = {
   tags: string[];
   healthyHighlights: string[];
   allergens: string[];
-  inventory: {
+  pantry: {
     status: InventoryStatus;
-    quantity: number;
-    unitLabel: string;
+    cookableServings: number;
+    missingIngredients: PantryGap[];
+    lowStockIngredients: PantryGap[];
+    operatorStatus: InventoryStatus;
+    operatorMissingIngredients: PantryGap[];
+    operatorLowStockIngredients: PantryGap[];
   };
   rationale: string;
   healthySwapCopy: string | null;

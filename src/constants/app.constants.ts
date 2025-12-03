@@ -6,6 +6,7 @@ export const ENABLE_AI_RANKING = (process.env.ENABLE_AI_RANKING ?? "true").toLow
 export const REQUIRE_AI_RANKING = (process.env.REQUIRE_AI_RANKING ?? "false").toLowerCase() === "true";
 export const JWT_SECRET = process.env.JWT_SECRET ?? "";
 export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? "admin@cargill.com").toLowerCase();
+export const SYSTEM_PANTRY_EMAIL = (process.env.SYSTEM_PANTRY_EMAIL ?? "system+pantry@goodfork.com").toLowerCase();
 export const RECIPE_EMBEDDING_MODEL = process.env.RECIPE_EMBEDDING_MODEL ?? "text-embedding-3-large";
 export const RECIPE_EMBEDDING_PROVIDER = (process.env.RECIPE_EMBEDDING_PROVIDER ?? "openai").toLowerCase();
 export const RECIPE_EMBEDDING_VERSION = process.env.RECIPE_EMBEDDING_VERSION ?? "v1";

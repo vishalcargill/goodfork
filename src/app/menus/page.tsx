@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { ADMIN_EMAIL } from "@/constants/app.constants";
 import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 import { normalizeRecommendationSource } from "@/constants/data-sources";
+import { InventoryStatus } from "@/generated/prisma/client";
 
 export const metadata: Metadata = {
   title: "GoodFork | Personalized Menus",
@@ -48,6 +49,14 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
   });
 
   const profile = user?.profile ?? null;
+  const pantryItems =
+    user && user.id
+      ? await prisma.pantryItem.findMany({
+          where: { userId: user.id },
+          include: { ingredient: true },
+          orderBy: { ingredient: { name: "asc" } },
+        })
+      : [];
 
   const goalLabels = profile?.dietaryGoals?.length
     ? GOAL_OPTIONS.filter((option) => profile.dietaryGoals?.includes(option.value)).map((option) => option.label)
@@ -57,6 +66,16 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
     ? ALLERGEN_OPTIONS.filter((option) => profile.allergens?.includes(option.value)).map((option) => option.label)
     : [];
 
+  const readyPantryCount = pantryItems.filter((item) => item.status === InventoryStatus.IN_STOCK).length;
+  const lowPantryCount = pantryItems.filter((item) => item.status === InventoryStatus.LOW_STOCK).length;
+  const pantryValues =
+    pantryItems.length === 0
+      ? ["Add pantry items to unlock cookable menus"]
+      : [
+          `Ready: ${readyPantryCount}`,
+          lowPantryCount ? `${lowPantryCount} low stock` : "Fully stocked",
+        ];
+
   const sessionHighlights = [
     {
       label: "Active goals",
@@ -65,6 +84,10 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
     {
       label: "Allergen shields",
       values: allergenLabels.length ? allergenLabels : ["No active shields"],
+    },
+    {
+      label: "Pantry pulse",
+      values: pantryValues,
     },
   ];
 
