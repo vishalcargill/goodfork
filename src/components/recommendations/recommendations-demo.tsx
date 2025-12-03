@@ -283,11 +283,9 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
       ? "Kitchen low"
       : statusCopy[personalStatus]?.label ?? statusCopy.IN_STOCK.label;
   const normalizedImageUrl = normalizeImageUrl(card.imageUrl);
-  const [imageErrored, setImageErrored] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const imageErrored = normalizedImageUrl ? failedImages.has(normalizedImageUrl) : false;
   const recipeImage = !normalizedImageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : normalizedImageUrl;
-  useEffect(() => {
-    setImageErrored(false);
-  }, [normalizedImageUrl]);
   const detailHref =
     !readOnly && userId
       ? `/recipes/${card.slug}?${new URLSearchParams({
@@ -305,7 +303,20 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
   const highlightChips = card.healthyHighlights.slice(0, 3);
   const tagChips = card.tags.slice(0, 4);
 
-  const handleImageError = () => setImageErrored(true);
+  const handleImageError = () => {
+    if (!normalizedImageUrl) {
+      return;
+    }
+
+    setFailedImages((prev) => {
+      if (prev.has(normalizedImageUrl)) {
+        return prev;
+      }
+      const next = new Set(prev);
+      next.add(normalizedImageUrl);
+      return next;
+    });
+  };
 
   return (
     <article className='group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-emerald-100 bg-[#f8fff4] shadow-[0_14px_40px_rgba(16,185,129,0.12)] transition hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(16,185,129,0.2)]'>

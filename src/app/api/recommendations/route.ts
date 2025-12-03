@@ -44,7 +44,8 @@ export async function POST(request: Request) {
       });
     }
 
-    requestedSource = parsed.data.source ?? DEFAULT_RECOMMENDATION_DATA_SOURCE;
+    const { source, ...generateInput } = parsed.data;
+    requestedSource = source ?? DEFAULT_RECOMMENDATION_DATA_SOURCE;
 
     trackTelemetry({
       type: "recommendation.requested",
@@ -56,7 +57,6 @@ export async function POST(request: Request) {
       dataSource: requestedSource,
     });
 
-    const { source, ...generateInput } = parsed.data;
     let data = null;
 
     if (requestedSource === "supabase") {
