@@ -93,6 +93,49 @@ CREATE TABLE "InventoryItem" (
 );
 
 -- CreateTable
+CREATE TABLE "Ingredient" (
+    "id" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "defaultUnit" TEXT NOT NULL DEFAULT 'unit',
+    "allergens" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Ingredient_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RecipeIngredient" (
+    "id" TEXT NOT NULL,
+    "recipeId" TEXT NOT NULL,
+    "ingredientId" TEXT NOT NULL,
+    "quantityPerServing" DECIMAL(10,2) NOT NULL,
+    "unitLabel" TEXT,
+    "notes" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RecipeIngredient_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PantryItem" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "ingredientId" TEXT NOT NULL,
+    "quantity" DECIMAL(10,2) NOT NULL,
+    "unitLabel" TEXT NOT NULL DEFAULT 'unit',
+    "status" "InventoryStatus" NOT NULL DEFAULT 'IN_STOCK',
+    "expiresOn" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PantryItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Recommendation" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -169,6 +212,15 @@ CREATE UNIQUE INDEX "Recipe_sourceId_key" ON "Recipe"("sourceId");
 CREATE UNIQUE INDEX "InventoryItem_recipeId_key" ON "InventoryItem"("recipeId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Ingredient_slug_key" ON "Ingredient"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RecipeIngredient_recipeId_ingredientId_key" ON "RecipeIngredient"("recipeId", "ingredientId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PantryItem_userId_ingredientId_key" ON "PantryItem"("userId", "ingredientId");
+
+-- CreateIndex
 CREATE INDEX "Recommendation_userId_idx" ON "Recommendation"("userId");
 
 -- CreateIndex
@@ -203,6 +255,18 @@ ALTER TABLE "UserProfile" ADD CONSTRAINT "UserProfile_userId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "InventoryItem" ADD CONSTRAINT "InventoryItem_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RecipeIngredient" ADD CONSTRAINT "RecipeIngredient_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RecipeIngredient" ADD CONSTRAINT "RecipeIngredient_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PantryItem" ADD CONSTRAINT "PantryItem_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PantryItem" ADD CONSTRAINT "PantryItem_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Recommendation" ADD CONSTRAINT "Recommendation_healthySwapRecipeId_fkey" FOREIGN KEY ("healthySwapRecipeId") REFERENCES "Recipe"("id") ON DELETE SET NULL ON UPDATE CASCADE;

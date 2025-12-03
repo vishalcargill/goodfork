@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ import {
   normalizeRecommendationSource,
 } from "@/constants/data-sources";
 import { cn } from "@/lib/utils";
-import { useRecommendationsMutation } from "@/services/client/recommendations.client";
+import { useRecommendationsQuery } from "@/services/client/recommendations.client";
 import type { RecommendationCard, RecommendationResponse } from "@/services/shared/recommendations.types";
 
 type RecommendationsDemoProps = {
@@ -83,23 +83,24 @@ export function RecommendationsDemo({
   activeEmail,
   initialSource = DEFAULT_RECOMMENDATION_DATA_SOURCE,
 }: RecommendationsDemoProps) {
-  const recommendationsMutation = useRecommendationsMutation();
-  const prefetchedEmailRef = useRef<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [source, setSource] = useState<RecommendationDataSource>(initialSource);
+  const source = useMemo(() => {
+    const paramValue = searchParams?.get("source");
+    return normalizeRecommendationSource(paramValue ?? initialSource);
+  }, [initialSource, searchParams]);
 
-  const { isPending, data, reset, mutate } = recommendationsMutation;
+  const recommendationsQuery = useRecommendationsQuery(
+    activeEmail
+      ? {
+          email: activeEmail,
+          source,
+        }
+      : null
+  );
+  const { data, isPending, isFetching } = recommendationsQuery;
   const successPayload = data && data.success ? data.data : null;
-  useEffect(() => {
-    if (!activeEmail || prefetchedEmailRef.current === activeEmail) {
-      return;
-    }
-
-    prefetchedEmailRef.current = activeEmail;
-    reset();
-    mutate({ email: activeEmail, source });
-  }, [activeEmail, mutate, reset, source]);
+  const showSkeleton = isPending || (isFetching && !successPayload);
 
   useEffect(() => {
     if (data && !data.success && data.errorCode === "user_not_found") {
@@ -109,25 +110,11 @@ export function RecommendationsDemo({
     }
   }, [data]);
 
-  useEffect(() => {
-    if (!searchParams) {
-      return;
-    }
-
-    const paramValue = searchParams.get("source");
-    const normalized = normalizeRecommendationSource(paramValue);
-
-    if (normalized !== source) {
-      setSource(normalized);
-    }
-  }, [searchParams, source]);
-
   const handleSourceChange = (nextSource: RecommendationDataSource) => {
     if (nextSource === source) {
       return;
     }
 
-    setSource(nextSource);
     toast.success("Updated data source ", {
       description: SOURCE_LABELS[nextSource],
       position: "top-center",
@@ -140,11 +127,6 @@ export function RecommendationsDemo({
     }
 
     router.replace(`/menus?${nextParams.toString()}`, { scroll: false });
-
-    if (activeEmail) {
-      reset();
-      mutate({ email: activeEmail, source: nextSource });
-    }
   };
 
   const sourceDescription = useMemo(() => SOURCE_DESCRIPTIONS[source], [source]);
@@ -161,7 +143,7 @@ export function RecommendationsDemo({
         <SourceToggle value={source} onChange={handleSourceChange} />
       </div>
 
-      {isPending ? (
+      {showSkeleton ? (
         <RecommendationsSkeleton />
       ) : successPayload ? (
         <RecommendationsList apiResponse={successPayload} />
@@ -438,11 +420,17 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
           <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Pantry readiness</p>
           {operatorStatus === "OUT_OF_STOCK" ? (
             <p className='mt-2 text-rose-700'>
-              Kitchen shortfall: {pantry.operatorMissingIngredients.map((gap) => gap.ingredient).join(", ") || "core ingredients"}
+              Kitchen shortfall:{" "}
+              {pantry.operatorMissingIngredients.map((gap) => gap.ingredient).join(", ") || "core ingredients"}
             </p>
           ) : operatorStatus === "LOW_STOCK" ? (
             <p className='mt-2 text-amber-700'>
-              Kitchen low on {pantry.operatorLowStockIngredients.map((gap) => gap.ingredient).slice(0, 2).join(", ")}.
+              Kitchen low on{" "}
+              {pantry.operatorLowStockIngredients
+                .map((gap) => gap.ingredient)
+                .slice(0, 2)
+                .join(", ")}
+              .
             </p>
           ) : null}
           {pantry.status === "OUT_OF_STOCK" || pantry.cookableServings <= 0 ? (
@@ -459,7 +447,11 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
           )}
           {pantry.lowStockIngredients.length ? (
             <p className='mt-1 text-xs text-amber-700'>
-              Low stock: {pantry.lowStockIngredients.map((gap) => gap.ingredient).slice(0, 2).join(", ")}
+              Low stock:{" "}
+              {pantry.lowStockIngredients
+                .map((gap) => gap.ingredient)
+                .slice(0, 2)
+                .join(", ")}
             </p>
           ) : null}
         </div>
