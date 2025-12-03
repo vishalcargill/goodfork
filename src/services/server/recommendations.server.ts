@@ -18,6 +18,7 @@ import {
   RECOMMENDER_MODEL,
   REQUIRE_AI_RANKING,
 } from "@/constants/app.constants";
+import { normalizeImageUrl } from "@/lib/images";
 import type {
   RecommendationCard,
   RecommendationResponse,
@@ -233,7 +234,7 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       slug: record.recipe.slug,
       title: record.recipe.title,
       description: record.recipe.description,
-      imageUrl: record.recipe.imageUrl ?? null,
+      imageUrl: normalizeImageUrl(record.recipe.imageUrl),
       calories: record.recipe.calories ?? null,
       proteinGrams: record.recipe.proteinGrams ?? null,
       carbsGrams: record.recipe.carbsGrams ?? null,

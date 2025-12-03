@@ -40,9 +40,9 @@ export default async function Home() {
         <section className='grid gap-10 rounded-[40px] border border-emerald-100 bg-white/90 p-10 shadow-[0_40px_140px_rgba(16,185,129,0.15)] backdrop-blur'>
           <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center'>
             <div className='space-y-6'>
-              <h1 className='text-4xl font-semibold leading-tight text-slate-900 sm:text-5xl'>
-                GoodFork hijacks boring meal plans—drop your goals, vibe with the motion, and let clean recepies do the
-                heavy lift.
+              <h1 className='text-4xl leading-tight text-slate-900 sm:text-5xl'>
+                <span className='text-emerald-500 font-semibold'>GoodFork</span> hijacks boring meal plans into
+                exciting, healthy and nutrtion-packed menus.
               </h1>
             </div>
             <HeroIllustration />

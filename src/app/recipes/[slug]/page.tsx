@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { FeedbackActions } from "@/components/feedback/feedback-actions";
 import { RecipeInsightsTabs } from "@/components/recipes/recipe-insights-tabs";
 import { cn } from "@/lib/utils";
+import { normalizeImageUrl } from "@/lib/images";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { getRecipeDetailBySlug } from "@/services/server/recipes.server";
 import type { InventoryStatus } from "@/generated/prisma/client";
@@ -72,7 +73,8 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
     { title: "Allergens", values: recipe.allergens },
     { title: "Healthy highlights", values: recipe.healthyHighlights },
   ];
-  const isRemoteImage = recipe.imageUrl?.startsWith("http");
+  const normalizedImageUrl = normalizeImageUrl(recipe.imageUrl);
+  const isRemoteImage = normalizedImageUrl?.startsWith("http");
   const fallbackContext = recommendationId && userId ? { recommendationId, userId } : null;
   const activeContext = recommendationContext ?? fallbackContext;
   const feedbackRecommendationId = activeContext?.recommendationId;
@@ -183,9 +185,9 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
           </div>
 
           <div className='relative h-72 w-full overflow-hidden rounded-[28px] border border-emerald-100 bg-emerald-50 shadow-[0_25px_60px_rgba(16,185,129,0.25)] sm:h-96'>
-            {recipe.imageUrl ? (
+            {normalizedImageUrl ? (
               <Image
-                src={recipe.imageUrl}
+                src={normalizedImageUrl}
                 alt={recipe.title}
                 fill
                 className='object-cover'

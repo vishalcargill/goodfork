@@ -15,6 +15,7 @@ import {
   normalizeRecommendationSource,
 } from "@/constants/data-sources";
 import { cn } from "@/lib/utils";
+import { normalizeImageUrl } from "@/lib/images";
 import { useRecommendationsQuery } from "@/services/client/recommendations.client";
 import type { RecommendationCard, RecommendationResponse } from "@/services/shared/recommendations.types";
 
@@ -281,8 +282,12 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
       : operatorStatus === "LOW_STOCK"
       ? "Kitchen low"
       : statusCopy[personalStatus]?.label ?? statusCopy.IN_STOCK.label;
+  const normalizedImageUrl = normalizeImageUrl(card.imageUrl);
   const [imageErrored, setImageErrored] = useState(false);
-  const recipeImage = !card.imageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : card.imageUrl;
+  const recipeImage = !normalizedImageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : normalizedImageUrl;
+  useEffect(() => {
+    setImageErrored(false);
+  }, [normalizedImageUrl]);
   const detailHref =
     !readOnly && userId
       ? `/recipes/${card.slug}?${new URLSearchParams({
