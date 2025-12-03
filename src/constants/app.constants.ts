@@ -11,6 +11,8 @@ export const RECIPE_EMBEDDING_MODEL = process.env.RECIPE_EMBEDDING_MODEL ?? "tex
 export const RECIPE_EMBEDDING_PROVIDER = (process.env.RECIPE_EMBEDDING_PROVIDER ?? "openai").toLowerCase();
 export const RECIPE_EMBEDDING_VERSION = process.env.RECIPE_EMBEDDING_VERSION ?? "v1";
 export const INVENTORY_SYNC_SECRET = process.env.INVENTORY_SYNC_SECRET ?? "";
+export const SUPABASE_MCP_URL = process.env.SUPABASE_MCP_URL ?? process.env.NEXT_PUBLIC_SUPABASE_MCP_URL ?? "";
+export const SUPABASE_MCP_API_KEY = process.env.SUPABASE_MCP_API_KEY ?? "";
 
 export const FEATURE_FLAGS = {
   healthySwap: (process.env.NEXT_PUBLIC_ENABLE_HEALTHY_SWAP ?? "true").toLowerCase() !== "false",

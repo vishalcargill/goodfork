@@ -9,6 +9,7 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ADMIN_EMAIL } from "@/constants/app.constants";
 import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
+import { normalizeRecommendationSource } from "@/constants/data-sources";
 import { InventoryStatus } from "@/generated/prisma/client";
 
 export const metadata: Metadata = {
@@ -25,6 +26,8 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const prefillValue = resolvedSearchParams?.prefillEmail;
   const prefillEmail = typeof prefillValue === "string" ? prefillValue : undefined;
+  const sourceValue = resolvedSearchParams?.source;
+  const initialSource = normalizeRecommendationSource(typeof sourceValue === "string" ? sourceValue : undefined);
 
   const currentUser = await getAuthenticatedUser();
 
@@ -131,7 +134,7 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
         </header>
 
         <section className='rounded-[28px] border border-emerald-100 bg-white p-6 shadow-[0_20px_60px_rgba(16,185,129,0.12)]'>
-          <RecommendationsDemo prefillEmail={displayEmail} />
+          <RecommendationsDemo activeEmail={displayEmail} initialSource={initialSource} />
         </section>
       </div>
     </div>

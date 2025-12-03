@@ -14,7 +14,9 @@
     "recipes:import": "tsx scripts/import-recipes.ts",
     "recipes:embed": "tsx scripts/generate-recipe-embeddings.ts",
     "inventory:import": "tsx scripts/import-inventory.ts",
-    "admin:create": "tsx scripts/create-admin-user.ts"
+    "admin:create": "tsx scripts/create-admin-user.ts",
+    "supabase:export": "tsx scripts/export-to-supabase.ts",
+    "supabase:verify": "tsx scripts/verify-supabase-sync.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
