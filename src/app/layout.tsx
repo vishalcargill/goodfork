@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/navigation/header.component";
 import { Footer } from "@/components/navigation/footer.component";
@@ -8,16 +7,6 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { ADMIN_EMAIL } from "@/constants/app.constants";
 import { ONBOARDING_PROFILE_COOKIE, parseOnboardingCookie } from "@/constants/cookies";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "GoodFork | AI Menu Personalization",
@@ -44,9 +33,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="font-sans antialiased">
         <AppProviders>
           <div className="flex min-h-screen flex-col">
             <Header currentUser={headerUser} />

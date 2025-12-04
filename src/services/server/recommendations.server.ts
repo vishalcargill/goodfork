@@ -491,14 +491,14 @@ function calculatePantryCoverage(
     cookableServings = 0;
   }
 
-  let status = InventoryStatus.OUT_OF_STOCK;
+  let status: InventoryStatus = InventoryStatus.OUT_OF_STOCK;
   if (cookableServings >= 2) {
     status = InventoryStatus.IN_STOCK;
   } else if (cookableServings >= 1) {
     status = InventoryStatus.LOW_STOCK;
   }
 
-  let operatorStatus = InventoryStatus.IN_STOCK;
+  let operatorStatus: InventoryStatus = InventoryStatus.IN_STOCK;
   if (!hasOperatorPantry) {
     operatorStatus = InventoryStatus.IN_STOCK;
   } else if (operatorCookableServings === 0 || operatorMissingIngredients.length) {

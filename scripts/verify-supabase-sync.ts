@@ -37,6 +37,10 @@ type CheckRow = { id: string; updatedAt?: string | null };
 const adapter = new PrismaPg({ connectionString: DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+function serializeDate(value?: Date | null): string | null {
+  return value ? value.toISOString() : null;
+}
+
 function supabaseHeaders(extra?: Record<string, string>): HeadersInit {
   return {
     apikey: SUPABASE_SERVICE_ROLE_KEY,
@@ -100,18 +104,28 @@ async function fetchSupabaseRows(table: string): Promise<{ rows: CheckRow[]; cou
 async function fetchPrismaRows(table: keyof typeof TABLES): Promise<CheckRow[]> {
   switch (table) {
     case "users":
-      return prisma.user.findMany({ select: { id: true, updatedAt: true } });
+      return prisma.user
+        .findMany({ select: { id: true, updatedAt: true } })
+        .then((entries) => entries.map((entry) => ({ id: entry.id, updatedAt: serializeDate(entry.updatedAt) })));
     case "profiles":
-      return prisma.userProfile.findMany({ select: { id: true, updatedAt: true } });
+      return prisma.userProfile
+        .findMany({ select: { id: true, updatedAt: true } })
+        .then((entries) => entries.map((entry) => ({ id: entry.id, updatedAt: serializeDate(entry.updatedAt) })));
     case "recipes":
-      return prisma.recipe.findMany({ select: { id: true, updatedAt: true } });
+      return prisma.recipe
+        .findMany({ select: { id: true, updatedAt: true } })
+        .then((entries) => entries.map((entry) => ({ id: entry.id, updatedAt: serializeDate(entry.updatedAt) })));
     case "inventory":
-      return prisma.inventoryItem.findMany({ select: { id: true, updatedAt: true } });
+      return prisma.inventoryItem
+        .findMany({ select: { id: true, updatedAt: true } })
+        .then((entries) => entries.map((entry) => ({ id: entry.id, updatedAt: serializeDate(entry.updatedAt) })));
     case "recommendations":
-      return prisma.recommendation.findMany({ select: { id: true, updatedAt: true } });
+      return prisma.recommendation
+        .findMany({ select: { id: true, updatedAt: true } })
+        .then((entries) => entries.map((entry) => ({ id: entry.id, updatedAt: serializeDate(entry.updatedAt) })));
     case "feedback":
       return prisma.feedback.findMany({ select: { id: true, createdAt: true } }).then((entries) =>
-        entries.map((entry) => ({ id: entry.id, updatedAt: entry.createdAt }))
+        entries.map((entry) => ({ id: entry.id, updatedAt: serializeDate(entry.createdAt) }))
       );
     default:
       return [];

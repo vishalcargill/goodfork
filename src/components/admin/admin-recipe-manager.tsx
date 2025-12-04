@@ -307,6 +307,9 @@ function buildPreviewPantry(
     cookableServings,
     missingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
     lowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
+    operatorStatus: safeStatus,
+    operatorMissingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    operatorLowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
   };
 }
 

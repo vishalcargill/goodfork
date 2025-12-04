@@ -833,12 +833,17 @@ function buildInventoryPreviewPantry(
     requiredQuantity: 1,
     availableQuantity: safeQuantity,
   };
+  const missingIngredients = safeStatus === "OUT_OF_STOCK" ? [placeholder] : [];
+  const lowStockIngredients = safeStatus === "LOW_STOCK" ? [placeholder] : [];
 
   return {
     status: safeStatus,
     cookableServings,
-    missingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
-    lowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
+    missingIngredients,
+    lowStockIngredients,
+    operatorStatus: safeStatus,
+    operatorMissingIngredients: missingIngredients,
+    operatorLowStockIngredients: lowStockIngredients,
   };
 }
 
