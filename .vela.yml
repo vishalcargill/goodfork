@@ -37,6 +37,7 @@ steps:
       event: [ push ]
     image: docker-utilities.binrepo.cglcloud.in/captain:1-stable
     parameters:
+      destroy: true
       env: dev
       run_apply: true
       edge_auth: false
