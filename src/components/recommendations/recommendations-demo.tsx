@@ -27,15 +27,15 @@ type RecommendationsDemoProps = {
 const statusCopy = {
   IN_STOCK: {
     label: "Cookable now",
-    badge: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badge: "bg-success/10 text-success border-success/20",
   },
   LOW_STOCK: {
     label: "Needs quick top-up",
-    badge: "bg-amber-100 text-amber-900 border-amber-200",
+    badge: "bg-warning/10 text-warning-foreground border-warning/20",
   },
   OUT_OF_STOCK: {
     label: "Missing pantry items",
-    badge: "bg-rose-100 text-rose-800 border-rose-200",
+    badge: "bg-destructive/10 text-destructive border-destructive/20",
   },
 } as const;
 
@@ -57,7 +57,7 @@ function SourceToggle({
   onChange: (next: RecommendationDataSource) => void;
 }) {
   return (
-    <div className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white p-1 text-xs font-semibold shadow-[0_10px_28px_rgba(15,23,42,0.08)]'>
+    <div className='inline-flex items-center gap-2 rounded-full border border-border bg-surface p-1 text-xs font-semibold shadow-sm'>
       {RECOMMENDATION_DATA_SOURCES.map((option) => {
         const isActive = option === value;
         return (
@@ -68,8 +68,8 @@ function SourceToggle({
             className={cn(
               "rounded-full px-3 py-1 transition",
               isActive
-                ? "bg-emerald-600 text-white shadow-[0_8px_24px_rgba(16,185,129,0.35)]"
-                : "text-slate-700 hover:bg-emerald-50"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-surface-subtle"
             )}
           >
             {SOURCE_LABELS[option]}
@@ -136,8 +136,8 @@ export function RecommendationsDemo({
     <div className='space-y-6'>
       <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
         <div className='space-y-1 text-sm'>
-          <p className='text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700'>Data source</p>
-          <p className='text-slate-600'>
+          <p className='text-xs font-semibold uppercase tracking-wider text-primary'>Data source</p>
+          <p className='text-muted-foreground'>
             {SOURCE_LABELS[source]} · {sourceDescription}
           </p>
         </div>
@@ -216,10 +216,10 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
     <div className='space-y-4'>
       <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
         <div className='space-y-1 text-xs'>
-          <p className='font-semibold uppercase tracking-[0.18em] text-emerald-700'>
+          <p className='font-semibold uppercase tracking-wider text-primary'>
             {apiResponse.delivered} menu cards · {apiResponse.source === "llm" ? "AI ranked" : "Deterministic fallback"}
           </p>
-          <p className='text-[11px] text-slate-500'>
+          <p className='text-[11px] text-muted-foreground'>
             Showing {showingStart}-{showingEnd} of {cards.length} · {cardsPerView} per view
           </p>
         </div>
@@ -228,7 +228,7 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
             type='button'
             onClick={handlePrev}
             disabled={!canGoPrev}
-            className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+            className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-xs font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
           >
             <ArrowLeft className='h-4 w-4' />
             Previous
@@ -237,7 +237,7 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
             type='button'
             onClick={handleNext}
             disabled={!canGoNext}
-            className='inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+            className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-xs font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
           >
             Next
             <ArrowRight className='h-4 w-4' />
@@ -319,18 +319,18 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
   };
 
   return (
-    <article className='group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-emerald-100 bg-[#f8fff4] shadow-[0_14px_40px_rgba(16,185,129,0.12)] transition hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(16,185,129,0.2)]'>
+    <article className='group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md'>
       <div className='flex h-full flex-col gap-4 p-5 pb-6'>
         <div className='flex items-start justify-between gap-3'>
           <div className='space-y-1'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700'>
+            <p className='text-[10px] font-bold uppercase tracking-wider text-primary'>
               #{card.recipeId.slice(-4)}
             </p>
-            <h4 className='text-lg font-semibold leading-snug text-slate-900'>{card.title}</h4>
+            <h4 className='text-lg font-semibold leading-snug text-foreground'>{card.title}</h4>
           </div>
           <span
             className={cn(
-              "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold shadow-inner shadow-emerald-50",
+              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
               statusTheme.badge
             )}
           >
@@ -341,7 +341,7 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
         <Link
           href={detailHref}
           prefetch={false}
-          className='relative block overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50'
+          className='relative block overflow-hidden rounded-lg border border-border-subtle bg-surface-subtle'
           aria-label={`Open ${card.title} recipe detail`}
         >
           <Image
@@ -357,11 +357,11 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
         </Link>
 
         {macroBadges.length ? (
-          <div className='flex flex-wrap gap-2 text-[12px] font-semibold text-emerald-900'>
+          <div className='flex flex-wrap gap-2 text-[11px] font-semibold text-primary'>
             {macroBadges.map((badge) => (
               <span
                 key={`${card.recommendationId}-${badge}`}
-                className='inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 shadow-inner shadow-emerald-50'
+                className='inline-flex items-center gap-1 rounded-full border border-border-subtle bg-surface-subtle px-2.5 py-1'
               >
                 {badge}
               </span>
@@ -369,22 +369,22 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
           </div>
         ) : null}
 
-        <div className='space-y-3 text-sm text-slate-700'>
+        <div className='space-y-3 text-sm text-muted-foreground'>
           {card.macrosLabel ? (
-            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700'>{card.macrosLabel}</p>
+            <p className='text-[10px] font-bold uppercase tracking-wider text-primary'>{card.macrosLabel}</p>
           ) : null}
-          <p className='text-[13px] leading-relaxed text-slate-600'>{card.rationale}</p>
+          <p className='text-[13px] leading-relaxed'>{card.rationale}</p>
         </div>
 
         {adjustmentChips.length ? (
-          <div className='flex flex-wrap gap-2 text-[11px] text-slate-600'>
+          <div className='flex flex-wrap gap-2 text-[11px] text-muted-foreground'>
             {adjustmentChips.map((adjustment, index) => (
               <span
                 key={`${card.recommendationId}-adjustment-${index}`}
-                className='inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-medium'
+                className='inline-flex items-center gap-1 rounded-full border border-border-subtle bg-surface-subtle px-2.5 py-1 font-medium'
               >
                 {adjustment.reason}
-                <span className='ml-1 font-semibold text-slate-900'>
+                <span className='ml-1 font-semibold text-foreground'>
                   {adjustment.delta > 0 ? `+${adjustment.delta}` : adjustment.delta}
                 </span>
               </span>
@@ -393,11 +393,11 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
         ) : null}
 
         {highlightChips.length ? (
-          <div className='flex flex-wrap gap-2 text-[11px] text-emerald-700'>
+          <div className='flex flex-wrap gap-2 text-[11px] text-primary'>
             {highlightChips.map((highlight) => (
               <span
                 key={`${card.recommendationId}-highlight-${highlight}`}
-                className='inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold'
+                className='inline-flex items-center rounded-full border border-border-subtle bg-surface-subtle px-2.5 py-1 font-semibold'
               >
                 {highlight}
               </span>
@@ -406,11 +406,11 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
         ) : null}
 
         {tagChips.length ? (
-          <div className='flex flex-wrap gap-2 text-[11px] text-slate-500'>
+          <div className='flex flex-wrap gap-2 text-[11px] text-muted-foreground'>
             {tagChips.map((tag) => (
               <span
                 key={`${card.recommendationId}-tag-${tag}`}
-                className='inline-flex items-center rounded-full border border-slate-100 bg-white px-3 py-1 font-semibold'
+                className='inline-flex items-center rounded-full border border-border-subtle bg-surface-subtle px-2.5 py-1 font-semibold'
               >
                 {tag}
               </span>
@@ -419,12 +419,12 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
         ) : null}
 
         {card.allergens.length ? (
-          <div className='flex flex-wrap items-center gap-2 text-[11px] text-rose-700'>
-            <span className='font-semibold uppercase tracking-[0.2em]'>Allergens</span>
+          <div className='flex flex-wrap items-center gap-2 text-[11px] text-destructive'>
+            <span className='font-bold uppercase tracking-wider'>Allergens</span>
             {card.allergens.map((allergen) => (
               <span
                 key={`${card.recommendationId}-allergen-${allergen}`}
-                className='rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-rose-700'
+                className='rounded-full border border-destructive/20 bg-destructive/10 px-2 py-0.5'
               >
                 {allergen}
               </span>
@@ -432,15 +432,15 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
           </div>
         ) : null}
 
-        <div className='rounded-2xl border border-emerald-100 bg-white/70 p-4 text-sm text-slate-700'>
-          <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Pantry readiness</p>
+        <div className='rounded-xl border border-border bg-surface-subtle p-4 text-sm text-muted-foreground'>
+          <p className='text-[10px] font-bold uppercase tracking-wider text-primary'>Pantry readiness</p>
           {operatorStatus === "OUT_OF_STOCK" ? (
-            <p className='mt-2 text-rose-700'>
+            <p className='mt-2 text-destructive'>
               Kitchen shortfall:{" "}
               {pantry.operatorMissingIngredients.map((gap) => gap.ingredient).join(", ") || "core ingredients"}
             </p>
           ) : operatorStatus === "LOW_STOCK" ? (
-            <p className='mt-2 text-amber-700'>
+            <p className='mt-2 text-warning'>
               Kitchen low on{" "}
               {pantry.operatorLowStockIngredients
                 .map((gap) => gap.ingredient)
@@ -450,19 +450,19 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
             </p>
           ) : null}
           {pantry.status === "OUT_OF_STOCK" || pantry.cookableServings <= 0 ? (
-            <p className='mt-2 text-rose-700'>
+            <p className='mt-2 text-destructive'>
               Missing:{" "}
               {pantry.missingIngredients.length
                 ? pantry.missingIngredients.map((gap) => gap.ingredient).join(", ")
                 : "core ingredients"}
             </p>
           ) : (
-            <p className='mt-2 text-emerald-700'>
+            <p className='mt-2 text-success'>
               Enough for {pantry.cookableServings} serving{pantry.cookableServings === 1 ? "" : "s"} with your pantry.
             </p>
           )}
           {pantry.lowStockIngredients.length ? (
-            <p className='mt-1 text-xs text-amber-700'>
+            <p className='mt-1 text-xs text-warning'>
               Low stock:{" "}
               {pantry.lowStockIngredients
                 .map((gap) => gap.ingredient)
@@ -473,7 +473,7 @@ export function RecommendationCard({ card, userId, readOnly }: RecommendationCar
         </div>
 
         {!readOnly ? (
-          <div className='mt-auto space-y-3 border-t border-emerald-100 pt-4'>
+          <div className='mt-auto space-y-3 border-t border-border pt-4'>
             <FeedbackActions recommendationId={card.recommendationId} userId={userId} layout='inline' />
           </div>
         ) : null}
@@ -488,29 +488,29 @@ function RecommendationsSkeleton() {
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={`skeleton-${index}`}
-          className='flex h-full animate-pulse flex-col rounded-[24px] border border-emerald-100 bg-white/80 p-5 shadow-sm'
+          className='flex h-full animate-pulse flex-col rounded-xl border border-border bg-card p-5 shadow-sm'
         >
           <div className='flex items-start justify-between gap-3'>
             <div className='space-y-2'>
-              <div className='h-3 w-16 rounded-full bg-emerald-100' />
-              <div className='h-4 w-32 rounded-full bg-emerald-50' />
+              <div className='h-3 w-16 rounded-full bg-surface-subtle' />
+              <div className='h-4 w-32 rounded-full bg-surface-subtle' />
             </div>
-            <div className='h-6 w-20 rounded-full bg-emerald-100' />
+            <div className='h-6 w-20 rounded-full bg-surface-subtle' />
           </div>
-          <div className='mt-3 h-40 rounded-2xl bg-emerald-50' />
+          <div className='mt-3 h-40 rounded-lg bg-surface-subtle' />
           <div className='mt-3 flex flex-wrap gap-2'>
-            <div className='h-6 w-20 rounded-full bg-emerald-50' />
-            <div className='h-6 w-24 rounded-full bg-emerald-50' />
-            <div className='h-6 w-24 rounded-full bg-emerald-50' />
+            <div className='h-6 w-20 rounded-full bg-surface-subtle' />
+            <div className='h-6 w-24 rounded-full bg-surface-subtle' />
+            <div className='h-6 w-24 rounded-full bg-surface-subtle' />
           </div>
           <div className='mt-3 space-y-2'>
-            <div className='h-3 w-1/2 rounded-full bg-emerald-50' />
-            <div className='h-3 w-full rounded-full bg-emerald-50' />
-            <div className='h-3 w-5/6 rounded-full bg-emerald-50' />
+            <div className='h-3 w-1/2 rounded-full bg-surface-subtle' />
+            <div className='h-3 w-full rounded-full bg-surface-subtle' />
+            <div className='h-3 w-5/6 rounded-full bg-surface-subtle' />
           </div>
-          <div className='mt-auto flex flex-col gap-2 border-t border-emerald-100 pt-4'>
-            <div className='h-10 w-full rounded-full bg-emerald-100' />
-            <div className='h-10 w-full rounded-full bg-emerald-50' />
+          <div className='mt-auto flex flex-col gap-2 border-t border-border pt-4'>
+            <div className='h-10 w-full rounded-full bg-surface-subtle' />
+            <div className='h-10 w-full rounded-full bg-surface-subtle' />
           </div>
         </div>
       ))}
@@ -520,8 +520,8 @@ function RecommendationsSkeleton() {
 
 function EmptyRecommendations() {
   return (
-    <div className='rounded-3xl border border-dashed border-emerald-200 bg-white p-6 text-sm text-slate-600'>
-      <p className='font-semibold text-slate-800'>Ready when you are.</p>
+    <div className='rounded-xl border border-dashed border-border bg-surface p-6 text-sm text-muted-foreground'>
+      <p className='font-semibold text-foreground'>Ready when you are.</p>
       <p className='mt-1'>
         Complete onboarding, then drop the same email above to preview your personalized menu cards.
       </p>
