@@ -11,6 +11,7 @@ import { ADMIN_EMAIL } from "@/constants/app.constants";
 import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 import { normalizeRecommendationSource } from "@/constants/data-sources";
 import { InventoryStatus } from "@/generated/prisma/client";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "GoodFork | Personalized Menus",
@@ -92,51 +93,46 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
   ];
 
   return (
-    <div className='min-h-screen bg-[#f2f6f2] text-slate-900'>
-      <div className='mx-auto flex max-w-6xl flex-col gap-10 px-4 py-10 sm:px-8'>
-        <header className='rounded-[28px] border border-emerald-100 bg-[#f8fbf7] px-6 py-8 shadow-[0_16px_50px_rgba(16,185,129,0.1)] sm:px-10'>
-          <div className='flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between'>
-            <div className='space-y-4'>
-              <h1 className='text-4xl font-semibold leading-tight text-[#1c2a24] sm:text-5xl'>
-                Menus tuned to your saved profile
-              </h1>
-              <p className='max-w-3xl text-lg text-slate-600'>
-                We hydrate this workspace directly from onboarding so recommendations, swaps, and inventory context stay
-                in sync.
-              </p>
+    <div className='space-y-8 pb-8'>
+      <header className='flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between'>
+        <div className='space-y-2'>
+          <h1 className='text-3xl font-bold text-foreground'>
+            Your Menus
+          </h1>
+          <p className='max-w-3xl text-muted-foreground'>
+            Menus tuned to your saved profile, inventory, and preferences.
+          </p>
+        </div>
+        <Link
+          href='/personalization'
+          className='inline-flex items-center gap-2 self-start rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-surface-subtle hover:text-primary'
+        >
+          <GearSix className='h-5 w-5 text-primary' weight='duotone' />
+          Adjust settings
+        </Link>
+      </header>
+
+      <section className='grid gap-4 sm:grid-cols-3'>
+        {sessionHighlights.map((highlight) => (
+          <div key={highlight.label} className='rounded-xl border border-border bg-surface p-4 shadow-sm'>
+            <p className='text-xs font-semibold uppercase tracking-wider text-primary mb-2'>{highlight.label}</p>
+            <div className='flex flex-wrap gap-2'>
+              {highlight.values.map((value) => (
+                <span
+                  key={`${highlight.label}-${value}`}
+                  className='inline-flex items-center rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium text-foreground border border-border-subtle'
+                >
+                  {value}
+                </span>
+              ))}
             </div>
-            <Link
-              href='/personalization'
-              className='inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_42px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f8fbf7]'
-            >
-              <GearSix className='h-5 w-5 text-emerald-700' weight='duotone' />
-              Adjust settings
-            </Link>
           </div>
+        ))}
+      </section>
 
-          <div className='mt-8 grid gap-8 sm:grid-cols-2 sm:items-start'>
-            {sessionHighlights.map((highlight) => (
-              <div key={highlight.label} className='space-y-3'>
-                <p className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-700'>{highlight.label}</p>
-                <div className='flex flex-wrap gap-3'>
-                  {highlight.values.map((value) => (
-                    <span
-                      key={`${highlight.label}-${value}`}
-                      className='inline-flex items-center rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-[0_8px_24px_rgba(15,23,42,0.08)]'
-                    >
-                      {value}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </header>
-
-        <section className='rounded-[28px] border border-emerald-100 bg-white p-6 shadow-[0_20px_60px_rgba(16,185,129,0.12)]'>
-          <RecommendationsDemo activeEmail={displayEmail} initialSource={initialSource} />
-        </section>
-      </div>
+      <section>
+        <RecommendationsDemo activeEmail={displayEmail} initialSource={initialSource} />
+      </section>
     </div>
   );
 }

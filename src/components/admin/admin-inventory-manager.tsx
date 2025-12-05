@@ -45,22 +45,22 @@ const statusMeta: Record<
 > = {
   IN_STOCK: {
     label: "Ready now",
-    pill: "bg-emerald-100 text-emerald-900 border-emerald-200",
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    pill: "bg-success/10 text-success border-success/20",
+    badge: "bg-success/10 text-success border-success/20",
     copy: "Inventory looks healthy. Recommendations will prioritize this recipe.",
     delta: 8,
   },
   LOW_STOCK: {
     label: "Low stock",
-    pill: "bg-amber-100 text-amber-900 border-amber-200",
-    badge: "bg-amber-50 text-amber-900 border-amber-200",
+    pill: "bg-warning/10 text-warning-foreground border-warning/20",
+    badge: "bg-warning/10 text-warning-foreground border-warning/20",
     copy: "Inventory is tightening. Consumers will see urgency copy.",
     delta: -4,
   },
   OUT_OF_STOCK: {
     label: "Out of stock",
-    pill: "bg-rose-100 text-rose-800 border-rose-200",
-    badge: "bg-rose-50 text-rose-800 border-rose-200",
+    pill: "bg-destructive/10 text-destructive border-destructive/20",
+    badge: "bg-destructive/10 text-destructive border-destructive/20",
     copy: "Recipe is hidden from personalization until restocked.",
     delta: -12,
   },
@@ -315,8 +315,8 @@ export function AdminInventoryManager({ initialItems }: AdminInventoryManagerPro
               />
             ))
           ) : (
-            <div className='rounded-3xl border border-dashed border-emerald-200 bg-white p-8 text-center text-sm text-slate-600'>
-              <p className='text-lg font-semibold text-slate-900'>No inventory matches</p>
+            <div className='rounded-xl border border-dashed border-border bg-surface p-8 text-center text-sm text-muted-foreground'>
+              <p className='text-lg font-semibold text-foreground'>No inventory matches</p>
               <p className='mt-2'>
                 Adjust filters or search terms to see relevant recipes. All inventory edits
                 and restocks flow through the list above.
@@ -327,19 +327,19 @@ export function AdminInventoryManager({ initialItems }: AdminInventoryManagerPro
       </section>
 
       <aside className='space-y-4'>
-        <div className='rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-50/50'>
+        <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
           <div className='flex items-center justify-between'>
             <div>
-              <p className='text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600'>
+              <p className='text-xs font-bold uppercase tracking-wider text-primary'>
                 Live preview
               </p>
-              <h3 className='text-2xl font-semibold text-slate-900'>Consumer card</h3>
+              <h3 className='text-2xl font-semibold text-foreground'>Consumer card</h3>
             </div>
-            <span className='rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800'>
+            <span className='rounded-full border border-border bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-muted-foreground'>
               Read only
             </span>
           </div>
-          <p className='mt-2 text-sm text-slate-600'>
+          <p className='mt-2 text-sm text-muted-foreground'>
             Select an inventory row to see how availability copy maps into the consumer
             recommendation card.
           </p>
@@ -347,7 +347,7 @@ export function AdminInventoryManager({ initialItems }: AdminInventoryManagerPro
             {previewCard ? (
               <RecommendationCard card={previewCard} userId='inventory-preview' readOnly />
             ) : (
-              <div className='rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-sm text-slate-600'>
+              <div className='rounded-lg border border-dashed border-border bg-surface-subtle p-6 text-sm text-muted-foreground'>
                 Pick an item to preview the consumer experience.
               </div>
             )}
@@ -390,10 +390,10 @@ function InventoryFilters({
   statusCounts,
 }: InventoryFiltersProps) {
   return (
-    <div className='space-y-4 rounded-3xl border border-emerald-100 bg-emerald-50/50 p-5 shadow-inner'>
+    <div className='space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm'>
       <div className='flex flex-col gap-4 lg:flex-row lg:items-center'>
-        <label className='flex-1 rounded-2xl border border-emerald-100 bg-white px-3 py-2 shadow-sm focus-within:border-emerald-400'>
-          <span className='flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700'>
+        <label className='flex-1 rounded-lg border border-border bg-surface px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary'>
+          <span className='flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary'>
             <Search className='h-3.5 w-3.5' />
             Search recipes
           </span>
@@ -402,23 +402,23 @@ function InventoryFilters({
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder='Title or slug'
-            className='mt-1 w-full border-none bg-transparent text-sm text-slate-900 outline-none'
+            className='mt-1 w-full border-none bg-transparent text-sm text-foreground outline-none'
           />
         </label>
         <div className='flex gap-3 text-sm'>
           <div>
-            <p className='text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700'>
+            <p className='text-xs font-bold uppercase tracking-wider text-primary'>
               Total portions
             </p>
-            <p className='text-2xl font-semibold text-slate-900'>
+            <p className='text-2xl font-semibold text-foreground'>
               {statusCounts.totalQuantity.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className='text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700'>
+            <p className='text-xs font-bold uppercase tracking-wider text-primary'>
               Recipes
             </p>
-            <p className='text-2xl font-semibold text-slate-900'>
+            <p className='text-2xl font-semibold text-foreground'>
               {statusCounts.IN_STOCK + statusCounts.LOW_STOCK + statusCounts.OUT_OF_STOCK}
             </p>
           </div>
@@ -440,8 +440,8 @@ function InventoryFilters({
             className={cn(
               "rounded-full border px-4 py-2 text-xs font-semibold transition",
               statusFilter === option.value
-                ? "border-emerald-500 bg-emerald-600 text-white shadow-[0_12px_30px_rgba(16,185,129,0.25)]"
-                : "border-emerald-200 bg-white text-emerald-700 hover:border-emerald-400"
+                ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                : "border-border bg-surface text-foreground hover:bg-surface-subtle"
             )}
           >
             {option.label}
@@ -460,18 +460,18 @@ type InventoryAlertsProps = {
 
 function InventoryAlerts({ lowCount, criticalCount, onFocusLow }: InventoryAlertsProps) {
   return (
-    <div className='rounded-3xl border border-amber-200 bg-amber-50/70 p-5 text-sm text-amber-900 shadow-inner'>
+    <div className='rounded-xl border border-warning/30 bg-warning/10 p-5 text-sm text-warning-foreground shadow-sm'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div className='flex items-start gap-3'>
-          <span className='rounded-2xl bg-white/80 p-2 text-amber-500 shadow-sm'>
+          <span className='rounded-lg bg-surface p-2 text-warning shadow-sm'>
             <AlertTriangle className='h-5 w-5' />
           </span>
           <div>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em]'>Attention</p>
+            <p className='text-xs font-bold uppercase tracking-wider'>Attention</p>
             <p className='text-base font-semibold'>
               {criticalCount ? `${criticalCount} recipes` : "Recipes"} nearly out of stock
             </p>
-            <p className='text-sm text-amber-800'>
+            <p className='text-sm opacity-90'>
               {criticalCount
                 ? `${criticalCount} items have <=4 portions left.`
                 : "Inventory is dipping across several recipes."}{" "}
@@ -482,7 +482,7 @@ function InventoryAlerts({ lowCount, criticalCount, onFocusLow }: InventoryAlert
         <button
           type='button'
           onClick={onFocusLow}
-          className='inline-flex items-center justify-center rounded-full border border-amber-300 bg-amber-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900 transition hover:-translate-y-0.5'
+          className='inline-flex items-center justify-center rounded-full border border-warning/30 bg-surface px-4 py-2 text-xs font-bold uppercase tracking-wider text-warning-foreground transition hover:-translate-y-0.5'
         >
           Focus low stock
         </button>
@@ -524,30 +524,30 @@ function InventoryRow({
   return (
     <article
       className={cn(
-        "rounded-3xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl",
-        selected ? "border-emerald-300 shadow-lg" : "border-slate-200"
+        "rounded-xl border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
+        selected ? "border-primary ring-1 ring-primary" : "border-border"
       )}
       onClick={onSelect}
     >
       <div className='flex flex-wrap items-start justify-between gap-4'>
         <div>
-          <p className='text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+          <p className='text-xs font-bold uppercase tracking-wider text-primary'>
             #{item.recipe.slug}
           </p>
-          <h3 className='text-xl font-semibold text-slate-900'>{item.recipe.title}</h3>
-          <p className='text-sm text-slate-500'>
+          <h3 className='text-xl font-semibold text-foreground'>{item.recipe.title}</h3>
+          <p className='text-sm text-muted-foreground'>
             {item.recipe.healthyHighlights?.slice(0, 2).join(" · ") || "Fresh ingredients"}
           </p>
         </div>
-        <span className={cn("rounded-full border px-3 py-1 text-xs font-semibold", statusTheme.pill)}>
+        <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", statusTheme.pill)}>
           {statusTheme.label}
         </span>
       </div>
 
-      <p className='mt-3 text-sm text-slate-600'>{statusTheme.copy}</p>
+      <p className='mt-3 text-sm text-muted-foreground'>{statusTheme.copy}</p>
 
       <div className='mt-4 grid gap-4 lg:grid-cols-4'>
-        <label className='text-xs font-semibold uppercase tracking-[0.14em] text-slate-500'>
+        <label className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
           Quantity · Unit
           <div className='mt-2 grid gap-2 sm:grid-cols-2'>
             <input
@@ -555,23 +555,23 @@ function InventoryRow({
               min={0}
               value={item.quantity}
               onChange={(event) => onQuantityChange(item.recipeId, event.target.value)}
-              className='w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
             />
             <input
               type='text'
               value={item.unitLabel}
               onChange={(event) => onUnitLabelChange(item.recipeId, event.target.value)}
-              className='w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
             />
           </div>
         </label>
 
-        <label className='text-xs font-semibold uppercase tracking-[0.14em] text-slate-500'>
+        <label className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
           Status
           <select
             value={item.status}
             onChange={(event) => onStatusChange(item.recipeId, event.target.value as InventoryStatus)}
-            className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+            className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
           >
             {inventoryStatuses.map((status) => (
               <option key={`${item.recipeId}-${status}`} value={status}>
@@ -581,13 +581,13 @@ function InventoryRow({
           </select>
         </label>
 
-        <label className='text-xs font-semibold uppercase tracking-[0.14em] text-slate-500'>
+        <label className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
           Restock date
           <input
             type='date'
             value={formatDateInput(item.restockDate)}
             onChange={(event) => onRestockDateChange(item.recipeId, event.target.value)}
-            className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+            className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
           />
         </label>
 
@@ -599,7 +599,7 @@ function InventoryRow({
               onSave(item.recipeId);
             }}
             disabled={saving}
-            className='flex-1 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+            className='flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
           >
             {saving ? (
               <span className='flex items-center justify-center gap-2'>
@@ -616,26 +616,26 @@ function InventoryRow({
               event.stopPropagation();
               onRestock(item);
             }}
-            className='rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700'
+            className='rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-surface-subtle'
           >
             Restock
           </button>
         </div>
       </div>
 
-      <div className='mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500'>
+      <div className='mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground'>
         <span
           className={cn(
-            "inline-flex items-center gap-2 rounded-full border px-3 py-1 font-semibold",
+            "inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 font-semibold",
             statusTheme.badge
           )}
         >
           <Truck className='h-3.5 w-3.5' />
           Next restock: {restockLabel}
         </span>
-        <span className='inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600'>
+        <span className='inline-flex items-center gap-1 rounded-full bg-surface-subtle border border-border px-2.5 py-0.5 font-semibold text-muted-foreground'>
           Score impact:{" "}
-          <span className='text-slate-900'>{statusTheme.delta > 0 ? `+${statusTheme.delta}` : statusTheme.delta}</span>
+          <span className='text-foreground'>{statusTheme.delta > 0 ? `+${statusTheme.delta}` : statusTheme.delta}</span>
         </span>
       </div>
     </article>
@@ -665,28 +665,28 @@ function RestockDrawer({
 
   return (
     <div className='fixed inset-0 z-40 flex'>
-      <div className='hidden flex-1 bg-slate-900/30 sm:block' onClick={onClose} />
-      <div className='relative ml-auto flex h-full w-full max-w-md flex-col bg-white p-6 shadow-2xl'>
+      <div className='hidden flex-1 bg-black/20 backdrop-blur-sm sm:block' onClick={onClose} />
+      <div className='relative ml-auto flex h-full w-full max-w-md flex-col bg-card p-6 shadow-2xl border-l border-border'>
         <button
           type='button'
-          className='absolute right-4 top-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'
+          className='absolute right-4 top-4 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground'
           onClick={onClose}
         >
           Close
         </button>
         <div className='mt-6 space-y-4'>
-          <p className='text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700'>
+          <p className='text-xs font-bold uppercase tracking-wider text-primary'>
             Restock
           </p>
-          <h3 className='text-2xl font-semibold text-slate-900'>{item.recipe.title}</h3>
-          <p className='text-sm text-slate-600'>
+          <h3 className='text-2xl font-semibold text-foreground'>{item.recipe.title}</h3>
+          <p className='text-sm text-muted-foreground'>
             Add fresh portions, override status, and log the expected arrival date. This
             updates the personalization engine immediately.
           </p>
         </div>
 
         <div className='mt-6 space-y-4'>
-          <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+          <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
             Add quantity
             <input
               type='number'
@@ -695,10 +695,10 @@ function RestockDrawer({
               onChange={(event) =>
                 onStateChange({ ...state, quantityDelta: event.target.value })
               }
-              className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
             />
           </label>
-          <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+          <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
             Expected restock date
             <input
               type='date'
@@ -706,17 +706,17 @@ function RestockDrawer({
               onChange={(event) =>
                 onStateChange({ ...state, restockDate: event.target.value })
               }
-              className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
             />
           </label>
-          <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+          <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
             Post-restock status
             <select
               value={state.status}
               onChange={(event) =>
                 onStateChange({ ...state, status: event.target.value as InventoryStatus })
               }
-              className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-400'
+              className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary'
             >
               {inventoryStatuses.map((status) => (
                 <option key={`drawer-status-${status}`} value={status}>
@@ -732,7 +732,7 @@ function RestockDrawer({
             type='button'
             disabled={pending}
             onClick={onSubmit}
-            className='flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_36px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+            className='flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
           >
             {pending ? (
               <>
@@ -748,7 +748,7 @@ function RestockDrawer({
           </button>
           <button
             type='button'
-            className='w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600'
+            className='w-full rounded-lg border border-border px-4 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-surface-subtle'
             onClick={onClose}
           >
             Cancel

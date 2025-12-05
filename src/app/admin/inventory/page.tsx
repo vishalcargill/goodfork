@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdminUser } from "@/lib/auth";
-import { AdminNavigation } from "@/components/admin/admin-navigation";
 import { AdminStockWorkspace } from "@/components/admin/admin-stock-workspace";
 import { mergeIngredientOptions } from "@/constants/ingredient-catalog";
 import { serializePantry, getSystemPantryItems } from "@/services/server/pantry.server";
@@ -50,18 +49,13 @@ export default async function AdminInventoryPage() {
   const ingredientOptions = mergeIngredientOptions(dbIngredients);
 
   return (
-    <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
-      <AdminNavigation active='inventory' />
-      <div className='space-y-2 pb-8'>
-        <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600'>
-          Admin · Inventory
+    <div className='space-y-8 pb-8'>
+      <header className='space-y-2'>
+        <h1 className='text-3xl font-bold text-foreground'>Inventory</h1>
+        <p className='max-w-3xl text-muted-foreground'>
+          Monitor live availability, bulk-edit quantities, and log restocks.
         </p>
-        <h1 className='text-3xl font-semibold text-slate-900'>Inventory control center</h1>
-        <p className='max-w-3xl text-slate-600'>
-          Monitor live availability, bulk-edit quantities, log restocks, and preview how inventory
-          state feeds the consumer recommendation cards. All edits are secured to your admin session.
-        </p>
-      </div>
+      </header>
       <AdminStockWorkspace
         inventoryItems={inventory}
         pantryItems={serializedPantry}
