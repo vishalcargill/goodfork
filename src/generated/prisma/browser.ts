@@ -38,6 +38,21 @@ export type Recipe = Prisma.RecipeModel
  */
 export type InventoryItem = Prisma.InventoryItemModel
 /**
+ * Model Ingredient
+ * 
+ */
+export type Ingredient = Prisma.IngredientModel
+/**
+ * Model RecipeIngredient
+ * 
+ */
+export type RecipeIngredient = Prisma.RecipeIngredientModel
+/**
+ * Model PantryItem
+ * 
+ */
+export type PantryItem = Prisma.PantryItemModel
+/**
  * Model Recommendation
  * 
  */

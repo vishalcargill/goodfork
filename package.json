@@ -13,7 +13,10 @@
     "db:seed": "prisma db seed",
     "recipes:import": "tsx scripts/import-recipes.ts",
     "recipes:embed": "tsx scripts/generate-recipe-embeddings.ts",
-    "inventory:import": "tsx scripts/import-inventory.ts"
+    "inventory:import": "tsx scripts/import-inventory.ts",
+    "admin:create": "tsx scripts/create-admin-user.ts",
+    "supabase:export": "tsx scripts/export-to-supabase.ts",
+    "supabase:verify": "tsx scripts/verify-supabase-sync.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -23,12 +26,17 @@
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
+    "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.90.10",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "brace-expansion": "2.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cross-spawn": "7.0.5",
     "framer-motion": "^11.0.3",
+    "glob": "10.5.0",
+    "hono": "4.10.3",
     "lucide-react": "^0.554.0",
     "next": "16.0.3",
     "react": "19.2.0",
@@ -36,6 +44,11 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.13"
+  },
+  "overrides": {
+    "hono": "4.10.3",
+    "valibot": "1.2.0",
+    "glob": "10.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

@@ -18,7 +18,6 @@ const inventoryInclude = {
       title: true,
       description: true,
       imageUrl: true,
-      priceCents: true,
       calories: true,
       proteinGrams: true,
       carbsGrams: true,

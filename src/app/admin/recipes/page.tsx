@@ -13,17 +13,13 @@ export default async function AdminRecipesPage() {
   });
 
   return (
-    <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
-      <div className='space-y-2 pb-8'>
-        <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600'>
-          Admin · Recipes
+    <div className='space-y-8 pb-8'>
+      <header className='space-y-2'>
+        <h1 className='text-3xl font-bold text-foreground'>Recipes</h1>
+        <p className='max-w-3xl text-muted-foreground'>
+          Add, edit, and retire recipes while previewing exactly how each card renders for consumers.
         </p>
-        <h1 className='text-3xl font-semibold text-slate-900'>Manage menu inventory</h1>
-        <p className='max-w-3xl text-slate-600'>
-          Add, edit, and retire recipes while previewing exactly how each card renders for consumers. All
-          fields map 1:1 to the Prisma data model so the recommendation engine stays consistent.
-        </p>
-      </div>
+      </header>
       <AdminRecipeManager initialRecipes={recipes} />
     </div>
   );

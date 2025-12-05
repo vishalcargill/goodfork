@@ -29,7 +29,6 @@ type RecipeFormState = {
   proteinGrams: string;
   carbsGrams: string;
   fatGrams: string;
-  priceCents: string;
   tags: string;
   allergens: string;
   healthyHighlights: string;
@@ -53,11 +52,6 @@ type RecipeFormState = {
   inventoryRestockDate: string;
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
-
 const INITIAL_FORM: RecipeFormState = {
   id: null,
   slug: "",
@@ -71,7 +65,6 @@ const INITIAL_FORM: RecipeFormState = {
   proteinGrams: "",
   carbsGrams: "",
   fatGrams: "",
-  priceCents: "",
   tags: "",
   allergens: "",
   healthyHighlights: "",
@@ -138,7 +131,6 @@ function mapRecipeToForm(recipe: RecipeWithInventory): RecipeFormState {
     proteinGrams: recipe.proteinGrams?.toString() ?? "",
     carbsGrams: recipe.carbsGrams?.toString() ?? "",
     fatGrams: recipe.fatGrams?.toString() ?? "",
-    priceCents: recipe.priceCents.toString(),
     tags: joinList(recipe.tags),
     allergens: joinList(recipe.allergens),
     healthyHighlights: joinList(recipe.healthyHighlights),
@@ -196,11 +188,6 @@ function parseOptionalFloat(value: string) {
 }
 
 function buildPayload(form: RecipeFormState): AdminRecipeInput {
-  const price = parseOptionalInt(form.priceCents);
-  if (price === null || price < 0) {
-    throw new Error("Price (cents) must be a non-negative number.");
-  }
-
   const quantity = parseOptionalInt(form.inventoryQuantity);
   if (quantity === null || quantity < 0) {
     throw new Error("Inventory quantity must be a non-negative number.");
@@ -236,7 +223,6 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
     proteinGrams: parseOptionalInt(form.proteinGrams),
     carbsGrams: parseOptionalInt(form.carbsGrams),
     fatGrams: parseOptionalInt(form.fatGrams),
-    priceCents: price,
     tags: splitList(form.tags),
     allergens: splitList(form.allergens),
     healthyHighlights: splitList(form.healthyHighlights),
@@ -264,21 +250,20 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
 }
 
 function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
-  const priceCents = parseOptionalInt(form.priceCents) ?? 0;
   const quantity = parseOptionalInt(form.inventoryQuantity) ?? 0;
   const calories = parseOptionalInt(form.calories);
   const protein = parseOptionalInt(form.proteinGrams);
   const carbs = parseOptionalInt(form.carbsGrams);
   const fat = parseOptionalInt(form.fatGrams);
+  const unitLabel = form.inventoryUnitLabel || "unit";
 
   return {
     recommendationId: "preview",
     recipeId: form.id ?? "preview",
+    slug: form.slug || "preview-recipe",
     title: form.title || "Recipe preview",
     description: form.description || null,
     imageUrl: form.imageUrl.trim() || null,
-    priceCents,
-    priceDisplay: currencyFormatter.format(priceCents / 100),
     calories,
     proteinGrams: protein,
     carbsGrams: carbs,
@@ -287,11 +272,7 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
     tags: splitList(form.tags),
     healthyHighlights: splitList(form.healthyHighlights),
     allergens: splitList(form.allergens),
-    inventory: {
-      status: form.inventoryStatus,
-      quantity,
-      unitLabel: form.inventoryUnitLabel || "unit",
-    },
+    pantry: buildPreviewPantry(form.inventoryStatus, quantity, unitLabel),
     rationale:
       form.description.trim() ||
       "Preview how AI rationale will render here once the recommendation service ranks this recipe.",
@@ -302,6 +283,33 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
       baseScore: 80,
       adjustments: [],
     },
+  };
+}
+
+function buildPreviewPantry(
+  status: InventoryStatus,
+  quantity: number,
+  unitLabel: string
+): RecommendationCardType["pantry"] {
+  const safeQuantity = Math.max(0, quantity);
+  const safeStatus = status as RecommendationCardType["pantry"]["status"];
+  const cookableServings =
+    safeStatus === "OUT_OF_STOCK" ? 0 : Math.max(1, Math.min(3, safeQuantity || 1));
+  const placeholder = {
+    ingredient: "Pantry staple",
+    unitLabel,
+    requiredQuantity: 1,
+    availableQuantity: safeQuantity,
+  };
+
+  return {
+    status: safeStatus,
+    cookableServings,
+    missingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    lowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
+    operatorStatus: safeStatus,
+    operatorMissingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    operatorLowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
   };
 }
 
@@ -437,35 +445,35 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
   };
 
   return (
-    <div className='grid gap-8 lg:grid-cols-[320px,1fr]'>
-      <aside className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-inner'>
+    <div className='grid gap-6 lg:grid-cols-[40%_60%] lg:items-start'>
+      <aside className='rounded-xl border border-border bg-card p-4 shadow-sm lg:sticky lg:top-24'>
         <div className='flex items-center justify-between gap-3 pb-4'>
-          <h2 className='text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700'>Recipes</h2>
+          <h2 className='text-xs font-bold uppercase tracking-wider text-primary'>Recipe List</h2>
           <button
             type='button'
             onClick={handleCreateNew}
-            className='rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow'
+            className='rounded-full bg-primary px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-sm hover:bg-primary/90'
           >
             New
           </button>
         </div>
-        <div className='max-h-[70vh] space-y-2 overflow-auto pr-2'>
+        <div className='h-[55vh] space-y-2 overflow-y-auto pr-2 lg:h-[72vh]'>
           {recipes.length === 0 ? (
-            <p className='text-sm text-slate-600'>No recipes yet — add your first one.</p>
+            <p className='text-sm text-muted-foreground'>No recipes yet — add your first one.</p>
           ) : (
             recipes.map((recipe) => (
               <button
                 key={recipe.id}
                 type='button'
                 onClick={() => handleSelect(recipe)}
-                className={`w-full rounded-2xl border px-3 py-3 text-left shadow-sm transition ${
+                className={`w-full rounded-lg border px-3 py-3 text-left shadow-sm transition ${
                   activeRecipeId === recipe.id
-                    ? "border-emerald-400 bg-white"
-                    : "border-transparent bg-white/70 hover:border-emerald-200"
+                    ? "border-primary bg-surface ring-1 ring-primary"
+                    : "border-transparent bg-surface-subtle hover:border-border"
                 }`}
               >
-                <p className='text-sm font-semibold text-slate-900'>{recipe.title}</p>
-                <p className='text-xs text-slate-500'>
+                <p className='text-sm font-semibold text-foreground'>{recipe.title}</p>
+                <p className='text-xs text-muted-foreground'>
                   {recipe.cuisine ?? "No cuisine"} · Updated {listFormat.format(new Date(recipe.updatedAt))}
                 </p>
               </button>
@@ -475,11 +483,11 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
       </aside>
 
       <section className='space-y-6'>
-        <div className='rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-50/50'>
+        <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
           <div className='flex flex-wrap items-center justify-between gap-3 pb-4'>
             <div>
-              <h3 className='text-lg font-semibold text-slate-900'>Recipe details</h3>
-              <p className='text-sm text-slate-500'>Every field maps to the Prisma model.</p>
+              <h3 className='text-lg font-semibold text-foreground'>Recipe details</h3>
+              <p className='text-sm text-muted-foreground'>Every field maps to the Prisma model.</p>
             </div>
             <div className='flex gap-3'>
               {isEditing ? (
@@ -487,7 +495,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
                   type='button'
                   onClick={deleteRecipe}
                   disabled={isDeleting}
-                  className='rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-50'
+                  className='rounded-full border border-destructive/30 px-4 py-2 text-sm font-semibold text-destructive transition hover:bg-destructive/10 disabled:opacity-50'
                 >
                   {isDeleting ? "Deleting…" : "Delete"}
                 </button>
@@ -496,7 +504,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
                 type='button'
                 onClick={persistRecipe}
                 disabled={isSaving}
-                className='rounded-full bg-emerald-600 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-300/60 transition disabled:opacity-50'
+                className='rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50'
               >
                 {isSaving ? "Saving…" : isEditing ? "Update" : "Create"}
               </button>
@@ -504,15 +512,15 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
           </div>
 
           {error ? (
-            <p className='rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800'>{error}</p>
+            <p className='rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive'>{error}</p>
           ) : null}
           {message ? (
-            <p className='rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800'>
+            <p className='rounded-lg border border-success/20 bg-success/10 px-4 py-3 text-sm text-success'>
               {message}
             </p>
           ) : null}
 
-          <div className='grid gap-6 lg:grid-cols-2'>
+          <div className='grid gap-6 lg:grid-cols-2 lg:max-h-[62vh] lg:overflow-y-auto lg:pr-2'>
             <div className='space-y-4'>
               <TextField label='Title' value={formState.title} onChange={(value) => handleFieldChange("title", value)} required />
               <TextField label='Slug' value={formState.slug} onChange={(value) => handleFieldChange("slug", value)} helper='Must be unique.' />
@@ -522,10 +530,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
               <TextField label='Image URL' value={formState.imageUrl} onChange={(value) => handleFieldChange("imageUrl", value)} />
               <TextareaField label='Description' value={formState.description} onChange={(value) => handleFieldChange("description", value)} rows={4} />
               <TextField label='Cuisine' value={formState.cuisine} onChange={(value) => handleFieldChange("cuisine", value)} />
-              <div className='grid grid-cols-2 gap-3'>
-                <TextField label='Price (cents)' value={formState.priceCents} onChange={(value) => handleFieldChange("priceCents", value)} required />
-                <TextField label='Serves' value={formState.serves} onChange={(value) => handleFieldChange("serves", value)} />
-              </div>
+              <TextField label='Serves' value={formState.serves} onChange={(value) => handleFieldChange("serves", value)} />
               <div className='grid grid-cols-2 gap-3'>
                 <TextField label='Difficulty' value={formState.difficulty} onChange={(value) => handleFieldChange("difficulty", value)} />
                 <TextField label='Dish Type' value={formState.dishType} onChange={(value) => handleFieldChange("dishType", value)} />
@@ -558,21 +563,21 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
               <TextareaField label='Instructions (step per line)' value={formState.instructions} onChange={(value) => handleFieldChange("instructions", value)} rows={4} />
               <TextareaField label='Nutrients JSON' value={formState.nutrients} onChange={(value) => handleFieldChange("nutrients", value)} rows={3} helper='Optional. Provide JSON object of nutrient values.' />
               <TextareaField label='Timers JSON' value={formState.timers} onChange={(value) => handleFieldChange("timers", value)} rows={3} helper='Optional. Provide JSON object of prep/cook timers.' />
-              <div className='rounded-2xl border border-slate-200 p-4'>
-                <p className='text-sm font-semibold text-slate-900'>Inventory</p>
+              <div className='rounded-xl border border-border p-4 bg-surface-subtle'>
+                <p className='text-sm font-semibold text-foreground'>Inventory</p>
                 <div className='mt-3 grid grid-cols-2 gap-3'>
                   <TextField label='Quantity' value={formState.inventoryQuantity} onChange={(value) => handleFieldChange("inventoryQuantity", value)} required />
                   <TextField label='Unit Label' value={formState.inventoryUnitLabel} onChange={(value) => handleFieldChange("inventoryUnitLabel", value)} />
                 </div>
                 <div className='mt-3 grid grid-cols-2 gap-3'>
-                  <label className='text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
                     Status
                     <select
                       value={formState.inventoryStatus}
                       onChange={(event) =>
                         handleFieldChange("inventoryStatus", event.target.value as InventoryStatus)
                       }
-                      className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-emerald-400'
+                      className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary'
                     >
                       {inventoryStatuses.map((status) => (
                         <option key={status} value={status}>
@@ -593,11 +598,11 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
           </div>
         </div>
 
-        <div className='rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-50/50'>
+        <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
           <div className='flex items-center justify-between pb-4'>
             <div>
-              <h3 className='text-lg font-semibold text-slate-900'>Preview</h3>
-              <p className='text-sm text-slate-500'>Live render of the recommendation card.</p>
+              <h3 className='text-lg font-semibold text-foreground'>Preview</h3>
+              <p className='text-sm text-muted-foreground'>Live render of the recommendation card.</p>
             </div>
           </div>
           <RecommendationCard card={previewCard} userId='preview-user' readOnly />
@@ -618,16 +623,16 @@ type TextFieldProps = {
 
 function TextField({ label, value, onChange, required, type = "text", helper }: TextFieldProps) {
   return (
-    <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+    <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
       {label}
       <input
         type={type}
         value={value}
         required={required}
         onChange={(event) => onChange(event.target.value)}
-        className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-emerald-400'
+        className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary'
       />
-      {helper ? <span className='mt-1 block text-[11px] text-slate-500'>{helper}</span> : null}
+      {helper ? <span className='mt-1 block text-[11px] text-muted-foreground'>{helper}</span> : null}
     </label>
   );
 }
@@ -642,15 +647,15 @@ type TextareaFieldProps = {
 
 function TextareaField({ label, value, onChange, rows = 4, helper }: TextareaFieldProps) {
   return (
-    <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+    <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
       {label}
       <textarea
         value={value}
         rows={rows}
         onChange={(event) => onChange(event.target.value)}
-        className='mt-2 w-full resize-y rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-emerald-400'
+        className='mt-2 w-full resize-y rounded-lg border border-border px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary'
       />
-      {helper ? <span className='mt-1 block text-[11px] text-slate-500'>{helper}</span> : null}
+      {helper ? <span className='mt-1 block text-[11px] text-muted-foreground'>{helper}</span> : null}
     </label>
   );
 }

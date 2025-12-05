@@ -38,6 +38,22 @@ npm run db:seed
 
 Seeds provision the `admin@cargill.com` account plus three flagship recipes + inventory states so the recommendation engine can hydrate.
 
+### Docker Dev Stack
+Run the entire stack with Docker if you can’t (or don’t want to) manage Postgres manually. This extends the "Local Database Setup" flow documented in `docs/work-items.md`.
+
+1. Copy `.env.local.example` → `.env.local` and update secrets. For Docker Compose, set `DATABASE_URL="postgresql://postgres:postgres@postgres:5432/goodfork_dev?schema=public"`.
+2. Build and start services:
+   ```bash
+   docker compose up -d postgres
+   docker compose run --rm web npx prisma migrate deploy
+   docker compose run --rm web npm run db:seed # optional
+   docker compose up -d web
+   ```
+3. Visit `http://localhost:3000`. Logs stream via `docker compose logs -f web`.
+4. Stop services with `docker compose down` (data persists because the Postgres container mounts the `goodfork_pgdata` volume). Run `docker compose down -v` only if you want to wipe the DB.
+
+`docker/postgres/init.sql` installs the `pgvector` extension automatically, so embeddings work inside containers the same way they do locally. If you need a clean start, delete the named volume (`docker volume rm goodfork_pgdata`) and rerun the migration + seed commands.
+
 ### Core Scripts
 | Script | Description |
 | --- | --- |
@@ -47,6 +63,7 @@ Seeds provision the `admin@cargill.com` account plus three flagship recipes + in
 | `npm run prisma:migrate` | Apply Prisma migrations (dev). |
 | `npm run prisma:generate` | Rebuild Prisma client (`src/generated/prisma`). |
 | `npm run db:seed` | Seed demo users + inventory. |
+| `npm run admin:create -- admin@example.com "Admin Name"` | Upsert the admin account using the provided email/name (password defaults to `admin@123` unless `ADMIN_PASSWORD` is set). |
 | `npm run recipes:import -- data/recipes.json` | Load the Kaggle dataset into the `Recipe` + `InventoryItem` tables. |
 | `npm run recipes:embed -- 50` | Generate embeddings for up to 50 recipes missing the configured vector version. |
 
@@ -88,9 +105,9 @@ Seeds provision the `admin@cargill.com` account plus three flagship recipes + in
 - Snapshot + accessibility sweeps are tracked in `docs/phase-1-plan.md` (Phase 1) and upcoming work items.
 
 ### Reference Docs
-- `docs/phase-0.md` - foundations checklist.
-- `docs/phase-1-plan.md` - SMART goals, TODO log, risks/assumptions (update after each milestone).
-- `docs/work-items.md` - multi-phase backlog.
+- `docs/engineering-guide.md` - architecture, data models, and feature flows.
+- `docs/work-items.md` - phase backlog and task tracking.
+- `specs/prd.md` - canonical product requirements.
 - `Hackathon 2025 - Kick Off.pdf` - judging rubric and scope clarifications.
 
-Questions? Check the PRD (`docs/PRD.md`) for requirements context before expanding scope. Happy hacking!
+Questions? Check the PRD (`specs/prd.md`) for requirements context before expanding scope. Happy hacking!

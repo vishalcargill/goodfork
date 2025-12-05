@@ -11,7 +11,6 @@ export const onboardingSchema = z.object({
   allergens: z.array(z.string()).default([]),
   dietaryPreferences: z.array(z.string()).default([]),
   tastePreferences: z.array(z.string()).default([]),
-  budgetTargetCents: z.union([z.number().int().positive(), z.null()]).optional(),
   lifestyleNotes: z
     .string()
     .trim()

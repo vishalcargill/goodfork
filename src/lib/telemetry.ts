@@ -1,7 +1,10 @@
 import type { InventoryStatus } from "@/generated/prisma/client";
+import type { RecommendationDataSource } from "@/constants/data-sources";
 import type { RecommendationResponse } from "@/services/shared/recommendations.types";
 
 type RecommendationSource = RecommendationResponse["source"];
+
+type PantryScope = "personal" | "global";
 
 type RecommendationIdentifier = {
   userId?: string;
@@ -15,6 +18,7 @@ type RecommendationRequestedEvent = {
   limit?: number;
   deterministicOnly?: boolean;
   sessionId?: string | null;
+  dataSource?: RecommendationDataSource;
 };
 
 type RecommendationSucceededEvent = {
@@ -27,6 +31,7 @@ type RecommendationSucceededEvent = {
   deterministicFallback: boolean;
   latencyMs: number;
   sessionId?: string | null;
+  dataSource?: RecommendationDataSource;
 };
 
 type RecommendationFailedEvent = {
@@ -36,6 +41,7 @@ type RecommendationFailedEvent = {
   reason: string;
   latencyMs?: number;
   sessionId?: string | null;
+  dataSource?: RecommendationDataSource;
 };
 
 type InventoryLowStockEvent = {
@@ -64,13 +70,32 @@ type InventorySyncFailedEvent = {
   reason: string;
 };
 
+type PantryQuantityEvent = {
+  type: "pantry.restocked" | "pantry.consumed";
+  userId: string;
+  ingredientSlug: string;
+  quantity: number;
+  delta: number;
+  status: InventoryStatus;
+  scope: PantryScope;
+};
+
+type PantryMissingEvent = {
+  type: "pantry.missing";
+  userId: string;
+  ingredientSlug: string;
+  scope: PantryScope;
+};
+
 export type TelemetryEvent =
   | RecommendationRequestedEvent
   | RecommendationSucceededEvent
   | RecommendationFailedEvent
   | InventoryLowStockEvent
   | InventoryRestockedEvent
-  | InventorySyncFailedEvent;
+  | InventorySyncFailedEvent
+  | PantryQuantityEvent
+  | PantryMissingEvent;
 
 export function trackTelemetry(event: TelemetryEvent) {
   const payload = {

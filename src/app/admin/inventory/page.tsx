@@ -1,51 +1,66 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdminUser } from "@/lib/auth";
-import { AdminInventoryManager } from "@/components/admin/admin-inventory-manager";
+import { AdminStockWorkspace } from "@/components/admin/admin-stock-workspace";
+import { mergeIngredientOptions } from "@/constants/ingredient-catalog";
+import { serializePantry, getSystemPantryItems } from "@/services/server/pantry.server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminInventoryPage() {
   await requireAdminUser();
 
-  const inventory = await prisma.inventoryItem.findMany({
-    include: {
-      recipe: {
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          description: true,
-          imageUrl: true,
-          priceCents: true,
-          calories: true,
-          proteinGrams: true,
-          carbsGrams: true,
-          fatGrams: true,
-          healthyHighlights: true,
-          tags: true,
-          allergens: true,
-          ratingCount: true,
-          difficulty: true,
-          serves: true,
+  const [inventory, systemPantry, dbIngredients] = await Promise.all([
+    prisma.inventoryItem.findMany({
+      include: {
+        recipe: {
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            calories: true,
+            proteinGrams: true,
+            carbsGrams: true,
+            fatGrams: true,
+            healthyHighlights: true,
+            tags: true,
+            allergens: true,
+            ratingCount: true,
+            difficulty: true,
+            serves: true,
+          },
         },
       },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+      orderBy: { updatedAt: "desc" },
+    }),
+    getSystemPantryItems(),
+    prisma.ingredient.findMany({
+      select: {
+        slug: true,
+        name: true,
+        defaultUnit: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  const serializedPantry = serializePantry(systemPantry);
+  const ingredientOptions = mergeIngredientOptions(dbIngredients);
 
   return (
-    <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
-      <div className='space-y-2 pb-8'>
-        <p className='text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600'>
-          Admin · Inventory
+    <div className='space-y-8 pb-8'>
+      <header className='space-y-2'>
+        <h1 className='text-3xl font-bold text-foreground'>Inventory</h1>
+        <p className='max-w-3xl text-muted-foreground'>
+          Monitor live availability, bulk-edit quantities, and log restocks.
         </p>
-        <h1 className='text-3xl font-semibold text-slate-900'>Inventory control center</h1>
-        <p className='max-w-3xl text-slate-600'>
-          Monitor live availability, bulk-edit quantities, log restocks, and preview how inventory
-          state feeds the consumer recommendation cards. All edits are secured to your admin session.
-        </p>
-      </div>
-      <AdminInventoryManager initialItems={inventory} />
+      </header>
+      <AdminStockWorkspace
+        inventoryItems={inventory}
+        pantryItems={serializedPantry}
+        ingredientOptions={ingredientOptions}
+      />
     </div>
   );
 }

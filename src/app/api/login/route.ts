@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { loginSchema } from "@/schema/login.schema";
-import { authenticateUser } from "@/services/server/auth.server";
+import { authenticateUser, SESSION_TTL_SECONDS } from "@/services/server/auth.server";
 import { ADMIN_EMAIL } from "@/constants/app.constants";
-
-const SESSION_COOKIE_NAME = "gf_session";
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+import { ONBOARDING_PROFILE_COOKIE, SESSION_COOKIE_NAME, serializeOnboardingCookie } from "@/constants/cookies";
 
 export async function POST(request: Request) {
   try {
@@ -46,14 +44,29 @@ export async function POST(request: Request) {
       },
     });
 
+    const cookieOptions = {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax" as const,
+      secure: process.env.NODE_ENV === "production",
+    };
+
     response.cookies.set({
       name: SESSION_COOKIE_NAME,
       value: session.tokenId,
-      httpOnly: true,
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      ...cookieOptions,
       maxAge: SESSION_TTL_SECONDS,
+    });
+
+    response.cookies.set({
+      name: ONBOARDING_PROFILE_COOKIE,
+      value: serializeOnboardingCookie({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      }),
+      ...cookieOptions,
+      maxAge: 60 * 60 * 24 * 14,
     });
 
     return response;

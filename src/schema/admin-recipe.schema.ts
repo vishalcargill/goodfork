@@ -22,7 +22,6 @@ export const adminRecipeSchema = z.object({
   proteinGrams: z.number().int().nullable(),
   carbsGrams: z.number().int().nullable(),
   fatGrams: z.number().int().nullable(),
-  priceCents: z.number().int().min(0),
   tags: stringArrayField,
   allergens: stringArrayField,
   healthyHighlights: stringArrayField,

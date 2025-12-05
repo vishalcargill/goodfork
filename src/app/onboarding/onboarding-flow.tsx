@@ -2,56 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useOnboardingSubmitMutation, type OnboardingResult } from "@/services/client/onboarding.client";
 import type { OnboardingPayload } from "@/schema/onboarding.schema";
+import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 
 const steps = [
   { id: "account", title: "Account basics", blurb: "So we know who to personalize for." },
   { id: "goals", title: "Goals & allergens", blurb: "Dial in health targets and safety flags." },
   {
     id: "nutrition",
-    title: "Diet & budget",
-    blurb: "Fine-tune dietary styles, taste, and budget band.",
+    title: "Diet & taste",
+    blurb: "Fine-tune dietary styles and flavor preferences.",
   },
 ];
 
-const goalOptions = [
-  {
-    value: "LEAN_MUSCLE",
-    label: "Lean muscle",
-    helper: "High-protein focus",
-  },
-  {
-    value: "ENERGY",
-    label: "Sustained energy",
-    helper: "Balanced macros",
-  },
-  {
-    value: "RESET",
-    label: "Metabolic reset",
-    helper: "Lower sugar & refined carbs",
-  },
-  {
-    value: "BRAINCARE",
-    label: "Brain care",
-    helper: "Omega-3 + micronutrient dense",
-  },
-];
-
-const allergenOptions = [
-  { value: "DAIRY", label: "Dairy" },
-  { value: "EGGS", label: "Eggs" },
-  { value: "FISH", label: "Fish" },
-  { value: "SHELLFISH", label: "Shellfish" },
-  { value: "SOY", label: "Soy" },
-  { value: "TREE_NUTS", label: "Tree nuts" },
-  { value: "PEANUTS", label: "Peanuts" },
-  { value: "GLUTEN", label: "Gluten" },
-  { value: "SESAME", label: "Sesame" },
-];
+const goalOptions = GOAL_OPTIONS;
+const allergenOptions = ALLERGEN_OPTIONS;
 
 const dietOptions = [
   { value: "VEGETARIAN", label: "Vegetarian" },
@@ -69,12 +39,6 @@ const tasteOptions = [
   { value: "EXPLORER", label: "Adventurous" },
 ];
 
-const budgetOptions = [
-  { value: 1200, label: "Under $12", helper: "Light lunch range" },
-  { value: 1500, label: "$12 – $15", helper: "Balanced splurge" },
-  { value: 1800, label: "$15 – $18", helper: "Chef-driven picks" },
-];
-
 type OnboardingFormValues = {
   name: string;
   email: string;
@@ -83,7 +47,6 @@ type OnboardingFormValues = {
   allergens: string[];
   dietaryPreferences: string[];
   tastePreferences: string[];
-  budgetTargetCents: number | null;
   lifestyleNotes: string;
 };
 
@@ -95,7 +58,6 @@ const initialValues: OnboardingFormValues = {
   allergens: [],
   dietaryPreferences: [],
   tastePreferences: [],
-  budgetTargetCents: 1500,
   lifestyleNotes: "",
 };
 
@@ -110,6 +72,7 @@ export function OnboardingFlow() {
   const [result, setResult] = useState<OnboardingResult | null>(null);
   const onboardingMutation = useOnboardingSubmitMutation();
   const isPending = onboardingMutation.isPending;
+  const router = useRouter();
 
   const accountComplete =
     values.name.trim().length >= 2 && values.email.trim().length > 0 && values.password.trim().length >= 8;
@@ -140,12 +103,14 @@ export function OnboardingFlow() {
     const payload: OnboardingPayload = {
       ...values,
       lifestyleNotes: values.lifestyleNotes.trim() ? values.lifestyleNotes.trim() : null,
-      budgetTargetCents: values.budgetTargetCents ?? null,
     };
 
     setResult(null);
     onboardingMutation.mutate(payload, {
-      onSuccess: (data) => setResult(data),
+      onSuccess: (data) => {
+        setResult(data);
+        router.refresh();
+      },
       onError: () =>
         setResult({
           success: false,
@@ -358,34 +323,6 @@ export function OnboardingFlow() {
                       })}
                     </div>
                   </div>
-                  <div className='space-y-3' role='group' aria-label='Budget band'>
-                    <p className='text-sm font-semibold text-slate-900'>Budget band</p>
-                    <div className='grid gap-3 sm:grid-cols-3'>
-                      {budgetOptions.map((band) => {
-                        const active = values.budgetTargetCents === band.value;
-                        return (
-                          <button
-                            key={band.value}
-                            type='button'
-                            onClick={() => updateField("budgetTargetCents", band.value)}
-                            className={cn(
-                              "rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition",
-                              active
-                                ? "border-emerald-400 bg-white text-emerald-800 shadow-[0_12px_30px_rgba(16,185,129,0.18)]"
-                                : "border-emerald-100 bg-white text-slate-700 hover:border-emerald-300"
-                            )}
-                            aria-pressed={active}
-                          >
-                            <p>{band.label}</p>
-                            <p className='text-xs font-normal text-slate-500'>{band.helper}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {fieldError("budgetTargetCents") && (
-                      <p className='text-xs text-rose-600'>{fieldError("budgetTargetCents")}</p>
-                    )}
-                  </div>
                   <label className='block space-y-2 text-sm font-medium text-slate-800'>
                     Lifestyle notes
                     <textarea
@@ -477,7 +414,11 @@ export function OnboardingFlow() {
               <CheckCircle2 className='h-4 w-4' />
               {result?.message}
             </p>
-            <Link href={recommendationsHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
+            <Link
+              href={recommendationsHref}
+              prefetch={false}
+              className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'
+            >
               Head to menus
               <ArrowRight className='h-3.5 w-3.5' />
             </Link>
