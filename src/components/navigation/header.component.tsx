@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { Logo } from "@/components/common/logo.component";
 import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
+import { Button } from "@/components/ui/button";
 
 type HeaderUser = {
   id: string;
@@ -22,32 +23,47 @@ type HeaderProps = {
 
 export function Header({ currentUser = null }: HeaderProps) {
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
   const showMarketingCtas = pathname === "/" && !currentUser;
 
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 20);
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className='sticky top-0 z-20 border-b border-emerald-100/60 bg-white/90 backdrop-blur'>
-      <div className='mx-auto flex max-w-6xl items-center px-4 py-4 sm:px-6 lg:px-8'>
-        <Link href='/' aria-label='GoodFork home' className='inline-flex items-center'>
+    <header
+      className={`sticky top-0 z-40 w-full border-b transition-all duration-300 ${
+        isScrolled
+          ? "border-emerald-100/50 bg-white/80 shadow-sm backdrop-blur-md"
+          : "border-transparent bg-white/0 backdrop-blur-none"
+      }`}
+    >
+      <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8'>
+        <Link href='/' aria-label='GoodFork home' className='flex items-center gap-2 transition-opacity hover:opacity-90'>
           <Logo />
         </Link>
-        <div className='ml-auto flex items-center gap-3'>
+
+        <div className='flex items-center gap-4'>
           {currentUser ? (
             <ProfileMenu user={currentUser} />
           ) : showMarketingCtas ? (
-            <>
-              <Link
-                href='/onboarding'
-                className='rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(16,185,129,0.35)] transition hover:-translate-y-0.5'
-              >
-                Start personalization
-              </Link>
+            <div className="flex items-center gap-3">
               <SmoothScrollLink
                 targetId='login'
-                className='rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(16,185,129,0.25)]'
+                className='text-sm font-medium text-slate-600 hover:text-slate-900 hidden sm:inline-block transition-colors'
               >
                 Log in
               </SmoothScrollLink>
-            </>
+              <Link href='/onboarding'>
+                <Button variant="default" size="sm" className="shadow-sm">
+                  Start personalization
+                </Button>
+              </Link>
+            </div>
           ) : null}
         </div>
       </div>
