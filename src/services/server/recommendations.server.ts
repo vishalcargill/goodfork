@@ -1,19 +1,31 @@
 import {
   InventoryStatus,
+  type Ingredient,
   type InventoryItem,
+  type PantryItem,
   type Recipe,
+  type RecipeIngredient,
   type User,
   type UserProfile,
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { DATABASE_URL, OPENAI_API_KEY, RECOMMENDER_MODEL } from "@/constants/app.constants";
+import { getSystemPantryUserId } from "@/lib/system-user";
+import {
+  DATABASE_URL,
+  ENABLE_AI_RANKING,
+  OPENAI_API_KEY,
+  OPENAI_BASE_URL,
+  RECOMMENDER_MODEL,
+  REQUIRE_AI_RANKING,
+} from "@/constants/app.constants";
+import { normalizeImageUrl } from "@/lib/images";
 import type {
   RecommendationCard,
   RecommendationResponse,
   ScoreAdjustment,
 } from "@/services/shared/recommendations.types";
 
-type GenerateRecommendationsInput = {
+export type GenerateRecommendationsInput = {
   userId?: string;
   email?: string;
   limit?: number;
@@ -21,7 +33,32 @@ type GenerateRecommendationsInput = {
   deterministicOnly?: boolean;
 };
 
-type CandidateRecipe = Recipe & { inventory: InventoryItem | null };
+type RecipeIngredientWithMeta = RecipeIngredient & { ingredient: Ingredient };
+
+type PantryGap = {
+  ingredientId: string;
+  ingredientName: string;
+  unitLabel: string;
+  requiredQuantity: number;
+  availableQuantity: number;
+  status: InventoryStatus;
+};
+
+type PantryCoverage = {
+  status: InventoryStatus;
+  cookableServings: number;
+  missingIngredients: PantryGap[];
+  lowStockIngredients: PantryGap[];
+  operatorStatus: InventoryStatus;
+  operatorMissingIngredients: PantryGap[];
+  operatorLowStockIngredients: PantryGap[];
+};
+
+type CandidateRecipe = Recipe & {
+  inventory: InventoryItem | null;
+  recipeIngredients: RecipeIngredientWithMeta[];
+  pantryCoverage: PantryCoverage;
+};
 
 type ScoredCandidate = CandidateRecipe & {
   score: number;
@@ -41,9 +78,6 @@ type FinalCandidate = ScoredCandidate & {
 const MIN_LIMIT = 3;
 const MAX_LIMIT = 5;
 const BASE_SCORE = 62;
-const BUDGET_CUSHION_CENTS = 200;
-const INVENTORY_PLENTY_THRESHOLD = 35;
-const INVENTORY_LOW_WARNING = 12;
 
 const tasteKeywordMap: Record<string, string[]> = {
   SPICY: ["spicy", "harissa", "ginger", "chili", "szechuan"],
@@ -96,13 +130,17 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
     });
   }
 
-  const candidates = await loadCandidateRecipes(profile, limit);
+  const candidates = await loadCandidateRecipes({
+    profile,
+    desired: limit,
+    userId: user.id,
+  });
 
   if (candidates.length === 0) {
-    throw createRecommendationError("No inventory matches the stated allergens right now.", {
+    throw createRecommendationError("No pantry-aligned inventory matches the stated allergens right now.", {
       statusCode: 404,
-      clientMessage: "We're out of inventory that matches your allergens right now. Check back soon!",
-      errorCode: "inventory_empty",
+      clientMessage: "Your pantry is missing a few essentials. Restock or adjust allergens to unlock menus.",
+      errorCode: "pantry_empty",
     });
   }
 
@@ -111,7 +149,7 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
 
   let finalSelection: FinalCandidate[] | null = null;
 
-  if (!input.deterministicOnly) {
+  if (!input.deterministicOnly && ENABLE_AI_RANKING && OPENAI_API_KEY && RECOMMENDER_MODEL) {
     const aiRanked = await rankWithLLM(profile, scored, limit);
     if (aiRanked?.length) {
       const enrichedAiSelection = aiRanked.reduce<FinalCandidate[]>((acc, aiEntry) => {
@@ -140,6 +178,14 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
   }
 
   if (!finalSelection?.length) {
+    if (!input.deterministicOnly && REQUIRE_AI_RANKING) {
+      throw createRecommendationError("AI ranking is required to deliver menus right now.", {
+        statusCode: 503,
+        clientMessage: "LLM rankings are warming up. Try again in a moment for fresh menus.",
+        errorCode: "llm_required",
+      });
+    }
+
     finalSelection = scored
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
@@ -182,16 +228,13 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       throw new Error("Recommendation metadata mismatch.");
     }
 
-    const inventory = record.recipe.inventory;
-
     return {
       recommendationId: record.id,
       recipeId: record.recipeId,
+      slug: record.recipe.slug,
       title: record.recipe.title,
       description: record.recipe.description,
-      imageUrl: record.recipe.imageUrl ?? null,
-      priceCents: record.recipe.priceCents,
-      priceDisplay: formatCurrency(record.recipe.priceCents),
+      imageUrl: normalizeImageUrl(record.recipe.imageUrl),
       calories: record.recipe.calories ?? null,
       proteinGrams: record.recipe.proteinGrams ?? null,
       carbsGrams: record.recipe.carbsGrams ?? null,
@@ -200,11 +243,35 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       tags: record.recipe.tags,
       healthyHighlights: record.recipe.healthyHighlights,
       allergens: record.recipe.allergens,
-      inventory: {
-        status: inventory?.status ?? InventoryStatus.OUT_OF_STOCK,
-        quantity: inventory?.quantity ?? 0,
-        unitLabel: inventory?.unitLabel ?? "unit",
-      },
+        pantry: {
+          status: entry.pantryCoverage.status,
+          cookableServings: entry.pantryCoverage.cookableServings,
+          missingIngredients: entry.pantryCoverage.missingIngredients.map((gap) => ({
+            ingredient: gap.ingredientName,
+            unitLabel: gap.unitLabel,
+            requiredQuantity: gap.requiredQuantity,
+            availableQuantity: gap.availableQuantity,
+          })),
+          lowStockIngredients: entry.pantryCoverage.lowStockIngredients.map((gap) => ({
+            ingredient: gap.ingredientName,
+            unitLabel: gap.unitLabel,
+            requiredQuantity: gap.requiredQuantity,
+            availableQuantity: gap.availableQuantity,
+          })),
+          operatorStatus: entry.pantryCoverage.operatorStatus,
+          operatorMissingIngredients: entry.pantryCoverage.operatorMissingIngredients.map((gap) => ({
+            ingredient: gap.ingredientName,
+            unitLabel: gap.unitLabel,
+            requiredQuantity: gap.requiredQuantity,
+            availableQuantity: gap.availableQuantity,
+          })),
+          operatorLowStockIngredients: entry.pantryCoverage.operatorLowStockIngredients.map((gap) => ({
+            ingredient: gap.ingredientName,
+            unitLabel: gap.unitLabel,
+            requiredQuantity: gap.requiredQuantity,
+            availableQuantity: gap.availableQuantity,
+          })),
+        },
       rationale: record.rationale,
       healthySwapCopy: record.healthySwapRationale ?? entry.healthySwapCopy ?? null,
       swapRecipe: record.healthySwapRecipe
@@ -249,45 +316,85 @@ async function resolveUser(input: GenerateRecommendationsInput) {
   return user as User & { profile: UserProfile | null };
 }
 
-async function loadCandidateRecipes(profile: UserProfile, desired: number) {
-  const recipes = await prisma.recipe.findMany({
-    include: { inventory: true },
-  });
+async function loadCandidateRecipes({
+  profile,
+  desired,
+  userId,
+}: {
+  profile: UserProfile;
+  desired: number;
+  userId: string;
+}) {
+  const systemPantryUserId = await getSystemPantryUserId().catch(() => null);
+
+  const [recipes, pantryItems, operatorPantryItems] = await Promise.all([
+    prisma.recipe.findMany({
+      include: {
+        inventory: true,
+        recipeIngredients: {
+          include: { ingredient: true },
+        },
+      },
+    }),
+    prisma.pantryItem.findMany({
+      where: { userId },
+    }),
+    systemPantryUserId
+      ? prisma.pantryItem.findMany({
+          where: { userId: systemPantryUserId },
+        })
+      : Promise.resolve([] as PantryItem[]),
+  ]);
+
+  const pantryMap = new Map<string, PantryItem>();
+  pantryItems.forEach((item) => pantryMap.set(item.ingredientId, item));
+  const operatorPantryMap = new Map<string, PantryItem>();
+  operatorPantryItems.forEach((item) => operatorPantryMap.set(item.ingredientId, item));
+  const hasOperatorPantry = Boolean(systemPantryUserId && operatorPantryItems.length > 0);
 
   const allergens = profile.allergens ?? [];
 
-  const available = recipes.filter((recipe) => {
-    if (!recipe.inventory || !isInventoryAvailable(recipe.inventory)) {
-      return false;
-    }
+  const allergenSafe = recipes.filter((recipe) => isAllergenSafe(recipe, allergens));
+  const enriched: CandidateRecipe[] = allergenSafe.map((recipe) => ({
+    ...recipe,
+    recipeIngredients: recipe.recipeIngredients as RecipeIngredientWithMeta[],
+    pantryCoverage: calculatePantryCoverage(
+      recipe.recipeIngredients as RecipeIngredientWithMeta[],
+      pantryMap,
+      operatorPantryMap,
+      hasOperatorPantry
+    ),
+  }));
 
-    if (!isAllergenSafe(recipe, allergens)) {
-      return false;
-    }
+  const operatorReady = hasOperatorPantry
+    ? enriched.filter((entry) => entry.pantryCoverage.operatorStatus !== InventoryStatus.OUT_OF_STOCK)
+    : enriched;
 
-    return true;
-  });
+  const ready = operatorReady.filter((entry) => entry.pantryCoverage.cookableServings >= 1);
+  const nearReady = operatorReady.filter(
+    (entry) => entry.pantryCoverage.cookableServings === 0 && entry.pantryCoverage.missingIngredients.length <= 2
+  );
+  const fallback = operatorReady.filter(
+    (entry) => !ready.includes(entry) && !nearReady.includes(entry)
+  );
 
-  const inStock = available.filter((recipe) => recipe.inventory?.status === InventoryStatus.IN_STOCK);
-  const lowStock = available.filter((recipe) => recipe.inventory?.status === InventoryStatus.LOW_STOCK);
+  const ordered: CandidateRecipe[] = [];
+  const seen = new Set<string>();
+  const enqueue = (list: CandidateRecipe[]) => {
+    list.forEach((item) => {
+      if (seen.has(item.id)) {
+        return;
+      }
+      seen.add(item.id);
+      ordered.push(item);
+    });
+  };
 
-  if (inStock.length >= desired) {
-    return inStock;
-  }
+  enqueue(ready as CandidateRecipe[]);
+  enqueue(nearReady as CandidateRecipe[]);
+  enqueue(fallback as CandidateRecipe[]);
 
-  return [...inStock, ...lowStock];
-}
-
-function isInventoryAvailable(inventory: InventoryItem | null) {
-  if (!inventory) {
-    return false;
-  }
-
-  if (inventory.status === InventoryStatus.OUT_OF_STOCK) {
-    return false;
-  }
-
-  return inventory.quantity > 0;
+  return ordered.slice(0, Math.max(desired * 2, desired));
 }
 
 function isAllergenSafe(recipe: Recipe, allergens: string[]) {
@@ -298,28 +405,140 @@ function isAllergenSafe(recipe: Recipe, allergens: string[]) {
   return !recipe.allergens.some((allergen) => allergens.includes(allergen));
 }
 
+function calculatePantryCoverage(
+  ingredients: RecipeIngredientWithMeta[],
+  pantryMap: Map<string, PantryItem>,
+  operatorPantryMap: Map<string, PantryItem>,
+  hasOperatorPantry: boolean
+): PantryCoverage {
+  const missingIngredients: PantryGap[] = [];
+  const lowStockIngredients: PantryGap[] = [];
+  let cookableServings: number | null = null;
+  const operatorMissingIngredients: PantryGap[] = [];
+  const operatorLowStockIngredients: PantryGap[] = [];
+  let operatorCookableServings: number | null = hasOperatorPantry ? null : Infinity;
+
+  for (const component of ingredients) {
+    const requiredQuantity = Number(component.quantityPerServing ?? 0) || 0;
+    const unitLabel = component.unitLabel ?? component.ingredient.defaultUnit ?? "unit";
+    const pantryItem = pantryMap.get(component.ingredientId);
+    const availableQuantity = pantryItem ? Number(pantryItem.quantity) : 0;
+
+    if (!pantryItem || availableQuantity <= 0 || requiredQuantity <= 0) {
+      cookableServings = 0;
+      missingIngredients.push({
+        ingredientId: component.ingredientId,
+        ingredientName: component.ingredient.name,
+        unitLabel,
+        requiredQuantity,
+        availableQuantity,
+        status: InventoryStatus.OUT_OF_STOCK,
+      });
+      continue;
+    }
+
+    const servings = Math.floor(availableQuantity / requiredQuantity);
+
+    cookableServings = cookableServings === null ? servings : Math.min(cookableServings, servings);
+
+    if (pantryItem.status !== InventoryStatus.IN_STOCK || servings < 2) {
+      lowStockIngredients.push({
+        ingredientId: component.ingredientId,
+        ingredientName: component.ingredient.name,
+        unitLabel,
+        requiredQuantity,
+        availableQuantity,
+        status: pantryItem.status,
+      });
+    }
+
+    if (hasOperatorPantry) {
+      const operatorItem = operatorPantryMap.get(component.ingredientId);
+      const operatorQuantity = operatorItem ? Number(operatorItem.quantity) : 0;
+
+      if (!operatorItem || operatorQuantity <= 0 || requiredQuantity <= 0) {
+        operatorCookableServings = 0;
+        operatorMissingIngredients.push({
+          ingredientId: component.ingredientId,
+          ingredientName: component.ingredient.name,
+          unitLabel,
+          requiredQuantity,
+          availableQuantity: operatorQuantity,
+          status: InventoryStatus.OUT_OF_STOCK,
+        });
+      } else {
+        const operatorServings = Math.floor(operatorQuantity / requiredQuantity);
+        operatorCookableServings =
+          operatorCookableServings === null
+            ? operatorServings
+            : Math.min(operatorCookableServings, operatorServings);
+
+        if (operatorItem.status !== InventoryStatus.IN_STOCK || operatorServings < 2) {
+          operatorLowStockIngredients.push({
+            ingredientId: component.ingredientId,
+            ingredientName: component.ingredient.name,
+            unitLabel,
+            requiredQuantity,
+            availableQuantity: operatorQuantity,
+            status: operatorItem.status,
+          });
+        }
+      }
+    }
+  }
+
+  if (cookableServings === null || cookableServings === Infinity) {
+    cookableServings = 0;
+  }
+
+  let status: InventoryStatus = InventoryStatus.OUT_OF_STOCK;
+  if (cookableServings >= 2) {
+    status = InventoryStatus.IN_STOCK;
+  } else if (cookableServings >= 1) {
+    status = InventoryStatus.LOW_STOCK;
+  }
+
+  let operatorStatus: InventoryStatus = InventoryStatus.IN_STOCK;
+  if (!hasOperatorPantry) {
+    operatorStatus = InventoryStatus.IN_STOCK;
+  } else if (operatorCookableServings === 0 || operatorMissingIngredients.length) {
+    operatorStatus = InventoryStatus.OUT_OF_STOCK;
+  } else if ((operatorCookableServings ?? 0) < 2) {
+    operatorStatus = InventoryStatus.LOW_STOCK;
+  }
+
+  return {
+    status,
+    cookableServings,
+    missingIngredients,
+    lowStockIngredients,
+    operatorStatus,
+    operatorMissingIngredients,
+    operatorLowStockIngredients,
+  };
+}
+
 function scoreCandidates(candidates: CandidateRecipe[], profile: UserProfile): ScoredCandidate[] {
   return candidates.map((candidate) => {
     let score = BASE_SCORE;
     const adjustments: ScoreAdjustment[] = [];
 
-    const inventory = candidate.inventory!;
+    const coverage = candidate.pantryCoverage;
 
     const addAdjustment = (reason: string, delta: number) => {
       score += delta;
       adjustments.push({ reason, delta });
     };
 
-    applyInventoryAvailability(inventory, addAdjustment);
+    applyPantryAvailability(coverage, addAdjustment);
 
     applyGoalHeuristics(candidate, profile, addAdjustment);
     applyDietaryPreferenceMatch(candidate, profile, addAdjustment);
     applyTasteMatch(candidate, profile, addAdjustment);
-    applyBudgetHeuristic(candidate, profile, addAdjustment);
     applyMacroBalance(candidate, addAdjustment);
 
     const macrosLabel = buildMacrosLabel(candidate);
-    const deterministicRationale = buildDeterministicRationale(candidate, profile, inventory, macrosLabel);
+    const deterministicRationale = buildDeterministicRationale(candidate, profile, coverage, macrosLabel);
     const deterministicSwap = buildHealthySwapSuggestion(candidate, profile);
 
     return {
@@ -432,25 +651,6 @@ function applyTasteMatch(
   });
 }
 
-function applyBudgetHeuristic(
-  candidate: CandidateRecipe,
-  profile: UserProfile,
-  push: (reason: string, delta: number) => void
-) {
-  if (!profile.budgetTargetCents) {
-    return;
-  }
-
-  const budget = profile.budgetTargetCents + BUDGET_CUSHION_CENTS;
-  const diff = budget - candidate.priceCents;
-
-  if (diff >= 0) {
-    push(`Within budget (saves ${formatCurrency(Math.max(diff - BUDGET_CUSHION_CENTS, 0))})`, 6);
-  } else {
-    push(`Over budget by ${formatCurrency(Math.abs(diff))}`, -Math.min(14, Math.round(Math.abs(diff) / 100) + 4));
-  }
-}
-
 function applyMacroBalance(candidate: CandidateRecipe, push: (reason: string, delta: number) => void) {
   const protein = candidate.proteinGrams ?? 0;
   const carbs = candidate.carbsGrams ?? 0;
@@ -465,29 +665,57 @@ function applyMacroBalance(candidate: CandidateRecipe, push: (reason: string, de
   }
 }
 
-function applyInventoryAvailability(inventory: InventoryItem, push: (reason: string, delta: number) => void) {
-  if (inventory.status === InventoryStatus.OUT_OF_STOCK || inventory.quantity <= 0) {
-    push("Out of stock", -100);
-    return;
-  }
-
-  if (inventory.status === InventoryStatus.LOW_STOCK) {
-    if (inventory.quantity <= 4) {
-      push("Critical inventory — nearly gone", -14);
-    } else if (inventory.quantity <= INVENTORY_LOW_WARNING) {
-      push(`Low stock — ${inventory.quantity} left`, -8);
-    } else {
-      push("Limited availability", -5);
+function applyPantryAvailability(coverage: PantryCoverage, push: (reason: string, delta: number) => void) {
+  if (coverage.operatorStatus === InventoryStatus.OUT_OF_STOCK) {
+    push("Kitchen pantry is out of core ingredients", -35);
+    if (coverage.operatorMissingIngredients.length) {
+      push(
+        `Global shortfall: ${coverage.operatorMissingIngredients
+          .slice(0, 2)
+          .map((gap) => gap.ingredientName.toLowerCase())
+          .join(", ")}`,
+        -8
+      );
     }
     return;
   }
 
-  if (inventory.quantity >= INVENTORY_PLENTY_THRESHOLD) {
-    push(`Plentiful inventory (${inventory.quantity} units)`, 10);
-  } else if (inventory.quantity >= 20) {
-    push("Healthy inventory buffer", 6);
+  if (coverage.operatorStatus === InventoryStatus.LOW_STOCK) {
+    push("Operator pantry running low", -6);
+  }
+
+  if (coverage.status === InventoryStatus.OUT_OF_STOCK || coverage.cookableServings <= 0) {
+    push("Pantry missing core ingredients", -30);
+    if (coverage.missingIngredients.length) {
+      push(
+        `Missing ${coverage.missingIngredients
+          .slice(0, 2)
+          .map((gap) => gap.ingredientName.toLowerCase())
+          .join(", ")}`,
+        -6
+      );
+    }
+    return;
+  }
+
+  if (coverage.status === InventoryStatus.LOW_STOCK) {
+    push("Only enough pantry stock for one serving", -6);
   } else {
-    push("Ready now", 4);
+    push("Pantry ready for multiple servings", 8);
+  }
+
+  if (coverage.cookableServings >= 3) {
+    push("Cookable for 3+ servings", 6);
+  }
+
+  if (coverage.lowStockIngredients.length) {
+    push(
+      `Low pantry levels: ${coverage.lowStockIngredients
+        .slice(0, 2)
+        .map((gap) => gap.ingredientName.toLowerCase())
+        .join(", ")}`,
+      -4
+    );
   }
 }
 
@@ -503,7 +731,7 @@ async function rankWithLLM(
   candidates: ScoredCandidate[],
   limit: number
 ): Promise<AiRankingResponse | null> {
-  if (!OPENAI_API_KEY) {
+  if (!OPENAI_API_KEY || !ENABLE_AI_RANKING) {
     return null;
   }
 
@@ -514,23 +742,26 @@ async function rankWithLLM(
         allergens: profile.allergens,
         diet: profile.dietaryPreferences,
         tastes: profile.tastePreferences,
-        budgetTargetCents: profile.budgetTargetCents,
       },
       limit,
       candidates: candidates.map((candidate) => ({
         recipeId: candidate.id,
         title: candidate.title,
-        priceCents: candidate.priceCents,
         macrosLabel: candidate.macrosLabel,
         tags: candidate.tags,
         highlights: candidate.healthyHighlights,
         score: candidate.score,
         description: candidate.description,
-        inventoryStatus: candidate.inventory?.status,
+        pantryStatus: candidate.pantryCoverage.status,
+        cookableServings: candidate.pantryCoverage.cookableServings,
+        missingIngredients: candidate.pantryCoverage.missingIngredients.map((gap) => gap.ingredientName),
+        operatorStatus: candidate.pantryCoverage.operatorStatus,
+        operatorMissing: candidate.pantryCoverage.operatorMissingIngredients.map((gap) => gap.ingredientName),
       })),
     };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const normalizedBase = OPENAI_BASE_URL.replace(/\/$/, "");
+    const response = await fetch(`${normalizedBase}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -589,15 +820,12 @@ async function rankWithLLM(
 function buildDeterministicRationale(
   recipe: CandidateRecipe,
   profile: UserProfile,
-  inventory: InventoryItem,
+  coverage: PantryCoverage,
   macrosLabel: string
 ) {
   const primaryGoal = profile.dietaryGoals?.[0];
   const highlights = recipe.healthyHighlights?.slice(0, 2).join(", ");
-  const readyText =
-    inventory.status === InventoryStatus.LOW_STOCK
-      ? `Low stock—only ${inventory.quantity} ${inventory.unitLabel} left.`
-      : `Ready now with ${inventory.quantity} ${inventory.unitLabel} prepped.`;
+  const readyText = buildPantryReadinessText(coverage);
 
   if (primaryGoal === "LEAN_MUSCLE" && recipe.proteinGrams) {
     return `Delivers ${recipe.proteinGrams}g protein with ${macrosLabel}, dialed for your lean muscle focus. ${readyText}`;
@@ -642,6 +870,41 @@ function buildHealthySwapSuggestion(recipe: CandidateRecipe, profile: UserProfil
   return "Add crunchy greens in place of starch for a lighter swap.";
 }
 
+function buildPantryReadinessText(coverage: PantryCoverage) {
+  if (coverage.operatorStatus === InventoryStatus.OUT_OF_STOCK) {
+    if (coverage.operatorMissingIngredients.length) {
+      return `Kitchen shortfall: ${coverage.operatorMissingIngredients
+        .map((gap) => gap.ingredientName.toLowerCase())
+        .join(", ")} until the operator pantry restocks.`;
+    }
+    return "Kitchen shortfall — operator pantry needs a restock before this dish is available.";
+  }
+
+  if (coverage.operatorStatus === InventoryStatus.LOW_STOCK) {
+    return "Operator pantry running low — snag it before the kitchen runs out.";
+  }
+
+  if (coverage.status === InventoryStatus.OUT_OF_STOCK || coverage.cookableServings <= 0) {
+    if (!coverage.missingIngredients.length) {
+      return "Missing pantry components—restock to cook this dish.";
+    }
+
+    return `Missing ${coverage.missingIngredients
+      .map((gap) => gap.ingredientName.toLowerCase())
+      .join(", ")} right now.`;
+  }
+
+  if (coverage.status === InventoryStatus.LOW_STOCK) {
+    return `Enough pantry stock for ${coverage.cookableServings} serving${
+      coverage.cookableServings === 1 ? "" : "s"
+    } before restocking.`;
+  }
+
+  return `Pantry ready for ${coverage.cookableServings} serving${
+    coverage.cookableServings === 1 ? "" : "s"
+  } without extra trips.`;
+}
+
 function buildMacrosLabel(recipe: Recipe) {
   const macros: string[] = [];
   if (recipe.proteinGrams != null) {
@@ -676,9 +939,4 @@ function safeJsonParse<T>(value: string): T | null {
   } catch {
     return null;
   }
-}
-
-function formatCurrency(cents: number) {
-  const dollars = cents / 100;
-  return dollars.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }

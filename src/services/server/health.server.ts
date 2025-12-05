@@ -24,8 +24,8 @@ async function checkDatabase(): Promise<HealthIndicator> {
   if (!DATABASE_URL) {
     return {
       label: "Database",
-      ok: false,
-      details: ENV_WARNINGS.missingDatabaseUrl,
+      ok: true,
+      details: "Skipped database check (DATABASE_URL not configured)",
     };
   }
 
@@ -82,12 +82,7 @@ function checkHealthySwapFlag(): HealthIndicator {
 export async function getHealthSnapshot(): Promise<HealthSnapshot> {
   const [database] = await Promise.all([checkDatabase()]);
 
-  const indicators: HealthIndicator[] = [
-    database,
-    checkOpenAI(),
-    checkJwt(),
-    checkHealthySwapFlag(),
-  ];
+  const indicators: HealthIndicator[] = [database, checkOpenAI(), checkJwt(), checkHealthySwapFlag()];
 
   return {
     timestamp: new Date().toISOString(),

@@ -29,7 +29,6 @@ type RecipeFormState = {
   proteinGrams: string;
   carbsGrams: string;
   fatGrams: string;
-  priceCents: string;
   tags: string;
   allergens: string;
   healthyHighlights: string;
@@ -53,11 +52,6 @@ type RecipeFormState = {
   inventoryRestockDate: string;
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
-
 const INITIAL_FORM: RecipeFormState = {
   id: null,
   slug: "",
@@ -71,7 +65,6 @@ const INITIAL_FORM: RecipeFormState = {
   proteinGrams: "",
   carbsGrams: "",
   fatGrams: "",
-  priceCents: "",
   tags: "",
   allergens: "",
   healthyHighlights: "",
@@ -138,7 +131,6 @@ function mapRecipeToForm(recipe: RecipeWithInventory): RecipeFormState {
     proteinGrams: recipe.proteinGrams?.toString() ?? "",
     carbsGrams: recipe.carbsGrams?.toString() ?? "",
     fatGrams: recipe.fatGrams?.toString() ?? "",
-    priceCents: recipe.priceCents.toString(),
     tags: joinList(recipe.tags),
     allergens: joinList(recipe.allergens),
     healthyHighlights: joinList(recipe.healthyHighlights),
@@ -196,11 +188,6 @@ function parseOptionalFloat(value: string) {
 }
 
 function buildPayload(form: RecipeFormState): AdminRecipeInput {
-  const price = parseOptionalInt(form.priceCents);
-  if (price === null || price < 0) {
-    throw new Error("Price (cents) must be a non-negative number.");
-  }
-
   const quantity = parseOptionalInt(form.inventoryQuantity);
   if (quantity === null || quantity < 0) {
     throw new Error("Inventory quantity must be a non-negative number.");
@@ -236,7 +223,6 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
     proteinGrams: parseOptionalInt(form.proteinGrams),
     carbsGrams: parseOptionalInt(form.carbsGrams),
     fatGrams: parseOptionalInt(form.fatGrams),
-    priceCents: price,
     tags: splitList(form.tags),
     allergens: splitList(form.allergens),
     healthyHighlights: splitList(form.healthyHighlights),
@@ -264,21 +250,20 @@ function buildPayload(form: RecipeFormState): AdminRecipeInput {
 }
 
 function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
-  const priceCents = parseOptionalInt(form.priceCents) ?? 0;
   const quantity = parseOptionalInt(form.inventoryQuantity) ?? 0;
   const calories = parseOptionalInt(form.calories);
   const protein = parseOptionalInt(form.proteinGrams);
   const carbs = parseOptionalInt(form.carbsGrams);
   const fat = parseOptionalInt(form.fatGrams);
+  const unitLabel = form.inventoryUnitLabel || "unit";
 
   return {
     recommendationId: "preview",
     recipeId: form.id ?? "preview",
+    slug: form.slug || "preview-recipe",
     title: form.title || "Recipe preview",
     description: form.description || null,
     imageUrl: form.imageUrl.trim() || null,
-    priceCents,
-    priceDisplay: currencyFormatter.format(priceCents / 100),
     calories,
     proteinGrams: protein,
     carbsGrams: carbs,
@@ -287,11 +272,7 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
     tags: splitList(form.tags),
     healthyHighlights: splitList(form.healthyHighlights),
     allergens: splitList(form.allergens),
-    inventory: {
-      status: form.inventoryStatus,
-      quantity,
-      unitLabel: form.inventoryUnitLabel || "unit",
-    },
+    pantry: buildPreviewPantry(form.inventoryStatus, quantity, unitLabel),
     rationale:
       form.description.trim() ||
       "Preview how AI rationale will render here once the recommendation service ranks this recipe.",
@@ -302,6 +283,33 @@ function buildPreviewCard(form: RecipeFormState): RecommendationCardType {
       baseScore: 80,
       adjustments: [],
     },
+  };
+}
+
+function buildPreviewPantry(
+  status: InventoryStatus,
+  quantity: number,
+  unitLabel: string
+): RecommendationCardType["pantry"] {
+  const safeQuantity = Math.max(0, quantity);
+  const safeStatus = status as RecommendationCardType["pantry"]["status"];
+  const cookableServings =
+    safeStatus === "OUT_OF_STOCK" ? 0 : Math.max(1, Math.min(3, safeQuantity || 1));
+  const placeholder = {
+    ingredient: "Pantry staple",
+    unitLabel,
+    requiredQuantity: 1,
+    availableQuantity: safeQuantity,
+  };
+
+  return {
+    status: safeStatus,
+    cookableServings,
+    missingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    lowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
+    operatorStatus: safeStatus,
+    operatorMissingIngredients: safeStatus === "OUT_OF_STOCK" ? [placeholder] : [],
+    operatorLowStockIngredients: safeStatus === "LOW_STOCK" ? [placeholder] : [],
   };
 }
 
@@ -437,8 +445,8 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
   };
 
   return (
-    <div className='grid gap-8 lg:grid-cols-[320px,1fr]'>
-      <aside className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-inner'>
+    <div className='grid gap-6 lg:grid-cols-[40%_60%] lg:items-start'>
+      <aside className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-inner lg:sticky lg:top-24'>
         <div className='flex items-center justify-between gap-3 pb-4'>
           <h2 className='text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700'>Recipes</h2>
           <button
@@ -449,7 +457,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
             New
           </button>
         </div>
-        <div className='max-h-[70vh] space-y-2 overflow-auto pr-2'>
+        <div className='h-[55vh] space-y-2 overflow-y-auto pr-2 lg:h-[72vh]'>
           {recipes.length === 0 ? (
             <p className='text-sm text-slate-600'>No recipes yet — add your first one.</p>
           ) : (
@@ -512,7 +520,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
             </p>
           ) : null}
 
-          <div className='grid gap-6 lg:grid-cols-2'>
+          <div className='grid gap-6 lg:grid-cols-2 lg:max-h-[62vh] lg:overflow-y-auto lg:pr-2'>
             <div className='space-y-4'>
               <TextField label='Title' value={formState.title} onChange={(value) => handleFieldChange("title", value)} required />
               <TextField label='Slug' value={formState.slug} onChange={(value) => handleFieldChange("slug", value)} helper='Must be unique.' />
@@ -522,10 +530,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
               <TextField label='Image URL' value={formState.imageUrl} onChange={(value) => handleFieldChange("imageUrl", value)} />
               <TextareaField label='Description' value={formState.description} onChange={(value) => handleFieldChange("description", value)} rows={4} />
               <TextField label='Cuisine' value={formState.cuisine} onChange={(value) => handleFieldChange("cuisine", value)} />
-              <div className='grid grid-cols-2 gap-3'>
-                <TextField label='Price (cents)' value={formState.priceCents} onChange={(value) => handleFieldChange("priceCents", value)} required />
-                <TextField label='Serves' value={formState.serves} onChange={(value) => handleFieldChange("serves", value)} />
-              </div>
+              <TextField label='Serves' value={formState.serves} onChange={(value) => handleFieldChange("serves", value)} />
               <div className='grid grid-cols-2 gap-3'>
                 <TextField label='Difficulty' value={formState.difficulty} onChange={(value) => handleFieldChange("difficulty", value)} />
                 <TextField label='Dish Type' value={formState.dishType} onChange={(value) => handleFieldChange("dishType", value)} />

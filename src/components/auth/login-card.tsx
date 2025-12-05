@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Lock, Sparkles } from "lucide-react";
@@ -23,17 +23,18 @@ export function LoginCard() {
     (!isSuccess && apiResponse && !apiResponse.success ? apiResponse.message : null) ??
     (loginMutation.isError ? loginMutation.error.message : null);
 
-  const successHref = successUser
-    ? successUser.isAdmin
-      ? "/admin"
-      : `/menus?prefillEmail=${encodeURIComponent(successUser.email)}`
-    : "/onboarding";
+  const successHref = useMemo(() => {
+    if (!successUser) {
+      return null;
+    }
+    return successUser.isAdmin ? "/admin" : `/menus?prefillEmail=${encodeURIComponent(successUser.email)}`;
+  }, [successUser]);
 
   useEffect(() => {
-    if (successUser?.isAdmin) {
-      router.replace("/admin");
+    if (successHref) {
+      router.replace(successHref);
     }
-  }, [successUser?.isAdmin, router]);
+  }, [successHref, router]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,10 +65,10 @@ export function LoginCard() {
               <CheckCircle2 className='h-4 w-4 text-emerald-600' />
               {apiResponse.message}
             </p>
-            <Link href={successHref} className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'>
-              {successUser?.isAdmin ? "Open admin console" : "Jump to recommendations"}
-              <Sparkles className='h-3.5 w-3.5' />
-            </Link>
+            <p className='mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-700'>
+              <Loader2 className='h-3.5 w-3.5 animate-spin' />
+              Redirecting you to {successUser?.isAdmin ? "the operator console" : "your menus"}...
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className='space-y-4'>

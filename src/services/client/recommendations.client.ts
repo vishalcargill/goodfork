@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useMutation, type UseMutationResult } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
 import { apiClient } from "@/config/axios.config";
 import type { RecommendationRequestPayload } from "@/schema/recommendations.schema";
@@ -20,9 +20,7 @@ export type RecommendationsApiResponse =
       fieldErrors?: Record<string, string[]>;
     };
 
-async function requestRecommendations(
-  payload: RecommendationRequestPayload
-): Promise<RecommendationsApiResponse> {
+async function requestRecommendations(payload: RecommendationRequestPayload): Promise<RecommendationsApiResponse> {
   try {
     const { data } = await apiClient.post<RecommendationsApiResponse>("/recommendations", payload);
     return data;
@@ -31,18 +29,28 @@ async function requestRecommendations(
       return error.response.data as RecommendationsApiResponse;
     }
 
-    throw new Error(
-      error instanceof Error ? error.message : "Unable to load recommendations. Try again."
-    );
+    throw new Error(error instanceof Error ? error.message : "Unable to load recommendations. Try again.");
   }
 }
 
-export function useRecommendationsMutation(): UseMutationResult<
-  RecommendationsApiResponse,
-  Error,
-  RecommendationRequestPayload
-> {
-  return useMutation({
-    mutationFn: requestRecommendations,
+export function useRecommendationsQuery(
+  payload: RecommendationRequestPayload | null
+): UseQueryResult<RecommendationsApiResponse, Error> {
+  const hasIdentifier = Boolean(payload && (payload.email || payload.userId));
+
+  return useQuery({
+    queryKey: [
+      "recommendations",
+      payload?.email,
+      payload?.userId,
+      payload?.source,
+      payload?.limit,
+      payload?.sessionId,
+      payload?.deterministicOnly,
+    ],
+    queryFn: () => requestRecommendations(payload as RecommendationRequestPayload),
+    enabled: hasIdentifier,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }

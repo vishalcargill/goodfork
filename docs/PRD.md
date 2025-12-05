@@ -22,10 +22,12 @@ GoodFork is our hackathon submission for the **AI-Driven Menu Personalization an
 ## 5. Functional Requirements
 - **Data ingestion:** nightly sync of inventory and macros; admin CRUD for emergency edits.
 - **Inventory feeds:** `npm run inventory:import path/to/feed.(json|csv)` supports manual replays, while `/api/admin/inventory/import` ingests cron-delivered payloads signed with `INVENTORY_SYNC_SECRET`.
+- **Personal pantry:** authenticated non-admins can visit `/pantry` to restock or consume ingredients, add items by slug/unit, and the recommendation service uses the same structured `Ingredient` + `RecipeIngredient` data to compute cookable servings and shortfall messaging.
 - **Recommendation engine:** combine deterministic filters (allergens, availability) with LLM re-ranking and rules for macros/cost targets.
 - **Healthy swap module:** for each card, propose an alternate meal that nudges toward goals (e.g., lower sodium) while noting trade-offs.
 - **Nutrition insights:** render calorie/macro badges, allergen flags, and short AI explanation (<200 chars) on every recommendation.
 - **User profile store:** persist preferences, recent selections, and feedback for better personalization.
+- **Personalization settings:** authenticated non-admin users can visit `/personalization` (linked through the profile icon in the header) to adjust goals, allergen shields, and reset their password; operator/admin accounts stay scoped to `/admin`.
 - **Operator tools:** `/admin` landing locked to `ADMIN_EMAIL` plus the `/admin/recipes` console that surfaces full CRUD for recipes + inventory with schema validation, live consumer card previewing, and immediate propagation to the recommendation engine; future iterations add stock warnings and analytics.
 - **Experience shell:** marketing landing page with high polish/animation that funnels to onboarding, a dedicated `/menus` route for personalized recommendations, and `/recipes/[slug]` deep-dive pages that reuse AI rationale + macros for individual dishes.
 - **Personalized preview safety rails:** the recommendation preview form must validate onboarding emails and surface Sonner toasts (instead of inline banners) whenever a non-existent profile or profile-less user submits a request so consumers immediately know to rerun onboarding.
@@ -66,7 +68,7 @@ Design a mobile-first, beautiful interface optimized for 360–390px widths and 
 - **Inventory model:** finalize whether inventory is tracked at ingredient, recipe, or menu-item level, and whether any location dimension is needed even in a single-tenant setup.
 - **Auth edges:** decide on password reset flow, email verification requirements, and session strategy for the simple sign up / login experience.
 - **Historical behavior tracking:** clarify how much of historical consumption patterns and feedback need to be persisted in early phases versus inferred on the fly.
-- **Pricing depth:** confirm how detailed pricing must be (single price vs variants, discounts, taxes) to support “budget-friendly” recommendations.
+- **Pricing depth:** confirm how detailed pricing must be (single price vs variants, discounts, taxes) to keep menu context accurate.
 - **Stretch analytics & accessibility:** confirm which analytics/observability hooks and accessibility investments, if any, are expected during the hackathon versus deferred post-hackathon.
 
 ## 12. Admin Console Deliverable (Shipped)
@@ -78,5 +80,6 @@ Design a mobile-first, beautiful interface optimized for 360–390px widths and 
 
 ## 13. Experience Architecture Refresh (Planned)
 - **Landing page:** evolves into a purely narrative hero with rich motion (Framer Motion for hero, scroll-linked feature reveals, animated stats, and CTA micro-interactions). Header now only carries the GoodFork logo plus “Start personalization” and “Log in” buttons to keep the CTA focus clear.
-- **Menus page:** `/menus` becomes the authenticated/home for recommendations, swaps, insights, and telemetry. It will hydrate from onboarding data (email or session) and support stateful UI without distracting marketing content.
+- **Menus page:** `/menus` becomes the authenticated/home for recommendations, swaps, insights, and telemetry. It will hydrate from onboarding data (email or session) and support stateful UI without distracting marketing content. The redundant “Signed in as” card has been removed from the header so the layout focuses on actionable signals like Kitchen Pulse + recommendation controls while onboarding links live elsewhere.
 - **Recipe detail pages:** `/recipes/[slug]` expand a single card into full nutrition breakdowns, inventory status, swap suggestions, and AI rationale history to deepen judge storytelling.
+- **Pantry manager:** `/pantry` surfaces the ingredient-level pantry with restock/consume shortcuts and hooks into recommendation scoring so users immediately see cookable counts and shortfalls.

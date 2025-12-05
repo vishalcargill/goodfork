@@ -1,5 +1,9 @@
+import { redirect } from "next/navigation";
+
 import { LoginCard } from "@/components/auth/login-card";
 import { HeroIllustration } from "@/components/landing/hero-illustration";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { ADMIN_EMAIL } from "@/constants/app.constants";
 
 const vibeNotes = [
   {
@@ -8,7 +12,7 @@ const vibeNotes = [
   },
   {
     title: "Goal-first prompts",
-    description: "Lean muscle, metabolic reset, or budget saves—we translate each pick into macros instantly.",
+    description: "Lean muscle, metabolic reset, or balanced energy—we translate each pick into macros instantly.",
   },
   {
     title: "Swap-ready data",
@@ -16,7 +20,14 @@ const vibeNotes = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const currentUser = await getAuthenticatedUser();
+
+  if (currentUser) {
+    const isAdmin = currentUser.email.toLowerCase() === ADMIN_EMAIL;
+    redirect(isAdmin ? "/admin" : "/menus");
+  }
+
   return (
     <div className='relative min-h-screen overflow-hidden bg-[#f6fff4] text-slate-900'>
       <div className='pointer-events-none absolute inset-0 -z-10'>
@@ -29,9 +40,9 @@ export default function Home() {
         <section className='grid gap-10 rounded-[40px] border border-emerald-100 bg-white/90 p-10 shadow-[0_40px_140px_rgba(16,185,129,0.15)] backdrop-blur'>
           <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center'>
             <div className='space-y-6'>
-              <h1 className='text-4xl font-semibold leading-tight text-slate-900 sm:text-5xl'>
-                GoodFork hijacks boring meal plans—drop your goals, vibe with the motion, and let clean recepies do the
-                heavy lift.
+              <h1 className='text-4xl leading-tight text-slate-900 sm:text-5xl'>
+                <span className='text-emerald-500 font-semibold'>GoodFork</span> hijacks boring meal plans into
+                exciting, healthy and nutrtion-packed menus.
               </h1>
             </div>
             <HeroIllustration />
@@ -52,7 +63,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className='grid gap-10 rounded-[36px] border border-emerald-100 bg-white/85 p-8 shadow-[0_30px_90px_rgba(16,185,129,0.12)] backdrop-blur lg:grid-cols-[1.1fr_0.9fr] lg:items-center'>
+        <section
+          id='login'
+          className='grid gap-10 rounded-[36px] border border-emerald-100 bg-white/85 p-8 shadow-[0_30px_90px_rgba(16,185,129,0.12)] backdrop-blur lg:grid-cols-[1.1fr_0.9fr] lg:items-center'
+        >
           <div className='space-y-4'>
             <p className='text-xs font-semibold uppercase tracking-[0.25em] text-emerald-600'>Already onboarded?</p>
             <h2 className='text-3xl font-semibold text-slate-900'>Hop back in without the fluff.</h2>

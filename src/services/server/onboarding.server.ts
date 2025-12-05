@@ -11,7 +11,6 @@ type PersistedProfileInput = {
   allergens: string[];
   dietaryPreferences: string[];
   tastePreferences: string[];
-  budgetTargetCents: number | null;
   lifestyleNotes: string | null;
 };
 
@@ -38,7 +37,6 @@ export async function upsertUserWithProfile(input: PersistedProfileInput) {
       allergens: input.allergens,
       dietaryPreferences: input.dietaryPreferences,
       tastePreferences: input.tastePreferences,
-      budgetTargetCents: input.budgetTargetCents,
       lifestyleNotes: input.lifestyleNotes,
     },
     create: {
@@ -47,7 +45,6 @@ export async function upsertUserWithProfile(input: PersistedProfileInput) {
       allergens: input.allergens,
       dietaryPreferences: input.dietaryPreferences,
       tastePreferences: input.tastePreferences,
-      budgetTargetCents: input.budgetTargetCents,
       lifestyleNotes: input.lifestyleNotes,
     },
   });
@@ -66,7 +63,6 @@ export async function saveOnboardingProfile(payload: OnboardingPayload) {
     allergens: payload.allergens,
     dietaryPreferences: payload.dietaryPreferences,
     tastePreferences: payload.tastePreferences,
-    budgetTargetCents: payload.budgetTargetCents ?? null,
     lifestyleNotes: payload.lifestyleNotes ?? null,
   });
 }
