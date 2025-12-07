@@ -1,4 +1,4 @@
--- Generated from data/recipes.json to seed Ingredient + Pantry data
+-- Generated from data/recipes1.json to seed Ingredient + Pantry data
 -- Records: 754
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";

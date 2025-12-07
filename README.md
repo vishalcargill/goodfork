@@ -64,7 +64,7 @@ Run the entire stack with Docker if you can’t (or don’t want to) manage Post
 | `npm run prisma:generate` | Rebuild Prisma client (`src/generated/prisma`). |
 | `npm run db:seed` | Seed demo users + inventory. |
 | `npm run admin:create -- admin@example.com "Admin Name"` | Upsert the admin account using the provided email/name (password defaults to `admin@123` unless `ADMIN_PASSWORD` is set). |
-| `npm run recipes:import -- data/recipes.json` | Load the Kaggle dataset into the `Recipe` + `InventoryItem` tables. |
+| `npm run recipes:import -- data/recipes1.json` | Load the Kaggle dataset into the `Recipe` + `InventoryItem` tables. |
 | `npm run recipes:embed -- 50` | Generate embeddings for up to 50 recipes missing the configured vector version. |
 
 ### Admin Recipes
@@ -74,8 +74,8 @@ Run the entire stack with Docker if you can’t (or don’t want to) manage Post
 - All actions flow through `/api/admin/recipes` (POST for create, PUT for update, DELETE for removal) and respect the `InventoryItem` relation. Inventory status + restock dates update the same row the recommendation engine uses.
 
 ### Recipe Dataset & Embeddings
-1. Place the Kaggle payload at `data/recipes.json` (already checked in).
-2. Run `npm run recipes:import -- data/recipes.json` to normalize slugs, macros, prep/cook times, and seed inventory placeholders. Re-running updates existing rows via `sourceId`.
+1. Place the Kaggle payload at `data/recipes1.json` (already checked in).
+2. Run `npm run recipes:import -- data/recipes1.json` to normalize slugs, macros, prep/cook times, and seed inventory placeholders. Re-running updates existing rows via `sourceId`.
 3. Ensure `OPENAI_API_KEY`, `RECIPE_EMBEDDING_MODEL`, and `RECIPE_EMBEDDING_PROVIDER` are configured. Then run `npm run recipes:embed -- 25` (limit optional) to create semantic vectors in the new `RecipeEmbedding` table.
 4. Recommendation services can now read both the enriched recipe metadata and embeddings to support semantic filtering, swaps, and similarity lookups.
 
