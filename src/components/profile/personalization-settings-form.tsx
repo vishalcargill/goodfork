@@ -91,17 +91,17 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
   const disableSave = mutation.isPending || goals.length === 0;
 
   return (
-    <div className='rounded-[28px] border border-emerald-100 bg-white/95 p-6 shadow-[0_24px_60px_rgba(16,185,129,0.12)]'>
-      <div className='space-y-3 rounded-3xl border border-emerald-50 bg-emerald-50/50 p-5'>
-        <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700'>Live shields</p>
+    <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
+      <div className='space-y-3 rounded-lg border border-border bg-surface-subtle p-5'>
+        <p className='text-[10px] font-bold uppercase tracking-wider text-primary'>Live shields</p>
         <div className='grid gap-3 sm:grid-cols-2'>
-          <div className='rounded-2xl border border-emerald-100 bg-white/80 p-4'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Goals</p>
-            <p className='mt-2 text-sm font-semibold text-slate-900'>{goalSummary}</p>
+          <div className='rounded-lg border border-border bg-surface p-4'>
+            <p className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>Goals</p>
+            <p className='mt-2 text-sm font-semibold text-foreground'>{goalSummary}</p>
           </div>
-          <div className='rounded-2xl border border-emerald-100 bg-white/80 p-4'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600'>Allergen shields</p>
-            <p className='mt-2 text-sm font-semibold text-slate-900'>{allergenSummary}</p>
+          <div className='rounded-lg border border-border bg-surface p-4'>
+            <p className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>Allergen shields</p>
+            <p className='mt-2 text-sm font-semibold text-foreground'>{allergenSummary}</p>
           </div>
         </div>
       </div>
@@ -109,13 +109,13 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
       <form onSubmit={handleSubmit} className='mt-8 space-y-8'>
         <section>
           <div className='flex items-center justify-between'>
-            <h2 className='text-lg font-semibold text-slate-900'>Goals</h2>
-            <span className='inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800'>
+            <h2 className='text-lg font-semibold text-foreground'>Goals</h2>
+            <span className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-muted-foreground'>
               <ShieldCheck className='h-3.5 w-3.5' />
               Priority match
             </span>
           </div>
-          <p className='mt-1 text-sm text-slate-600'>Tap all goals that best represent this season&apos;s focus.</p>
+          <p className='mt-1 text-sm text-muted-foreground'>Tap all goals that best represent this season&apos;s focus.</p>
           <div className='mt-4 grid gap-3 sm:grid-cols-2'>
             {GOAL_OPTIONS.map((goal) => {
               const active = goals.includes(goal.value);
@@ -125,31 +125,31 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
                   key={goal.value}
                   onClick={() => toggleGoal(goal.value)}
                   className={cn(
-                    "rounded-3xl border px-4 py-3 text-left shadow-sm transition",
+                    "rounded-xl border px-4 py-3 text-left shadow-sm transition",
                     active
-                      ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-                      : "border-emerald-100 bg-white text-slate-800 hover:border-emerald-200"
+                      ? "border-primary bg-primary/5 text-primary"
+                      : "border-border bg-surface text-foreground hover:bg-surface-subtle"
                   )}
                 >
                   <p className='text-sm font-semibold'>{goal.label}</p>
-                  <p className='text-xs text-slate-500'>{goal.helper}</p>
+                  <p className='text-xs opacity-80'>{goal.helper}</p>
                 </button>
               );
             })}
           </div>
           {goalError ? (
-            <p className='mt-2 text-sm text-rose-600'>{goalError}</p>
+            <p className='mt-2 text-sm text-destructive'>{goalError}</p>
           ) : null}
         </section>
 
         <section>
           <div className='flex items-center justify-between'>
-            <h2 className='text-lg font-semibold text-slate-900'>Allergen shields</h2>
-            <span className='inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-3 py-1 text-xs font-semibold text-slate-700'>
+            <h2 className='text-lg font-semibold text-foreground'>Allergen shields</h2>
+            <span className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-muted-foreground'>
               Safety first
             </span>
           </div>
-          <p className='mt-1 text-sm text-slate-600'>We never surface menus carrying these allergens.</p>
+          <p className='mt-1 text-sm text-muted-foreground'>We never surface menus carrying these allergens.</p>
           <div className='mt-4 flex flex-wrap gap-2'>
             {ALLERGEN_OPTIONS.map((option) => {
               const active = allergens.includes(option.value);
@@ -161,8 +161,8 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
                   className={cn(
                     "rounded-full border px-4 py-2 text-sm font-semibold transition",
                     active
-                      ? "border-emerald-300 bg-emerald-600/10 text-emerald-800"
-                      : "border-emerald-100 bg-white text-slate-700 hover:border-emerald-200"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-surface text-muted-foreground hover:text-foreground hover:bg-surface-subtle"
                   )}
                 >
                   {option.label}
@@ -171,49 +171,49 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
             })}
           </div>
           {allergenError ? (
-            <p className='mt-2 text-sm text-rose-600'>{allergenError}</p>
+            <p className='mt-2 text-sm text-destructive'>{allergenError}</p>
           ) : null}
         </section>
 
         <section>
           <div className='flex items-center gap-2'>
-            <Lock className='h-4 w-4 text-emerald-600' />
-            <h2 className='text-lg font-semibold text-slate-900'>Change password</h2>
+            <Lock className='h-4 w-4 text-primary' />
+            <h2 className='text-lg font-semibold text-foreground'>Change password</h2>
           </div>
-          <p className='mt-1 text-sm text-slate-600'>Leave these fields blank to keep your existing password.</p>
+          <p className='mt-1 text-sm text-muted-foreground'>Leave these fields blank to keep your existing password.</p>
           <div className='mt-4 grid gap-4 sm:grid-cols-2'>
-            <label className='space-y-2 text-sm font-medium text-slate-800'>
+            <label className='space-y-2 text-sm font-medium text-foreground'>
               New password
               <input
                 type='password'
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder='••••••••'
-                className='w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
+                className='w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground shadow-sm outline-none transition focus:ring-2 focus:ring-primary'
                 aria-invalid={Boolean(passwordError)}
                 aria-describedby={passwordError ? "profile-password-error" : undefined}
                 autoComplete='new-password'
               />
               {passwordError ? (
-                <span id='profile-password-error' className='text-xs text-rose-600'>
+                <span id='profile-password-error' className='text-xs text-destructive'>
                   {passwordError}
                 </span>
               ) : null}
             </label>
-            <label className='space-y-2 text-sm font-medium text-slate-800'>
+            <label className='space-y-2 text-sm font-medium text-foreground'>
               Confirm new password
               <input
                 type='password'
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 placeholder='••••••••'
-                className='w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:shadow-[0_12px_30px_rgba(16,185,129,0.12)]'
+                className='w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground shadow-sm outline-none transition focus:ring-2 focus:ring-primary'
                 aria-invalid={Boolean(confirmPasswordError)}
                 aria-describedby={confirmPasswordError ? "profile-password-confirm-error" : undefined}
                 autoComplete='new-password'
               />
               {confirmPasswordError ? (
-                <span id='profile-password-confirm-error' className='text-xs text-rose-600'>
+                <span id='profile-password-confirm-error' className='text-xs text-destructive'>
                   {confirmPasswordError}
                 </span>
               ) : null}
@@ -222,11 +222,11 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
         </section>
 
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-          <p className='text-sm text-slate-500'>Signed in as {user.email}</p>
+          <p className='text-sm text-muted-foreground'>Signed in as {user.email}</p>
           <button
             type='submit'
             disabled={disableSave}
-            className='inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(16,185,129,0.3)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50'
+            className='inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
           >
             {mutation.isPending ? (
               <>
