@@ -26,8 +26,8 @@ export function AdminStockWorkspace({ inventoryItems, pantryItems, ingredientOpt
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("recipes");
 
   return (
-    <section className='rounded-[32px] border border-emerald-100 bg-white/70 p-4 shadow-[0_30px_90px_rgba(16,185,129,0.12)]'>
-      <div className='mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-100 bg-white/80 p-1 text-sm font-semibold text-slate-700'>
+    <section className='rounded-xl border border-border bg-card p-4 shadow-sm'>
+      <div className='mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-1 text-sm font-semibold text-muted-foreground'>
         <TabButton label='Recipe inventory' active={activeTab === "recipes"} onClick={() => setActiveTab("recipes")} />
         <TabButton label='Ingredient pantry' active={activeTab === "pantry"} onClick={() => setActiveTab("pantry")} />
       </div>
@@ -52,10 +52,10 @@ function TabButton({ label, active, onClick }: TabButtonProps) {
       type='button'
       onClick={onClick}
       className={cn(
-        "inline-flex flex-1 items-center justify-center rounded-2xl px-4 py-2 transition",
+        "inline-flex flex-1 items-center justify-center rounded-md px-4 py-2 transition",
         active
-          ? "bg-emerald-500 text-white shadow-[0_12px_30px_rgba(16,185,129,0.25)]"
-          : "text-slate-500 hover:text-emerald-700"
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "hover:bg-surface-subtle hover:text-foreground"
       )}
     >
       {label}
