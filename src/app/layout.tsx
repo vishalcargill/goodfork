@@ -8,6 +8,8 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { ADMIN_EMAIL } from "@/constants/app.constants";
 import { ONBOARDING_PROFILE_COOKIE, parseOnboardingCookie } from "@/constants/cookies";
 
+import { AppShell } from "@/components/navigation/app-shell";
+
 export const metadata: Metadata = {
   title: "GoodFork | AI Menu Personalization",
   description:
@@ -35,11 +37,13 @@ export default async function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         <AppProviders>
-          <div className="flex min-h-screen flex-col">
-            <Header currentUser={headerUser} />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <AppShell 
+            user={headerUser}
+            header={<Header currentUser={headerUser} />}
+            footer={<Footer />}
+          >
+            {children}
+          </AppShell>
         </AppProviders>
       </body>
     </html>

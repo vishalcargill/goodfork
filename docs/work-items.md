@@ -1,6 +1,10 @@
 # GoodFork Work Items & Phase Plan
 
-This plan breaks the hackathon build into concrete tasks per phase. Assume all secrets (OpenAI keys, database URLs, feature flags) live in `.env.local` and are never committed. Document new variables inside that file with inline comments when added.
+## How to Use This Doc
+- Context, architecture, and feature overviews live in `docs/engineering-guide.md`; product scope lives in `specs/prd.md`.
+- This file is for task tracking, milestones, and status notes. Keep updates terse and link to the guide/spec for deeper context.
+
+Assume all secrets (OpenAI keys, database URLs, feature flags) live in `.env.local` and are never committed. Document new variables inside that file with inline comments when added.
 
 ## Local Database Setup
 - Run a local Postgres server (Homebrew, Docker, or Prisma Dev) and create a database named `goodfork_dev` (`createdb goodfork_dev`).

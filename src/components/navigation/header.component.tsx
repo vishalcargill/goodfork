@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, UserRound } from "lucide-react";
-import { toast } from "sonner";
+import { CaretDown, UserCircle } from "@phosphor-icons/react";
 
 import { Logo } from "@/components/common/logo.component";
 import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
+import { Button } from "@/components/ui/button";
+import { useLogout } from "@/hooks/use-logout";
 
 type HeaderUser = {
   id: string;
@@ -22,32 +23,47 @@ type HeaderProps = {
 
 export function Header({ currentUser = null }: HeaderProps) {
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
   const showMarketingCtas = pathname === "/" && !currentUser;
 
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 20);
+    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className='sticky top-0 z-20 border-b border-emerald-100/60 bg-white/90 backdrop-blur'>
-      <div className='mx-auto flex max-w-6xl items-center px-4 py-4 sm:px-6 lg:px-8'>
-        <Link href='/' aria-label='GoodFork home' className='inline-flex items-center'>
+    <header
+      className={`sticky top-0 z-40 w-full border-b transition-all duration-300 ${
+        isScrolled
+          ? "border-emerald-100/50 bg-white/80 shadow-sm backdrop-blur-md"
+          : "border-transparent bg-white/0 backdrop-blur-none"
+      }`}
+    >
+      <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8'>
+        <Link href='/' aria-label='GoodFork home' className='flex items-center gap-2 transition-opacity hover:opacity-90'>
           <Logo />
         </Link>
-        <div className='ml-auto flex items-center gap-3'>
+
+        <div className='flex items-center gap-4'>
           {currentUser ? (
             <ProfileMenu user={currentUser} />
           ) : showMarketingCtas ? (
-            <>
-              <Link
-                href='/onboarding'
-                className='rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(16,185,129,0.35)] transition hover:-translate-y-0.5'
-              >
-                Start personalization
-              </Link>
+            <div className="flex items-center gap-3">
               <SmoothScrollLink
                 targetId='login'
-                className='rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(16,185,129,0.25)]'
+                className='text-sm font-medium text-slate-600 hover:text-slate-900 hidden sm:inline-block transition-colors'
               >
                 Log in
               </SmoothScrollLink>
-            </>
+              <Link href='/onboarding'>
+                <Button variant="default" size="sm" className="shadow-sm">
+                  Start personalization
+                </Button>
+              </Link>
+            </div>
           ) : null}
         </div>
       </div>
@@ -61,9 +77,8 @@ type ProfileMenuProps = {
 
 function ProfileMenu({ user }: ProfileMenuProps) {
   const [open, setOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { logout, isLoggingOut } = useLogout();
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -104,21 +119,8 @@ function ProfileMenu({ user }: ProfileMenuProps) {
   const pantryUrl = `/pantry`;
 
   async function handleLogout() {
-    try {
-      setIsLoggingOut(true);
-      const response = await fetch("/api/logout", { method: "POST" });
-      if (!response.ok) {
-        throw new Error("Failed to log out.");
-      }
-      setOpen(false);
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed", error);
-      toast.error("Unable to log out. Try again.");
-    } finally {
-      setIsLoggingOut(false);
-    }
+    await logout();
+    setOpen(false);
   }
 
   return (
@@ -131,10 +133,10 @@ function ProfileMenu({ user }: ProfileMenuProps) {
         aria-expanded={open}
       >
         <span className='flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white'>
-          {initials || <UserRound className='h-4 w-4' />}
+          {initials || <UserCircle className='h-4 w-4' />}
         </span>
         <span className='hidden sm:inline'>{user.name.split(" ")[0] ?? "Profile"}</span>
-        <ChevronDown className='h-4 w-4 text-emerald-700' />
+        <CaretDown className='h-4 w-4 text-emerald-700' />
       </button>
       {open ? (
         <div

@@ -105,9 +105,9 @@ Run the entire stack with Docker if you can’t (or don’t want to) manage Post
 - Snapshot + accessibility sweeps are tracked in `docs/phase-1-plan.md` (Phase 1) and upcoming work items.
 
 ### Reference Docs
-- `docs/phase-0.md` - foundations checklist.
-- `docs/phase-1-plan.md` - SMART goals, TODO log, risks/assumptions (update after each milestone).
-- `docs/work-items.md` - multi-phase backlog.
+- `docs/engineering-guide.md` - architecture, data models, and feature flows.
+- `docs/work-items.md` - phase backlog and task tracking.
+- `specs/prd.md` - canonical product requirements.
 - `Hackathon 2025 - Kick Off.pdf` - judging rubric and scope clarifications.
 
-Questions? Check the PRD (`docs/PRD.md`) for requirements context before expanding scope. Happy hacking!
+Questions? Check the PRD (`specs/prd.md`) for requirements context before expanding scope. Happy hacking!

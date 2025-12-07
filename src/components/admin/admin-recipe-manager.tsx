@@ -6,7 +6,7 @@ import type { InventoryItem, InventoryStatus, Recipe } from "@/generated/prisma/
 import { apiClient } from "@/config/axios.config";
 import type { AdminRecipeInput } from "@/schema/admin-recipe.schema";
 import type { RecommendationCard as RecommendationCardType } from "@/services/shared/recommendations.types";
-import { RecommendationCard } from "@/components/recommendations/recommendations-demo";
+import { RecommendationCard } from "@/components/recommendations/recommendation-card";
 
 const inventoryStatuses: InventoryStatus[] = ["IN_STOCK", "LOW_STOCK", "OUT_OF_STOCK"];
 
@@ -446,34 +446,34 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
 
   return (
     <div className='grid gap-6 lg:grid-cols-[40%_60%] lg:items-start'>
-      <aside className='rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-inner lg:sticky lg:top-24'>
+      <aside className='rounded-xl border border-border bg-card p-4 shadow-sm lg:sticky lg:top-24'>
         <div className='flex items-center justify-between gap-3 pb-4'>
-          <h2 className='text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700'>Recipes</h2>
+          <h2 className='text-xs font-bold uppercase tracking-wider text-primary'>Recipe List</h2>
           <button
             type='button'
             onClick={handleCreateNew}
-            className='rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow'
+            className='rounded-full bg-primary px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-sm hover:bg-primary/90'
           >
             New
           </button>
         </div>
         <div className='h-[55vh] space-y-2 overflow-y-auto pr-2 lg:h-[72vh]'>
           {recipes.length === 0 ? (
-            <p className='text-sm text-slate-600'>No recipes yet — add your first one.</p>
+            <p className='text-sm text-muted-foreground'>No recipes yet — add your first one.</p>
           ) : (
             recipes.map((recipe) => (
               <button
                 key={recipe.id}
                 type='button'
                 onClick={() => handleSelect(recipe)}
-                className={`w-full rounded-2xl border px-3 py-3 text-left shadow-sm transition ${
+                className={`w-full rounded-lg border px-3 py-3 text-left shadow-sm transition ${
                   activeRecipeId === recipe.id
-                    ? "border-emerald-400 bg-white"
-                    : "border-transparent bg-white/70 hover:border-emerald-200"
+                    ? "border-primary bg-surface ring-1 ring-primary"
+                    : "border-transparent bg-surface-subtle hover:border-border"
                 }`}
               >
-                <p className='text-sm font-semibold text-slate-900'>{recipe.title}</p>
-                <p className='text-xs text-slate-500'>
+                <p className='text-sm font-semibold text-foreground'>{recipe.title}</p>
+                <p className='text-xs text-muted-foreground'>
                   {recipe.cuisine ?? "No cuisine"} · Updated {listFormat.format(new Date(recipe.updatedAt))}
                 </p>
               </button>
@@ -483,11 +483,11 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
       </aside>
 
       <section className='space-y-6'>
-        <div className='rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-50/50'>
+        <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
           <div className='flex flex-wrap items-center justify-between gap-3 pb-4'>
             <div>
-              <h3 className='text-lg font-semibold text-slate-900'>Recipe details</h3>
-              <p className='text-sm text-slate-500'>Every field maps to the Prisma model.</p>
+              <h3 className='text-lg font-semibold text-foreground'>Recipe details</h3>
+              <p className='text-sm text-muted-foreground'>Every field maps to the Prisma model.</p>
             </div>
             <div className='flex gap-3'>
               {isEditing ? (
@@ -495,7 +495,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
                   type='button'
                   onClick={deleteRecipe}
                   disabled={isDeleting}
-                  className='rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-50'
+                  className='rounded-full border border-destructive/30 px-4 py-2 text-sm font-semibold text-destructive transition hover:bg-destructive/10 disabled:opacity-50'
                 >
                   {isDeleting ? "Deleting…" : "Delete"}
                 </button>
@@ -504,7 +504,7 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
                 type='button'
                 onClick={persistRecipe}
                 disabled={isSaving}
-                className='rounded-full bg-emerald-600 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-300/60 transition disabled:opacity-50'
+                className='rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50'
               >
                 {isSaving ? "Saving…" : isEditing ? "Update" : "Create"}
               </button>
@@ -512,10 +512,10 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
           </div>
 
           {error ? (
-            <p className='rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800'>{error}</p>
+            <p className='rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive'>{error}</p>
           ) : null}
           {message ? (
-            <p className='rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800'>
+            <p className='rounded-lg border border-success/20 bg-success/10 px-4 py-3 text-sm text-success'>
               {message}
             </p>
           ) : null}
@@ -563,21 +563,21 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
               <TextareaField label='Instructions (step per line)' value={formState.instructions} onChange={(value) => handleFieldChange("instructions", value)} rows={4} />
               <TextareaField label='Nutrients JSON' value={formState.nutrients} onChange={(value) => handleFieldChange("nutrients", value)} rows={3} helper='Optional. Provide JSON object of nutrient values.' />
               <TextareaField label='Timers JSON' value={formState.timers} onChange={(value) => handleFieldChange("timers", value)} rows={3} helper='Optional. Provide JSON object of prep/cook timers.' />
-              <div className='rounded-2xl border border-slate-200 p-4'>
-                <p className='text-sm font-semibold text-slate-900'>Inventory</p>
+              <div className='rounded-xl border border-border p-4 bg-surface-subtle'>
+                <p className='text-sm font-semibold text-foreground'>Inventory</p>
                 <div className='mt-3 grid grid-cols-2 gap-3'>
                   <TextField label='Quantity' value={formState.inventoryQuantity} onChange={(value) => handleFieldChange("inventoryQuantity", value)} required />
                   <TextField label='Unit Label' value={formState.inventoryUnitLabel} onChange={(value) => handleFieldChange("inventoryUnitLabel", value)} />
                 </div>
                 <div className='mt-3 grid grid-cols-2 gap-3'>
-                  <label className='text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
                     Status
                     <select
                       value={formState.inventoryStatus}
                       onChange={(event) =>
                         handleFieldChange("inventoryStatus", event.target.value as InventoryStatus)
                       }
-                      className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-emerald-400'
+                      className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary'
                     >
                       {inventoryStatuses.map((status) => (
                         <option key={status} value={status}>
@@ -598,11 +598,11 @@ export function AdminRecipeManager({ initialRecipes }: AdminRecipeManagerProps) 
           </div>
         </div>
 
-        <div className='rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-50/50'>
+        <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
           <div className='flex items-center justify-between pb-4'>
             <div>
-              <h3 className='text-lg font-semibold text-slate-900'>Preview</h3>
-              <p className='text-sm text-slate-500'>Live render of the recommendation card.</p>
+              <h3 className='text-lg font-semibold text-foreground'>Preview</h3>
+              <p className='text-sm text-muted-foreground'>Live render of the recommendation card.</p>
             </div>
           </div>
           <RecommendationCard card={previewCard} userId='preview-user' readOnly />
@@ -623,16 +623,16 @@ type TextFieldProps = {
 
 function TextField({ label, value, onChange, required, type = "text", helper }: TextFieldProps) {
   return (
-    <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+    <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
       {label}
       <input
         type={type}
         value={value}
         required={required}
         onChange={(event) => onChange(event.target.value)}
-        className='mt-2 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-emerald-400'
+        className='mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary'
       />
-      {helper ? <span className='mt-1 block text-[11px] text-slate-500'>{helper}</span> : null}
+      {helper ? <span className='mt-1 block text-[11px] text-muted-foreground'>{helper}</span> : null}
     </label>
   );
 }
@@ -647,15 +647,15 @@ type TextareaFieldProps = {
 
 function TextareaField({ label, value, onChange, rows = 4, helper }: TextareaFieldProps) {
   return (
-    <label className='block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500'>
+    <label className='block text-xs font-bold uppercase tracking-wider text-muted-foreground'>
       {label}
       <textarea
         value={value}
         rows={rows}
         onChange={(event) => onChange(event.target.value)}
-        className='mt-2 w-full resize-y rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-emerald-400'
+        className='mt-2 w-full resize-y rounded-lg border border-border px-3 py-2 text-sm text-foreground shadow-sm outline-none focus:ring-2 focus:ring-primary'
       />
-      {helper ? <span className='mt-1 block text-[11px] text-slate-500'>{helper}</span> : null}
+      {helper ? <span className='mt-1 block text-[11px] text-muted-foreground'>{helper}</span> : null}
     </label>
   );
 }
