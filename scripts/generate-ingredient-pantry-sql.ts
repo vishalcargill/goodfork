@@ -11,7 +11,8 @@ type IngredientEntry = {
   defaultUnit: string;
 };
 
-const DATA_PATH = path.join(process.cwd(), "data/recipes.json");
+const DATA_PATH = path.join(process.cwd(), "data/recipes1.json");
+const DATA_LABEL = path.relative(process.cwd(), DATA_PATH);
 const OUTPUT_PATH = path.join(process.cwd(), "scripts/generated/ingredient-pantry-seed.sql");
 const SYSTEM_EMAIL = (process.env.SYSTEM_PANTRY_EMAIL ?? "system+pantry@goodfork.com").toLowerCase();
 
@@ -429,10 +430,17 @@ const extractIngredients = (recipes: Recipe[]) => {
 
 const buildSql = (entries: IngredientEntry[]) => {
   const valuesSql = entries
-    .map(({ slug, name, defaultUnit }) => `    ('${escapeLiteral(slug)}', '${escapeLiteral(name)}', '${escapeLiteral(defaultUnit)}')`)
+    .map(
+      ({ slug, name, defaultUnit }) =>
+        `    ('${escapeLiteral(slug)}', '${escapeLiteral(name)}', '${escapeLiteral(defaultUnit)}')`
+    )
     .join(",\n");
 
-return `-- Generated from data/recipes.json to seed Ingredient + Pantry data\n-- Records: ${entries.length}\nBEGIN;\nCREATE EXTENSION IF NOT EXISTS \"pgcrypto\";\nWITH ingredient_payload (slug, name, unit) AS (\n  VALUES\n${valuesSql}\n),\nupserted_ingredients AS (\n  INSERT INTO \"Ingredient\" (\"id\", \"slug\", \"name\", \"defaultUnit\", \"allergens\", \"tags\")\n  SELECT gen_random_uuid()::text, slug, name, unit, '{}'::text[], '{}'::text[]\n  FROM ingredient_payload\n  ON CONFLICT (\"slug\") DO UPDATE\n    SET \"name\" = EXCLUDED.\"name\",\n        \"defaultUnit\" = EXCLUDED.\"defaultUnit\"\n  RETURNING id, slug, name, \"defaultUnit\"\n),\nselected_user AS (\n  SELECT id FROM \"User\" WHERE email = lower('${escapeLiteral(SYSTEM_EMAIL)}') LIMIT 1\n)\nINSERT INTO \"PantryItem\" (\"id\", \"userId\", \"ingredientId\", \"quantity\", \"unitLabel\", \"status\")\nSELECT gen_random_uuid()::text, selected_user.id, upserted_ingredients.id, 0.00, upserted_ingredients.\"defaultUnit\", 'OUT_OF_STOCK'\nFROM upserted_ingredients\nCROSS JOIN selected_user\nON CONFLICT (\"userId\", \"ingredientId\") DO NOTHING;\nCOMMIT;\n`;
+  return `-- Generated from ${DATA_LABEL} to seed Ingredient + Pantry data\n-- Records: ${
+    entries.length
+  }\nBEGIN;\nCREATE EXTENSION IF NOT EXISTS \"pgcrypto\";\nWITH ingredient_payload (slug, name, unit) AS (\n  VALUES\n${valuesSql}\n),\nupserted_ingredients AS (\n  INSERT INTO \"Ingredient\" (\"id\", \"slug\", \"name\", \"defaultUnit\", \"allergens\", \"tags\")\n  SELECT gen_random_uuid()::text, slug, name, unit, '{}'::text[], '{}'::text[]\n  FROM ingredient_payload\n  ON CONFLICT (\"slug\") DO UPDATE\n    SET \"name\" = EXCLUDED.\"name\",\n        \"defaultUnit\" = EXCLUDED.\"defaultUnit\"\n  RETURNING id, slug, name, \"defaultUnit\"\n),\nselected_user AS (\n  SELECT id FROM \"User\" WHERE email = lower('${escapeLiteral(
+    SYSTEM_EMAIL
+  )}') LIMIT 1\n)\nINSERT INTO \"PantryItem\" (\"id\", \"userId\", \"ingredientId\", \"quantity\", \"unitLabel\", \"status\")\nSELECT gen_random_uuid()::text, selected_user.id, upserted_ingredients.id, 0.00, upserted_ingredients.\"defaultUnit\", 'OUT_OF_STOCK'\nFROM upserted_ingredients\nCROSS JOIN selected_user\nON CONFLICT (\"userId\", \"ingredientId\") DO NOTHING;\nCOMMIT;\n`;
 };
 
 const main = () => {

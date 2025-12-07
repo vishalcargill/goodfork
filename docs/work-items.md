@@ -134,4 +134,11 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - Performance tuning: enable Next.js image optimizations, preload critical fonts, and verify lighthouse scores on mobile.
 - Add micro-interactions (150–200ms transitions) for cards, sticky bottom nav, and CTA buttons; hover/focus states for larger screens.
 - Finalize operator onboarding docs, add demo script, and capture screenshots/video for submission.
-- Deploy to Vercel, configure production `.env.local` equivalents, and validate database migrations + seeds in staging.
+- Deploy to Netlify (Next.js adapter) with Supabase Postgres, configure production `.env.local` equivalents, and validate database migrations + seeds in staging.
+
+### Deploy – Netlify + Supabase (production/preview)
+- Netlify config: `netlify.toml` uses `npm run build`, publishes `.next`, and enables `@netlify/plugin-nextjs` (Node `20` set in `[build.environment]`). Point the Netlify site at this repo; no extra base dir required.
+- Environment on Netlify: set `DATABASE_URL` to the Supabase (pooled) connection string; also set `OPENAI_API_KEY`, `OPENAI_BASE_URL` (if overridden), `JWT_SECRET`, `ADMIN_EMAIL`, `SYSTEM_PANTRY_EMAIL`, `RECIPE_EMBEDDING_MODEL`, `RECIPE_EMBEDDING_PROVIDER`, `RECIPE_EMBEDDING_VERSION`, `INVENTORY_SYNC_SECRET`, `SUPABASE_URL`/`SUPABASE_PROJECT_URL`, `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SERVICE_KEY`), `SUPABASE_SCHEMA`, and `SUPABASE_MCP_URL`/`SUPABASE_MCP_API_KEY` when MCP is used.
+- Prisma migrations to Supabase: temporarily set `DATABASE_URL` to Supabase and run `npx prisma migrate deploy`; regenerate the client. Initial bootstrap can also run `supabase-init.sql` via Supabase SQL Editor.
+- Seeding Supabase: either run `npm run db:seed` with `DATABASE_URL` pointing to Supabase or export local data via `npm run supabase:export -- --truncate` (requires Supabase URL + service role key).
+- Verification: run `npm run supabase:verify` (needs `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and hit `/api/health` on a Netlify preview to confirm DB connectivity + envs. Ensure an admin user exists in Supabase (run `npm run admin:create` with `DATABASE_URL` targeting Supabase).
