@@ -46,3 +46,5 @@
 - UI patterns: Shadcn + Tailwind utilities; mobile-first; prefer SSR with client components only where needed.
 - When adding new architectural decisions, append to this guide; avoid scattering new `.plan.md` files in `docs/`.
 
+
+

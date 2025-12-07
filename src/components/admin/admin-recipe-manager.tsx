@@ -6,7 +6,7 @@ import type { InventoryItem, InventoryStatus, Recipe } from "@/generated/prisma/
 import { apiClient } from "@/config/axios.config";
 import type { AdminRecipeInput } from "@/schema/admin-recipe.schema";
 import type { RecommendationCard as RecommendationCardType } from "@/services/shared/recommendations.types";
-import { RecommendationCard } from "@/components/recommendations/recommendations-demo";
+import { RecommendationCard } from "@/components/recommendations/recommendation-card";
 
 const inventoryStatuses: InventoryStatus[] = ["IN_STOCK", "LOW_STOCK", "OUT_OF_STOCK"];
 

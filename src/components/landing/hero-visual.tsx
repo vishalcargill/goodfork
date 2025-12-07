@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Leaf } from "lucide-react";
+import { Plant } from "@phosphor-icons/react";
 import Image from "next/image";
 
 export function HeroVisual() {
@@ -65,7 +65,7 @@ export function HeroVisual() {
       >
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-            <Leaf className="h-4 w-4" />
+            <Plant className="h-4 w-4" />
           </div>
           <div>
             <p className="text-xs font-bold text-emerald-700">Healthy Swap</p>
@@ -94,4 +94,3 @@ export function HeroVisual() {
     </div>
   );
 }
-
