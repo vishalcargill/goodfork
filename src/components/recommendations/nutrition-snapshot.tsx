@@ -59,3 +59,4 @@ export function NutritionSnapshot({ recommendations, className }: NutritionSnaps
   );
 }
 
+
