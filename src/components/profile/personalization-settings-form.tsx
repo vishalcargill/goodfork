@@ -267,7 +267,7 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
                   className={cn(
                     "rounded-full border px-4 py-2 text-sm font-semibold transition",
                     active
-                      ? "border-primary bg-primary/10 text-primary"
+                      ? "border-red-500 bg-red-500 text-white"
                       : "border-border bg-surface text-muted-foreground hover:text-foreground hover:bg-surface-subtle"
                   )}
                 >

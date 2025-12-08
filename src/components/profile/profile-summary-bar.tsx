@@ -46,13 +46,13 @@ export function ProfileSummaryBar({
 
           {/* Allergens */}
           <div className="flex items-center gap-2 text-sm">
-            <ShieldCheck className="h-4 w-4 text-success" weight="duotone" />
+            <ShieldCheck className="h-4 w-4 text-red-500" weight="duotone" />
             <div className="flex flex-wrap gap-1.5">
               {allergenLabels.length > 0 ? (
                 allergenLabels.map((label) => (
                   <span
                     key={`allergen-${label}`}
-                    className="inline-flex items-center rounded-md border border-success/20 bg-success/5 px-2 py-0.5 text-xs font-medium text-success-foreground"
+                    className="inline-flex items-center rounded-md border border-red-500/20 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700"
                   >
                     {label}
                   </span>

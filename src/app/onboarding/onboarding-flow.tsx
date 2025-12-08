@@ -240,7 +240,7 @@ export function OnboardingFlow() {
                             className={cn(
                               "rounded-full border px-4 py-2 text-xs font-semibold transition",
                               active
-                                ? "border-rose-200 bg-rose-50 text-rose-700"
+                                ? "border-red-500 bg-red-500 text-white"
                                 : "border-emerald-100 bg-white text-slate-600 hover:border-emerald-200"
                             )}
                             aria-pressed={active}

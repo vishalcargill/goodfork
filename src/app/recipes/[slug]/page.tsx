@@ -214,7 +214,12 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                   {group.values.map((value) => (
                     <span
                       key={`${group.title}-${value}`}
-                      className='inline-flex items-center rounded-full border border-border-subtle bg-surface-subtle px-2.5 py-0.5 text-xs font-semibold text-foreground'
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                        group.title === "Allergens"
+                          ? "border-red-500/20 bg-red-50 text-red-700"
+                          : "border-border-subtle bg-surface-subtle text-foreground"
+                      )}
                     >
                       {value.replace(/_/g, " ")}
                     </span>
