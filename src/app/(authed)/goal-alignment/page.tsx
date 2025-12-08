@@ -426,20 +426,20 @@ function MealCard({
   const theme = bandConfig[band];
 
   return (
-    <article 
+    <article
       className={cn(
-        CARD_SHELL, 
+        CARD_SHELL,
         ELEVATED_CARD,
         "group flex flex-col justify-between overflow-hidden"
       )}
     >
       <div className='relative p-5'>
         {/* Color Stripe with fade */}
-        <div 
+        <div
           className={cn(
-            "absolute left-0 top-0 bottom-0 w-1.5 transition-opacity opacity-60 group-hover:opacity-100", 
+            "absolute left-0 top-0 bottom-0 w-1.5 transition-opacity opacity-60 group-hover:opacity-100",
             theme.bg.replace("bg-", "bg-current text-")
-          )} 
+          )}
         />
 
         <div className='mb-3 flex items-start justify-between gap-2 pl-2'>
@@ -546,3 +546,5 @@ function formatDate(value: Date) {
     day: "numeric",
   }).format(value);
 }
+
+

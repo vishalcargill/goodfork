@@ -6,7 +6,6 @@ import { FeedbackActions } from "@/components/feedback/feedback-actions";
 import { RecipeInsightsTabs } from "@/components/recipes/recipe-insights-tabs";
 import { cn } from "@/lib/utils";
 import { normalizeImageUrl } from "@/lib/images";
-import { getAuthenticatedUser } from "@/lib/auth";
 import { getRecipeDetailBySlug } from "@/services/server/recipes.server";
 import type { InventoryStatus } from "@/generated/prisma/client";
 
@@ -14,6 +13,8 @@ type RecipeDetailPageProps = {
   params: Promise<{ slug: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export const revalidate = 300;
 
 const inventoryThemes: Record<InventoryStatus, { badge: string; label: string; copy: string }> = {
   IN_STOCK: {
@@ -51,11 +52,10 @@ export async function generateMetadata({ params }: RecipeDetailPageProps): Promi
 
 export default async function RecipeDetailPage({ params, searchParams }: RecipeDetailPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const currentUser = await getAuthenticatedUser();
   const queryUserId = typeof resolvedSearchParams?.userId === "string" ? resolvedSearchParams.userId : undefined;
   const recommendationId =
     typeof resolvedSearchParams?.recommendationId === "string" ? resolvedSearchParams.recommendationId : undefined;
-  const userId = queryUserId ?? currentUser?.id;
+  const userId = queryUserId;
 
   const { slug } = await params;
   const detail = await getRecipeDetailBySlug(slug, { userId, recommendationId });

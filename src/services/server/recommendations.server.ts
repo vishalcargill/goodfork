@@ -9,6 +9,7 @@ import {
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSystemPantryUserId } from "@/lib/system-user";
+import { unstable_cache } from "next/cache";
 import {
   DATABASE_URL,
   ENABLE_AI_RANKING,
@@ -384,10 +385,8 @@ async function resolveUser(input: GenerateRecommendationsInput) {
   return user as User & { profile: UserProfile | null };
 }
 
-async function loadCandidateRecipes({ profile, userId }: { profile: UserProfile; userId: string }) {
-  const systemPantryUserId = await getSystemPantryUserId().catch(() => null);
-
-  const [recipes, pantryItems, operatorPantryItems, vectorMatches] = await Promise.all([
+const loadBaseRecipes = unstable_cache(
+  async () =>
     prisma.recipe
       .findMany({
         select: {
@@ -426,6 +425,15 @@ async function loadCandidateRecipes({ profile, userId }: { profile: UserProfile;
         },
       })
       .then((rows) => rows as unknown as SlimRecipe[]),
+  ["recommendations-base-recipes"],
+  { revalidate: 60 }
+);
+
+async function loadCandidateRecipes({ profile, userId }: { profile: UserProfile; userId: string }) {
+  const systemPantryUserId = await getSystemPantryUserId().catch(() => null);
+
+  const [recipes, pantryItems, operatorPantryItems, vectorMatches] = await Promise.all([
+    loadBaseRecipes(),
     prisma.pantryItem.findMany({
       where: { userId },
     }),

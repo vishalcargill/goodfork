@@ -49,8 +49,8 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
   // Double check profile existence if we rely on it heavily
   if (!user?.profile) {
     // If user exists but no profile, they might need onboarding
-     // This redirect logic might loop if user is created but not profiled properly, 
-     // but for now it matches existing flow.
+    // This redirect logic might loop if user is created but not profiled properly,
+    // but for now it matches existing flow.
   }
 
   const profile = user?.profile ?? null;
@@ -77,13 +77,13 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
 
   return (
     <div className="flex flex-col min-h-full">
-      <ProfileSummaryBar 
-        goalLabels={goalLabels} 
-        allergenLabels={allergenLabels} 
+      <ProfileSummaryBar
+        goalLabels={goalLabels}
+        allergenLabels={allergenLabels}
         pantryStats={{
           readyCount: readyPantryCount,
           lowCount: lowPantryCount,
-          isEmpty: pantryIsEmpty
+          isEmpty: pantryIsEmpty,
         }}
       />
 
@@ -93,7 +93,7 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
             Your Menus
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Menus tuned to your goals, allergens, and pantry. <br className="hidden sm:inline"/>
+            Menus tuned to your goals, allergens, and pantry. <br className="hidden sm:inline" />
             Adjust your profile above and we’ll re-personalize in seconds.
           </p>
         </header>
@@ -105,3 +105,5 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
     </div>
   );
 }
+
+

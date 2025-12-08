@@ -3,6 +3,7 @@ import { InventoryStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { trackTelemetry } from "@/lib/telemetry";
 import { getSystemPantryUserId } from "@/lib/system-user";
+import { unstable_cache } from "next/cache";
 
 import type { PantryUpdateInput, PantryAdjustInput } from "@/schema/pantry.schema";
 import type { PantryItemView, PantryStatus } from "@/services/shared/pantry.types";
@@ -19,9 +20,17 @@ export async function getPantryForUser(userId: string) {
   return items;
 }
 
+const getCachedSystemPantryItems = unstable_cache(
+  async () => {
+    const systemUserId = await getSystemPantryUserId();
+    return getPantryForUser(systemUserId);
+  },
+  ["system-pantry-items"],
+  { revalidate: 60 }
+);
+
 export async function getSystemPantryItems() {
-  const systemUserId = await getSystemPantryUserId();
-  return getPantryForUser(systemUserId);
+  return getCachedSystemPantryItems();
 }
 
 export async function upsertPantryItems(userId: string, payload: PantryUpdateInput["items"]) {
