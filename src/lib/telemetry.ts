@@ -32,6 +32,9 @@ type RecommendationSucceededEvent = {
   latencyMs: number;
   sessionId?: string | null;
   dataSource?: RecommendationDataSource;
+  candidateCount?: number;
+  filteredCount?: number;
+  vectorMatchCount?: number;
 };
 
 type RecommendationFailedEvent = {
