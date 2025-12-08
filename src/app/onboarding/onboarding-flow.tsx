@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-r
 import { cn } from "@/lib/utils";
 import { useOnboardingSubmitMutation, type OnboardingResult } from "@/services/client/onboarding.client";
 import type { OnboardingPayload } from "@/schema/onboarding.schema";
-import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
+import { ALLERGEN_OPTIONS, DIET_OPTIONS, GOAL_OPTIONS, TASTE_OPTIONS } from "@/constants/personalization-options";
 
 const steps = [
   { id: "account", title: "Account basics", blurb: "So we know who to personalize for." },
@@ -22,22 +22,6 @@ const steps = [
 
 const goalOptions = GOAL_OPTIONS;
 const allergenOptions = ALLERGEN_OPTIONS;
-
-const dietOptions = [
-  { value: "VEGETARIAN", label: "Vegetarian" },
-  { value: "VEGAN", label: "Vegan" },
-  { value: "PESCATARIAN", label: "Pescatarian" },
-  { value: "MEDITERRANEAN", label: "Mediterranean" },
-  { value: "LOW_CARB", label: "Lower carb" },
-];
-
-const tasteOptions = [
-  { value: "SPICY", label: "Spicy kick" },
-  { value: "COMFORT", label: "Comforting" },
-  { value: "BRIGHT", label: "Bright & citrusy" },
-  { value: "UMAMI", label: "Umami-rich" },
-  { value: "EXPLORER", label: "Adventurous" },
-];
 
 type OnboardingFormValues = {
   name: string;
@@ -275,7 +259,7 @@ export function OnboardingFlow() {
                   <div className='space-y-3' role='group' aria-label='Dietary styles'>
                     <p className='text-sm font-semibold text-slate-900'>Dietary styles</p>
                     <div className='flex flex-wrap gap-2'>
-                      {dietOptions.map((diet) => {
+                      {DIET_OPTIONS.map((diet) => {
                         const active = values.dietaryPreferences.includes(diet.value);
                         return (
                           <button
@@ -302,7 +286,7 @@ export function OnboardingFlow() {
                   <div className='space-y-3' role='group' aria-label='Taste profile'>
                     <p className='text-sm font-semibold text-slate-900'>Taste profile</p>
                     <div className='flex flex-wrap gap-2'>
-                      {tasteOptions.map((taste) => {
+                      {TASTE_OPTIONS.map((taste) => {
                         const active = values.tastePreferences.includes(taste.value);
                         return (
                           <button
