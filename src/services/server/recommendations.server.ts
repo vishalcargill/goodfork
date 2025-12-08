@@ -3,7 +3,6 @@ import {
   type Ingredient,
   type InventoryItem,
   type PantryItem,
-  type Recipe,
   type RecipeIngredient,
   type User,
   type UserProfile,
@@ -19,6 +18,7 @@ import {
   REQUIRE_AI_RANKING,
 } from "@/constants/app.constants";
 import { normalizeImageUrl } from "@/lib/images";
+import { findSimilarRecipes } from "@/services/server/recipe-embeddings.server";
 import type {
   RecommendationCard,
   RecommendationResponse,
@@ -34,6 +34,28 @@ export type GenerateRecommendationsInput = {
 };
 
 type RecipeIngredientWithMeta = RecipeIngredient & { ingredient: Ingredient };
+
+type SlimInventory = Pick<
+  InventoryItem,
+  "id" | "recipeId" | "quantity" | "unitLabel" | "status" | "restockDate" | "createdAt" | "updatedAt"
+>;
+
+type SlimRecipe = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  calories: number | null;
+  proteinGrams: number | null;
+  carbsGrams: number | null;
+  fatGrams: number | null;
+  tags: string[];
+  allergens: string[];
+  healthyHighlights: string[];
+  imageUrl: string | null;
+  inventory: SlimInventory | null;
+  recipeIngredients: RecipeIngredientWithMeta[];
+};
 
 type PantryGap = {
   ingredientId: string;
@@ -54,10 +76,9 @@ type PantryCoverage = {
   operatorLowStockIngredients: PantryGap[];
 };
 
-type CandidateRecipe = Recipe & {
-  inventory: InventoryItem | null;
-  recipeIngredients: RecipeIngredientWithMeta[];
+type CandidateRecipe = SlimRecipe & {
   pantryCoverage: PantryCoverage;
+  vectorScore?: number;
 };
 
 type ScoredCandidate = CandidateRecipe & {
@@ -91,8 +112,8 @@ const preferenceTagMap: Record<string, string[]> = {
   VEGETARIAN: ["VEGETARIAN", "PLANT_BASED"],
   VEGAN: ["VEGAN", "PLANT_BASED"],
   PESCATARIAN: ["PESCATARIAN", "SEAFOOD", "FISH"],
-  MEDITERRANEAN: ["MEDITERRANEAN", "GUT_HEALTH"],
-  LOW_CARB: ["LOW_CARB", "LIGHTER_CHOICE"],
+  MEDITERRANEAN: ["MEDITERRANEAN", "GUT_HEALTH", "HEART_HEALTHY", "WHOLE_GRAIN"],
+  LOW_CARB: ["LOW_CARB", "LIGHTER_CHOICE", "KETO", "HIGH_PROTEIN"],
 };
 
 type RecommendationErrorOptions = {
@@ -130,9 +151,8 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
     });
   }
 
-  const candidates = await loadCandidateRecipes({
+  const { candidates, stats } = await loadCandidateRecipes({
     profile,
-    desired: limit,
     userId: user.id,
   });
 
@@ -145,12 +165,20 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
   }
 
   const scored = scoreCandidates(candidates, profile);
+
+  // Sort by score immediately so we prioritize the best candidates
+  scored.sort((a, b) => b.score - a.score);
+
   const candidateMap = new Map(scored.map((entry) => [entry.id, entry]));
+
+  // Cap the candidates passed to the LLM to avoid context limits and latency.
+  // Keep a bit more than the requested limit to allow the LLM some choice.
+  const topCandidates = scored.slice(0, 10);
 
   let finalSelection: FinalCandidate[] | null = null;
 
   if (!input.deterministicOnly && ENABLE_AI_RANKING && OPENAI_API_KEY && RECOMMENDER_MODEL) {
-    const aiRanked = await rankWithLLM(profile, scored, limit);
+    const aiRanked = await rankWithLLM(profile, topCandidates, limit);
     if (aiRanked?.length) {
       const enrichedAiSelection = aiRanked.reduce<FinalCandidate[]>((acc, aiEntry) => {
         const base = candidateMap.get(aiEntry.recipeId);
@@ -186,16 +214,15 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       });
     }
 
-    finalSelection = scored
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map((entry) => ({
-        ...entry,
-        rankingSource: "deterministic" as const,
-        rationale: entry.deterministicRationale,
-        healthySwapCopy: entry.deterministicSwap,
-        swapRecipeId: null,
-      }));
+    // Fallback to top scored deterministic candidates
+    // We already sorted `scored` by score above.
+    finalSelection = scored.slice(0, limit).map((entry) => ({
+      ...entry,
+      rankingSource: "deterministic" as const,
+      rationale: entry.deterministicRationale,
+      healthySwapCopy: entry.deterministicSwap,
+      swapRecipeId: null,
+    }));
   }
 
   const persisted = await Promise.all(
@@ -243,35 +270,35 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       tags: record.recipe.tags,
       healthyHighlights: record.recipe.healthyHighlights,
       allergens: record.recipe.allergens,
-        pantry: {
-          status: entry.pantryCoverage.status,
-          cookableServings: entry.pantryCoverage.cookableServings,
-          missingIngredients: entry.pantryCoverage.missingIngredients.map((gap) => ({
-            ingredient: gap.ingredientName,
-            unitLabel: gap.unitLabel,
-            requiredQuantity: gap.requiredQuantity,
-            availableQuantity: gap.availableQuantity,
-          })),
-          lowStockIngredients: entry.pantryCoverage.lowStockIngredients.map((gap) => ({
-            ingredient: gap.ingredientName,
-            unitLabel: gap.unitLabel,
-            requiredQuantity: gap.requiredQuantity,
-            availableQuantity: gap.availableQuantity,
-          })),
-          operatorStatus: entry.pantryCoverage.operatorStatus,
-          operatorMissingIngredients: entry.pantryCoverage.operatorMissingIngredients.map((gap) => ({
-            ingredient: gap.ingredientName,
-            unitLabel: gap.unitLabel,
-            requiredQuantity: gap.requiredQuantity,
-            availableQuantity: gap.availableQuantity,
-          })),
-          operatorLowStockIngredients: entry.pantryCoverage.operatorLowStockIngredients.map((gap) => ({
-            ingredient: gap.ingredientName,
-            unitLabel: gap.unitLabel,
-            requiredQuantity: gap.requiredQuantity,
-            availableQuantity: gap.availableQuantity,
-          })),
-        },
+      pantry: {
+        status: entry.pantryCoverage.status,
+        cookableServings: entry.pantryCoverage.cookableServings,
+        missingIngredients: entry.pantryCoverage.missingIngredients.map((gap) => ({
+          ingredient: gap.ingredientName,
+          unitLabel: gap.unitLabel,
+          requiredQuantity: gap.requiredQuantity,
+          availableQuantity: gap.availableQuantity,
+        })),
+        lowStockIngredients: entry.pantryCoverage.lowStockIngredients.map((gap) => ({
+          ingredient: gap.ingredientName,
+          unitLabel: gap.unitLabel,
+          requiredQuantity: gap.requiredQuantity,
+          availableQuantity: gap.availableQuantity,
+        })),
+        operatorStatus: entry.pantryCoverage.operatorStatus,
+        operatorMissingIngredients: entry.pantryCoverage.operatorMissingIngredients.map((gap) => ({
+          ingredient: gap.ingredientName,
+          unitLabel: gap.unitLabel,
+          requiredQuantity: gap.requiredQuantity,
+          availableQuantity: gap.availableQuantity,
+        })),
+        operatorLowStockIngredients: entry.pantryCoverage.operatorLowStockIngredients.map((gap) => ({
+          ingredient: gap.ingredientName,
+          unitLabel: gap.unitLabel,
+          requiredQuantity: gap.requiredQuantity,
+          availableQuantity: gap.availableQuantity,
+        })),
+      },
       rationale: record.rationale,
       healthySwapCopy: record.healthySwapRationale ?? entry.healthySwapCopy ?? null,
       swapRecipe: record.healthySwapRecipe
@@ -291,6 +318,11 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
     delivered: recommendations.length,
     source: recommendations.some((rec) => rec.metadata.rankingSource === "llm") ? "llm" : "deterministic",
     recommendations,
+    telemetry: {
+      candidateCount: candidates.length,
+      filteredCount: stats.filteredCount,
+      vectorMatchCount: stats.vectorMatchCount,
+    },
   };
 
   return response;
@@ -316,26 +348,55 @@ async function resolveUser(input: GenerateRecommendationsInput) {
   return user as User & { profile: UserProfile | null };
 }
 
-async function loadCandidateRecipes({
-  profile,
-  desired,
-  userId,
-}: {
-  profile: UserProfile;
-  desired: number;
-  userId: string;
-}) {
+async function loadCandidateRecipes({ profile, userId }: { profile: UserProfile; userId: string }) {
   const systemPantryUserId = await getSystemPantryUserId().catch(() => null);
 
-  const [recipes, pantryItems, operatorPantryItems] = await Promise.all([
-    prisma.recipe.findMany({
-      include: {
-        inventory: true,
-        recipeIngredients: {
-          include: { ingredient: true },
+  const queryParts = [
+    ...(profile.dietaryGoals ?? []),
+    ...(profile.tastePreferences ?? []),
+    ...(profile.dietaryPreferences ?? []),
+    profile.lifestyleNotes ?? "",
+  ].filter(Boolean);
+
+  const [recipes, pantryItems, operatorPantryItems, vectorMatches] = await Promise.all([
+    prisma.recipe
+      .findMany({
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          calories: true,
+          proteinGrams: true,
+          carbsGrams: true,
+          fatGrams: true,
+          tags: true,
+          allergens: true,
+          healthyHighlights: true,
+          imageUrl: true,
+          inventory: {
+            select: {
+              id: true,
+              recipeId: true,
+              quantity: true,
+              unitLabel: true,
+              status: true,
+              restockDate: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+          recipeIngredients: {
+            select: {
+              ingredientId: true,
+              quantityPerServing: true,
+              unitLabel: true,
+              ingredient: { select: { id: true, name: true, defaultUnit: true } },
+            },
+          },
         },
-      },
-    }),
+      })
+      .then((rows) => rows as unknown as SlimRecipe[]),
     prisma.pantryItem.findMany({
       where: { userId },
     }),
@@ -344,7 +405,11 @@ async function loadCandidateRecipes({
           where: { userId: systemPantryUserId },
         })
       : Promise.resolve([] as PantryItem[]),
+    queryParts.length > 0 ? findSimilarRecipes(queryParts.join(" "), 60) : Promise.resolve([]),
   ]);
+
+  const vectorScores = new Map<string, number>();
+  vectorMatches.forEach((match) => vectorScores.set(match.recipeId, match.score));
 
   const dietFiltered = filterRecipesByDietPreferences(profile, recipes);
   if (dietFiltered.length === 0) {
@@ -374,6 +439,7 @@ async function loadCandidateRecipes({
       operatorPantryMap,
       hasOperatorPantry
     ),
+    vectorScore: vectorScores.get(recipe.id) ?? 0,
   }));
 
   const operatorReady = hasOperatorPantry
@@ -384,9 +450,7 @@ async function loadCandidateRecipes({
   const nearReady = operatorReady.filter(
     (entry) => entry.pantryCoverage.cookableServings === 0 && entry.pantryCoverage.missingIngredients.length <= 2
   );
-  const fallback = operatorReady.filter(
-    (entry) => !ready.includes(entry) && !nearReady.includes(entry)
-  );
+  const fallback = operatorReady.filter((entry) => !ready.includes(entry) && !nearReady.includes(entry));
 
   const ordered: CandidateRecipe[] = [];
   const seen = new Set<string>();
@@ -404,10 +468,16 @@ async function loadCandidateRecipes({
   enqueue(nearReady as CandidateRecipe[]);
   enqueue(fallback as CandidateRecipe[]);
 
-  return ordered.slice(0, Math.max(desired * 2, desired));
+  return {
+    candidates: ordered,
+    stats: {
+      filteredCount: dietFiltered.length,
+      vectorMatchCount: vectorScores.size,
+    },
+  };
 }
 
-function isAllergenSafe(recipe: Recipe, allergens: string[]) {
+function isAllergenSafe(recipe: SlimRecipe, allergens: string[]) {
   if (!allergens?.length) {
     return true;
   }
@@ -415,7 +485,7 @@ function isAllergenSafe(recipe: Recipe, allergens: string[]) {
   return !recipe.allergens.some((allergen) => allergens.includes(allergen));
 }
 
-export function filterRecipesByDietPreferences(profile: UserProfile, recipes: Recipe[]) {
+export function filterRecipesByDietPreferences(profile: UserProfile, recipes: SlimRecipe[]) {
   const preferences = profile.dietaryPreferences ?? [];
   if (!preferences.length) {
     return recipes;
@@ -538,9 +608,7 @@ function calculatePantryCoverage(
       } else {
         const operatorServings = Math.floor(operatorQuantity / requiredQuantity);
         operatorCookableServings =
-          operatorCookableServings === null
-            ? operatorServings
-            : Math.min(operatorCookableServings, operatorServings);
+          operatorCookableServings === null ? operatorServings : Math.min(operatorCookableServings, operatorServings);
 
         if (operatorItem.status !== InventoryStatus.IN_STOCK || operatorServings < 2) {
           operatorLowStockIngredients.push({
@@ -605,6 +673,9 @@ function scoreCandidates(candidates: CandidateRecipe[], profile: UserProfile): S
     applyDietaryPreferenceMatch(candidate, profile, addAdjustment);
     applyTasteMatch(candidate, profile, addAdjustment);
     applyMacroBalance(candidate, addAdjustment);
+    if (candidate.vectorScore && candidate.vectorScore > 0.7) {
+      addAdjustment("Aligned with your vibe", Math.round(candidate.vectorScore * 15));
+    }
 
     const macrosLabel = buildMacrosLabel(candidate);
     const deterministicRationale = buildDeterministicRationale(candidate, profile, coverage, macrosLabel);
@@ -634,43 +705,43 @@ function applyGoalHeuristics(
 
   if (goals.includes("LEAN_MUSCLE")) {
     if (protein >= 35) {
-      push("Lean muscle — high protein density", 18);
+      push("Lean muscle — high protein density", 25);
     } else if (protein >= 25) {
-      push("Lean muscle — solid protein support", 10);
+      push("Lean muscle — solid protein support", 15);
     } else {
-      push("Lean muscle — limited protein", -6);
+      push("Lean muscle — limited protein", -10);
     }
   }
 
   if (goals.includes("ENERGY")) {
     if (carbs >= 35 && carbs <= 65) {
-      push("Energy — steady carb window", 8);
+      push("Energy — steady carb window", 15);
     } else if (carbs > 80) {
-      push("Energy — heavy carbs", -5);
+      push("Energy — heavy carbs", -10);
     }
   }
 
   if (goals.includes("RESET")) {
     if (carbs <= 40) {
-      push("Reset — lower glycemic load", 9);
+      push("Reset — lower glycemic load", 18);
     } else {
-      push("Reset — carb-heavy", -7);
+      push("Reset — carb-heavy", -12);
     }
   }
 
   if (goals.includes("BRAINCARE")) {
     if (fat >= 18) {
-      push("Brain care — healthy fats in range", 7);
+      push("Brain care — healthy fats in range", 12);
     }
     if (candidate.healthyHighlights.includes("OMEGA_3")) {
-      push("Brain care — omega-3 highlight", 6);
+      push("Brain care — omega-3 highlight", 10);
     }
   }
 
   if (calories >= 650) {
-    push("Calorie dense", -6);
+    push("Calorie dense", -8);
   } else if (calories && calories <= 520) {
-    push("Approachable calorie load", 4);
+    push("Approachable calorie load", 6);
   }
 }
 
@@ -689,9 +760,9 @@ function applyDietaryPreferenceMatch(
     const matches = tags.some((tag) => candidate.tags.includes(tag));
 
     if (matches) {
-      push(`Matches ${preference.toLowerCase()} preference`, 8);
+      push(`Matches ${preference.toLowerCase()} preference`, 15);
     } else {
-      push(`${preference.toLowerCase()} preference unmet`, -5);
+      push(`${preference.toLowerCase()} preference unmet`, -8);
     }
   });
 }
@@ -715,7 +786,7 @@ function applyTasteMatch(
     }
 
     if (keywords.some((keyword) => haystack.includes(keyword))) {
-      push(`Hits your ${taste.toLowerCase()} vibe`, 6);
+      push(`Hits your ${taste.toLowerCase()} vibe`, 10);
     }
   });
 }
@@ -818,9 +889,8 @@ async function rankWithLLM(
         title: candidate.title,
         macrosLabel: candidate.macrosLabel,
         tags: candidate.tags,
-        highlights: candidate.healthyHighlights,
+        highlights: (candidate.healthyHighlights ?? []).slice(0, 3),
         score: candidate.score,
-        description: candidate.description,
         pantryStatus: candidate.pantryCoverage.status,
         cookableServings: candidate.pantryCoverage.cookableServings,
         missingIngredients: candidate.pantryCoverage.missingIngredients.map((gap) => gap.ingredientName),
@@ -844,7 +914,7 @@ async function rankWithLLM(
           {
             role: "system",
             content:
-              "You are GoodFork's nutrition assistant. Re-rank menu items for the user. Return compact rationales (<200 chars) and optional healthy swap ideas.",
+              "You are GoodFork's nutrition assistant. Re-rank menu items for the user. Always obey diet/allergen constraints and pantry availability; never return recipes that conflict. Prefer items that best match primary goal and taste preferences. Return compact rationales (<200 chars) and optional healthy swap ideas.",
           },
           {
             role: "user",
@@ -879,7 +949,17 @@ async function rankWithLLM(
       return null;
     }
 
-    return parsed.recommendations.slice(0, limit);
+    // Keep only candidates the backend knows about and dedupe
+    const seen = new Set<string>();
+    const filtered = parsed.recommendations
+      .filter((entry) => entry.recipeId && !seen.has(entry.recipeId))
+      .map((entry) => {
+        seen.add(entry.recipeId);
+        return entry;
+      })
+      .slice(0, limit);
+
+    return filtered;
   } catch (error) {
     console.error("AI ranking failed", error);
     return null;
@@ -974,7 +1054,7 @@ function buildPantryReadinessText(coverage: PantryCoverage) {
   } without extra trips.`;
 }
 
-function buildMacrosLabel(recipe: Recipe) {
+function buildMacrosLabel(recipe: SlimRecipe) {
   const macros: string[] = [];
   if (recipe.proteinGrams != null) {
     macros.push(`${recipe.proteinGrams}g protein`);

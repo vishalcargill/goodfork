@@ -79,6 +79,9 @@ export async function POST(request: Request) {
       latencyMs,
       sessionId: parsed.data.sessionId ?? null,
       dataSource: requestedSource,
+      candidateCount: data.telemetry?.candidateCount,
+      filteredCount: data.telemetry?.filteredCount,
+      vectorMatchCount: data.telemetry?.vectorMatchCount,
     });
 
     return NextResponse.json({

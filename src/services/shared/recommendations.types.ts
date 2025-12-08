@@ -56,4 +56,9 @@ export type RecommendationResponse = {
   delivered: number;
   source: "llm" | "deterministic";
   recommendations: RecommendationCard[];
+  telemetry?: {
+    candidateCount: number;
+    filteredCount: number;
+    vectorMatchCount: number;
+  };
 };
