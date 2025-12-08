@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Leaf, RefreshCw, ScanBarcode, Sparkles } from "lucide-react";
+import { ArrowRight, Plant, ArrowsClockwise, Barcode, Sparkle } from "@phosphor-icons/react";
 import Link from "next/link";
 import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
 import { LoginCard } from "@/components/auth/login-card";
@@ -41,7 +41,7 @@ export function LandingPageContent() {
           >
             <motion.div variants={itemVariants} className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50/50 px-3 py-1 text-sm font-medium text-emerald-800 backdrop-blur-sm">
-                <Sparkles className="h-4 w-4" />
+                <Sparkle className="h-4 w-4" />
                 <span>AI-Driven Menu Personalization</span>
               </div>
               <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
@@ -71,9 +71,9 @@ export function LandingPageContent() {
 
             <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 pt-4">
               {[
-                { label: "Live Inventory", icon: ScanBarcode },
-                { label: "Goal Aligned", icon: Leaf },
-                { label: "Healthy Swaps", icon: RefreshCw },
+                { label: "Live Inventory", icon: Barcode },
+                { label: "Goal Aligned", icon: Plant },
+                { label: "Healthy Swaps", icon: ArrowsClockwise },
               ].map((feature) => (
                 <div key={feature.label} className="flex flex-col gap-2">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100/50 text-emerald-700">
@@ -108,17 +108,17 @@ export function LandingPageContent() {
             {
               title: "Connect Inventory",
               desc: "We sync with your kitchen's live stock so you never see a recipe you can't cook.",
-              icon: ScanBarcode,
+              icon: Barcode,
             },
             {
               title: "Set Your Goals",
               desc: "Tell us about your allergens, diet preferences, and fitness targets.",
-              icon: Leaf,
+              icon: Plant,
             },
             {
               title: "Get Ranked Menus",
               desc: "AI ranks the best 3-5 meals for you, offering healthy swaps to boost nutrition.",
-              icon: Sparkles,
+              icon: Sparkle,
             },
           ].map((step, i) => (
             <motion.div

@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, UserRound } from "lucide-react";
-import { toast } from "sonner";
+import { CaretDown, UserCircle } from "@phosphor-icons/react";
 
 import { Logo } from "@/components/common/logo.component";
 import { SmoothScrollLink } from "@/components/common/smooth-scroll-link";
 import { Button } from "@/components/ui/button";
+import { useLogout } from "@/hooks/use-logout";
 
 type HeaderUser = {
   id: string;
@@ -77,9 +77,8 @@ type ProfileMenuProps = {
 
 function ProfileMenu({ user }: ProfileMenuProps) {
   const [open, setOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { logout, isLoggingOut } = useLogout();
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -120,21 +119,8 @@ function ProfileMenu({ user }: ProfileMenuProps) {
   const pantryUrl = `/pantry`;
 
   async function handleLogout() {
-    try {
-      setIsLoggingOut(true);
-      const response = await fetch("/api/logout", { method: "POST" });
-      if (!response.ok) {
-        throw new Error("Failed to log out.");
-      }
-      setOpen(false);
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed", error);
-      toast.error("Unable to log out. Try again.");
-    } finally {
-      setIsLoggingOut(false);
-    }
+    await logout();
+    setOpen(false);
   }
 
   return (
@@ -147,10 +133,10 @@ function ProfileMenu({ user }: ProfileMenuProps) {
         aria-expanded={open}
       >
         <span className='flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white'>
-          {initials || <UserRound className='h-4 w-4' />}
+          {initials || <UserCircle className='h-4 w-4' />}
         </span>
         <span className='hidden sm:inline'>{user.name.split(" ")[0] ?? "Profile"}</span>
-        <ChevronDown className='h-4 w-4 text-emerald-700' />
+        <CaretDown className='h-4 w-4 text-emerald-700' />
       </button>
       {open ? (
         <div

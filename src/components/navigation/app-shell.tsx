@@ -3,10 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, BookOpen, UtensilsCrossed, Refrigerator, Target, Settings, LayoutDashboard, ChefHat, Package } from "lucide-react";
+import { List, X, BookOpen, Target, GearSix, SquaresFour, ChefHat, Package, SignOut, CookingPot } from "@phosphor-icons/react";
 import { Logo } from "@/components/common/logo.component";
 import { cn } from "@/lib/utils";
-import { type User } from "@/lib/system-user"; // Or specific type
+import { useLogout } from "@/hooks/use-logout";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -23,6 +23,7 @@ interface AppShellProps {
 export function AppShell({ children, user, header, footer }: AppShellProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const { logout, isLoggingOut } = useLogout();
   
   // Close sidebar on route change
   React.useEffect(() => {
@@ -44,13 +45,13 @@ export function AppShell({ children, user, header, footer }: AppShellProps) {
   // App routes
   const navItems = [
     { label: "Menus", href: "/menus", icon: BookOpen },
-    { label: "Pantry", href: "/pantry", icon: Refrigerator },
+    { label: "Pantry", href: "/pantry", icon: CookingPot },
     { label: "Goals", href: "/goal-alignment", icon: Target },
-    { label: "Settings", href: "/personalization", icon: Settings },
+    { label: "Settings", href: "/personalization", icon: GearSix },
   ];
 
   if (user?.isAdmin) {
-    navItems.push({ label: "Admin", href: "/admin", icon: LayoutDashboard });
+    navItems.push({ label: "Admin", href: "/admin", icon: SquaresFour });
   }
 
   return (
@@ -63,7 +64,7 @@ export function AppShell({ children, user, header, footer }: AppShellProps) {
             className="p-2 -ml-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-surface-subtle"
             aria-label="Toggle menu"
           >
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            {sidebarOpen ? <X size={24} /> : <List size={24} />}
           </button>
           <Logo />
         </div>
@@ -156,6 +157,15 @@ export function AppShell({ children, user, header, footer }: AppShellProps) {
                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                </div>
              </div>
+             
+             <button
+                onClick={logout}
+                disabled={isLoggingOut}
+                className="mt-2 w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+             >
+                <SignOut size={20} />
+                {isLoggingOut ? "Logging out..." : "Log out"}
+             </button>
            </div>
         )}
       </aside>
@@ -171,4 +181,3 @@ export function AppShell({ children, user, header, footer }: AppShellProps) {
     </div>
   );
 }
-

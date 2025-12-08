@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { ArrowUpRight, ChefHat, Recycle, Timer, Utensils } from "lucide-react";
+import { ArrowUpRight, ChefHat, Recycle, Timer, ForkKnife } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
 const metrics = [
@@ -35,7 +35,7 @@ const metrics = [
     value: 100,
     suffix: "%",
     description: "Every recommendation has a healthier alternative.",
-    icon: Utensils,
+    icon: ForkKnife,
   },
 ];
 
@@ -119,4 +119,3 @@ export function LandingMetricsStrip() {
     </div>
   );
 }
-

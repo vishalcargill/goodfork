@@ -78,3 +78,6 @@ GoodFork targets the **AI-Driven Menu Personalization and Nutrition Insights** t
 - Pricing depth required (single price vs. variants/discounts/taxes) to keep menu context accurate.
 - Stretch analytics & accessibility expectations for hackathon vs. post-hackathon.
 
+
+
+
