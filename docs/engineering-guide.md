@@ -32,6 +32,7 @@
 - Dietary styles are hard filters: vegetarian/vegan/pescatarian must match tags (vegan also excludes dairy/eggs) before scoring.
 - Historical recipe-level inventory is considered deprecated; keep only for compatibility in older migrations.
 - Seeds/importers: `prisma/seed.ts` seeds recipes + pantry demo data; `scripts/generated/ingredient-pantry-seed.sql` bulk seeds the ingredient catalog; inventory importer supports CSV/JSON feeds.
+- Recipe enrichment/import (LLM-assisted): `scripts/enrich-recipes-from-json.ts` maps `data/recipes1.json` into Prisma `Recipe` + `InventoryItem` rows. Flags: `--file <path>` (default `data/recipes1.json`), `--limit <n>` to subset, `--dry-run` to skip DB writes. Requires `DATABASE_URL`; uses `OPENAI_API_KEY` + `RECOMMENDER_MODEL` when present for tags/allergens/healthy highlights, otherwise falls back to heuristics. Defaults inventory to `quantity=10`, `unitLabel="plate"`, `status=IN_STOCK` (override via `ENRICH_DEFAULT_*` envs). Validates each record with `adminRecipeSchema` before insert.
 
 ### Core Flows & Features
 

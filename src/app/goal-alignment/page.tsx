@@ -30,6 +30,11 @@ export const metadata: Metadata = {
   description: "See how your recent choices align to your primary nutrition goal.",
 };
 
+// --- Shared Card Patterns ---
+const CARD_SHELL = "rounded-xl border border-border bg-card shadow-soft transition-all duration-200";
+const ELEVATED_CARD = "hover:shadow-medium hover:-translate-y-0.5";
+const HERO_CARD = "rounded-2xl border border-border-subtle bg-surface shadow-medium ring-1 ring-border-subtle/50";
+
 export default async function GoalAlignmentPage() {
   const user = await getAuthenticatedUser();
 
@@ -53,57 +58,60 @@ export default async function GoalAlignmentPage() {
 
   return (
     <div className='min-h-screen bg-muted pb-12'>
-      {/* Hero Section */}
-      <div className='border-b border-border bg-card shadow-sm'>
-        <div className='container mx-auto max-w-5xl p-6 md:p-8'>
-          <div className='flex flex-col gap-6 md:flex-row md:items-start md:justify-between'>
-            <div className='space-y-4'>
-              <div className='flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground'>
-                <Target className='h-4 w-4 text-primary' />
-                <span>Goal Alignment</span>
-              </div>
-              <div className='space-y-2'>
-                <h1 className='text-3xl font-bold tracking-tight text-foreground sm:text-4xl'>
-                  Tracking against <br className='hidden sm:block' />
-                  <span className='text-primary'>{goalLabel}</span>
-                </h1>
-                <p className='max-w-xl text-base text-muted-foreground'>
-                  We score your recent accepted or saved menus against your primary goal. Keep picking aligned dishes to
-                  lift your score.
-                </p>
-              </div>
-
-              <div className='flex flex-wrap items-center gap-3 pt-2'>
-                <div className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-foreground shadow-sm'>
-                  <Activity className='h-3.5 w-3.5 text-primary' />
-                  Updates on accept/save
+      <div className='container mx-auto max-w-5xl space-y-8 p-4 sm:p-6'>
+        {/* Hero Section - Elevated Card */}
+        <div className={cn(HERO_CARD, "relative overflow-hidden mt-2")}>
+          {/* Subtle Gradient Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--surface),var(--surface-subtle))] opacity-50" />
+          
+          <div className='relative p-6 md:p-8'>
+            <div className='flex flex-col gap-6 md:flex-row md:items-start md:justify-between'>
+              <div className='space-y-4'>
+                <div className='flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground'>
+                  <Target className='h-4 w-4 text-primary' />
+                  <span>Goal Alignment</span>
                 </div>
-                {alignment.usedFallbackData && (
-                  <div className='inline-flex items-center gap-2 rounded-full border border-warning/20 bg-warning/10 px-3 py-1 text-xs text-black font-semibold'>
-                    <Info className='h-3.5 w-3.5' />
-                    Using recent history
-                  </div>
-                )}
-              </div>
-            </div>
+                <div className='space-y-2'>
+                  <h1 className='text-3xl font-bold tracking-tight text-foreground sm:text-4xl'>
+                    Tracking against <br className='hidden sm:block' />
+                    <span className='text-primary'>{goalLabel}</span>
+                  </h1>
+                  <p className='max-w-xl text-base text-muted-foreground'>
+                    We score your recent accepted or saved menus against your primary goal. Keep picking aligned dishes to
+                    lift your score.
+                  </p>
+                </div>
 
-            <Link
-              href='/personalization'
-              className='group inline-flex items-center gap-2 self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md active:scale-95'
-            >
-              Adjust goals
-              <ArrowUpRight className='h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5' />
-            </Link>
+                <div className='flex flex-wrap items-center gap-3 pt-2'>
+                  <div className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-surface-subtle'>
+                    <Activity className='h-3.5 w-3.5 text-primary' />
+                    Updates on accept/save
+                  </div>
+                  {alignment.usedFallbackData && (
+                    <div className='inline-flex items-center gap-2 rounded-full border border-warning/20 bg-warning/10 px-3 py-1 text-xs text-black font-semibold'>
+                      <Info className='h-3.5 w-3.5' />
+                      Using recent history
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Link
+                href='/personalization'
+                className='group inline-flex items-center gap-2 self-start rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-strong active:scale-95'
+              >
+                Adjust goals
+                <ArrowUpRight className='h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5' />
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className='container mx-auto mt-8 max-w-5xl space-y-8 px-4 sm:px-6'>
         {!alignment.goal ? (
           <EmptyGoalState />
         ) : (
           <>
-            {/* Macro Stat Strip */}
+            {/* Macro Stat Strip - Bento Grid */}
             <MacroStatsStrip macroAverages={alignment.macroAverages} />
 
             {/* Main Dashboard Grid */}
@@ -118,7 +126,7 @@ export default async function GoalAlignmentPage() {
 
               {/* Right Column: Breakdown */}
               <div className='flex flex-col gap-6'>
-                <div className='rounded-xl border border-border bg-card p-6 shadow-sm'>
+                <div className={cn(CARD_SHELL, "p-6")}>
                   <div className='mb-4 flex items-center justify-between'>
                     <h3 className='flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground'>
                       <TrendingUp className='h-4 w-4 text-primary' />
@@ -198,13 +206,14 @@ function deriveBand(score: number): GoalAlignmentBand {
 
 const bandConfig: Record<
   GoalAlignmentBand,
-  { label: string; color: string; bg: string; icon: React.ReactNode; border: string }
+  { label: string; color: string; bg: string; icon: React.ReactNode; border: string; ring: string }
 > = {
   aligned: {
     label: "Aligned",
     color: "text-success",
     bg: "bg-success/10",
     border: "border-success/20",
+    ring: "ring-success/20",
     icon: <CheckCircle2 className='h-4 w-4' />,
   },
   needs_nudge: {
@@ -212,6 +221,7 @@ const bandConfig: Record<
     color: "text-warning",
     bg: "bg-warning/10",
     border: "border-warning/20",
+    ring: "ring-warning/20",
     icon: <AlertTriangle className='h-4 w-4' />,
   },
   off_track: {
@@ -219,6 +229,7 @@ const bandConfig: Record<
     color: "text-destructive",
     bg: "bg-destructive/10",
     border: "border-destructive/20",
+    ring: "ring-destructive/20",
     icon: <AlertCircle className='h-4 w-4' />,
   },
 };
@@ -238,12 +249,10 @@ function AlignmentGaugeCard({
   const theme = bandConfig[band];
 
   // Conic gradient for the gauge
-  // Using hardcoded hex for fallback, but variables would be better.
-  // Primary for score, slate-100 for background.
   const gradient = `conic-gradient(currentColor ${dial}%, transparent ${dial}% 100%)`;
 
   return (
-    <div className='flex flex-col justify-between rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md'>
+    <div className={cn(CARD_SHELL, "flex flex-col justify-between p-6")}>
       <div className='flex items-start justify-between'>
         <div>
           <h3 className='flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground'>
@@ -254,7 +263,7 @@ function AlignmentGaugeCard({
         </div>
         <div
           className={cn(
-            "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider",
+            "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider transition-colors",
             theme.bg,
             theme.color,
             theme.border
@@ -268,17 +277,20 @@ function AlignmentGaugeCard({
       <div className='my-8 flex justify-center'>
         <div
           className={cn(
-            "relative flex h-56 w-56 items-center justify-center rounded-full bg-surface-subtle shadow-inner",
+            "relative flex h-56 w-56 items-center justify-center rounded-full bg-surface-subtle shadow-inner ring-1 ring-black/5",
             theme.color
           )}
           aria-label={`Alignment score ${score} out of 100`}
         >
+          {/* Outer Glow Ring */}
+          <div className="absolute -inset-4 rounded-full border border-primary/5 bg-primary/5 opacity-50 blur-sm" />
+
           {/* Gauge Track */}
           <div className='absolute inset-0 rounded-full border-[16px] border-surface opacity-50' />
 
           {/* Active Gauge */}
           <div
-            className='absolute inset-0 rounded-full'
+            className='absolute inset-0 rounded-full drop-shadow-sm'
             style={{
               background: gradient,
               maskImage: "radial-gradient(transparent 62%, black 63%)",
@@ -288,7 +300,7 @@ function AlignmentGaugeCard({
 
           {/* Center Content */}
           <div className='relative z-10 flex flex-col items-center text-center'>
-            <span className='text-6xl font-black tracking-tight text-foreground'>{dial}</span>
+            <span className='text-6xl font-black tracking-tight text-foreground drop-shadow-sm'>{dial}</span>
             <span className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>/ 100</span>
           </div>
         </div>
@@ -323,25 +335,25 @@ function MacroStatsStrip({
       label: "Calories",
       value: macroAverages.calories ? `${macroAverages.calories}` : "—",
       unit: "kcal",
-      icon: <Flame className='h-4 w-4' />,
+      icon: <Flame className='h-4 w-4 text-primary' />,
     },
     {
       label: "Protein",
       value: macroAverages.protein ? `${macroAverages.protein}` : "—",
       unit: "g",
-      icon: <Utensils className='h-4 w-4' />,
+      icon: <Utensils className='h-4 w-4 text-primary' />,
     },
     {
       label: "Carbs",
       value: macroAverages.carbs ? `${macroAverages.carbs}` : "—",
       unit: "g",
-      icon: <Zap className='h-4 w-4' />,
+      icon: <Zap className='h-4 w-4 text-primary' />,
     },
     {
       label: "Fats",
       value: macroAverages.fat ? `${macroAverages.fat}` : "—",
       unit: "g",
-      icon: <Activity className='h-4 w-4' />,
+      icon: <Activity className='h-4 w-4 text-primary' />,
     },
   ];
 
@@ -350,7 +362,7 @@ function MacroStatsStrip({
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className='flex flex-col justify-between rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:border-primary/20'
+          className={cn(CARD_SHELL, ELEVATED_CARD, "flex flex-col justify-between p-4")}
         >
           <div className='flex items-center gap-2 text-muted-foreground'>
             {stat.icon}
@@ -371,7 +383,7 @@ function BreakdownPill({ label, value, tone }: { label: string; value: number; t
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md",
+        "group relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
         theme.border
       )}
     >
@@ -381,6 +393,9 @@ function BreakdownPill({ label, value, tone }: { label: string; value: number; t
           theme.bg.replace("bg-", "bg-current text-")
         )}
       />
+      {/* Top Stripe */}
+      <div className={cn("absolute top-0 left-0 right-0 h-1 opacity-50", theme.bg.replace("bg-", "bg-current text-"))} />
+
       <div className='relative z-10'>
         <div className='flex items-center justify-between'>
           <span className={cn("text-xs font-bold uppercase tracking-wider opacity-80", theme.color)}>{label}</span>
@@ -411,41 +426,58 @@ function MealCard({
   const theme = bandConfig[band];
 
   return (
-    <article className='group flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/30 hover:shadow-md'>
+    <article 
+      className={cn(
+        CARD_SHELL, 
+        ELEVATED_CARD,
+        "group flex flex-col justify-between overflow-hidden"
+      )}
+    >
       <div className='relative p-5'>
-        {/* Color Stripe */}
-        <div className={cn("absolute left-0 top-0 h-full w-1", theme.bg.replace("bg-", "bg-current text-"))} />
+        {/* Color Stripe with fade */}
+        <div 
+          className={cn(
+            "absolute left-0 top-0 bottom-0 w-1.5 transition-opacity opacity-60 group-hover:opacity-100", 
+            theme.bg.replace("bg-", "bg-current text-")
+          )} 
+        />
 
-        <div className='mb-3 flex items-start justify-between gap-2'>
+        <div className='mb-3 flex items-start justify-between gap-2 pl-2'>
           <Link
             href={`/recipes/${sample.recipeSlug}`}
-            className='line-clamp-1 font-semibold text-foreground underline decoration-primary/30 underline-offset-4 transition hover:text-primary hover:decoration-primary'
+            className='line-clamp-1 font-semibold text-foreground decoration-primary/30 underline-offset-4 transition hover:text-primary hover:underline'
           >
             {sample.recipeTitle}
           </Link>
           <div
             className={cn(
-              "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+              "shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
               theme.bg,
-              theme.color
+              theme.color,
+              theme.ring,
+              "ring-1 ring-inset"
             )}
           >
             {sample.score}
           </div>
         </div>
 
-        <p className='mb-4 line-clamp-2 text-sm text-muted-foreground'>{sample.note}</p>
+        <p className='mb-4 line-clamp-2 pl-2 text-sm text-muted-foreground'>{sample.note}</p>
 
-        <div className='flex flex-wrap items-center gap-2'>
+        <div className='flex flex-wrap items-center gap-2 pl-2'>
           <StatusBadge status={sample.status} />
           {sample.macrosLabel && (
-            <span className='rounded text-[10px] font-medium text-muted-foreground'>{sample.macrosLabel}</span>
+            <span className='rounded px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-surface-subtle border border-border-subtle'>
+              {sample.macrosLabel}
+            </span>
           )}
         </div>
       </div>
 
-      <div className='border-t border-border bg-surface-subtle/50 px-5 py-3 text-xs text-muted-foreground'>
-        {formatDate(sample.createdAt)}
+      <div className='border-t border-border bg-surface-subtle/30 px-5 py-3 text-xs text-muted-foreground transition-colors group-hover:bg-surface-subtle/60'>
+        <div className="pl-2">
+          {formatDate(sample.createdAt)}
+        </div>
       </div>
     </article>
   );
@@ -453,9 +485,9 @@ function MealCard({
 
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, string> = {
-    ACCEPTED: "bg-success text-success-foreground border-transparent",
+    ACCEPTED: "bg-success/15 text-success border-success/20",
     SAVED: "bg-secondary text-secondary-foreground border-border",
-    SWAPPED: "bg-warning text-warning-foreground border-transparent",
+    SWAPPED: "bg-warning/15 text-warning-foreground border-warning/20",
     SHOWN: "bg-muted text-muted-foreground border-border",
   };
 
@@ -463,7 +495,7 @@ function StatusBadge({ status }: { status: string }) {
   const label = status.charAt(0) + status.slice(1).toLowerCase();
 
   return (
-    <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", styles)}>
+    <span className={cn("rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider", styles)}>
       {label}
     </span>
   );
