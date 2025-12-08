@@ -14,6 +14,8 @@ export type RecommendationCardProps = {
   userId: string;
   readOnly?: boolean;
   onOpenInsights?: () => void;
+  isSwapped?: boolean;
+  onSwap?: (hasSwap: boolean) => void;
 };
 
 const statusCopy = {
@@ -38,6 +40,8 @@ export function RecommendationCard({
   userId,
   readOnly,
   onOpenInsights,
+  isSwapped = false,
+  onSwap,
 }: RecommendationCardProps) {
   const pantry = card.pantry ?? {
     status: "IN_STOCK" as const,
@@ -68,13 +72,22 @@ export function RecommendationCard({
   const imageErrored = normalizedImageUrl ? failedImages.has(normalizedImageUrl) : false;
   const recipeImage = !normalizedImageUrl || imageErrored ? FALLBACK_RECIPE_IMAGE : normalizedImageUrl;
 
+  const swap = card.swapRecipe;
+  const hasSwap = Boolean(swap && swap.id && swap.id !== card.recipeId);
+  const showingSwap = Boolean(isSwapped && hasSwap && swap);
+  const activeTitle = showingSwap ? swap!.title : card.title;
+  const activeSlug = showingSwap ? swap!.slug ?? card.slug : card.slug;
+  const activeImage = showingSwap ? swap!.imageUrl ?? recipeImage : recipeImage;
+  const activeMacrosLabel = showingSwap ? swap!.macrosLabel ?? card.macrosLabel : card.macrosLabel;
+  const activeCalories = showingSwap ? swap!.calories ?? card.calories : card.calories;
+
   const detailHref =
     !readOnly && userId
-      ? `/recipes/${card.slug}?${new URLSearchParams({
+      ? `/recipes/${activeSlug}?${new URLSearchParams({
           recommendationId: card.recommendationId,
           userId,
         }).toString()}`
-      : `/recipes/${card.slug}`;
+      : `/recipes/${activeSlug}`;
 
   const handleImageError = () => {
     if (!normalizedImageUrl) return;
@@ -119,15 +132,25 @@ export function RecommendationCard({
         <div className="mb-4 space-y-1">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
-              {card.macrosLabel || "Recommended"}
+              {activeMacrosLabel || "Recommended"}
             </p>
-            <span className="text-xs text-muted-foreground">{card.calories} kcal</span>
+            <span className="text-xs text-muted-foreground">
+              {activeCalories != null ? `${activeCalories} kcal` : "—"}
+            </span>
           </div>
           <Link href={detailHref} className="block">
             <h3 className="font-display text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
-              {card.title}
+              {activeTitle}
             </h3>
           </Link>
+          {showingSwap ? (
+            <p className="text-xs font-semibold text-success flex items-center gap-1">
+              <Info size={14} />
+              Swapped to this healthier pick
+            </p>
+          ) : hasSwap ? (
+            <p className="text-[11px] font-semibold text-emerald-800/80">Healthy swap available</p>
+          ) : null}
         </div>
 
         {/* Badges / Tags */}
@@ -145,6 +168,11 @@ export function RecommendationCard({
               {pantry.cookableServings} servings
             </span>
           )}
+          {showingSwap && (
+            <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200">
+              Swapped
+            </span>
+          )}
         </div>
 
         {/* AI Rationale */}
@@ -153,6 +181,12 @@ export function RecommendationCard({
             <span className="mr-1 font-semibold text-primary">Why:</span>
             {card.rationale}
           </p>
+          {card.healthySwapCopy && (
+            <p className="mt-2 text-xs leading-relaxed text-emerald-800">
+              <span className="mr-1 font-semibold text-emerald-700">Healthy swap:</span>
+              {card.healthySwapCopy}
+            </p>
+          )}
           {onOpenInsights && (
             <button
               onClick={onOpenInsights}
@@ -167,10 +201,13 @@ export function RecommendationCard({
         {/* Bottom Actions */}
         <div className="mt-auto pt-4 border-t border-border flex flex-col gap-3">
           {!readOnly ? (
-            <div className="w-full">
+            <div className="w-full space-y-2">
                <FeedbackActions 
                  recommendationId={card.recommendationId} 
                  userId={userId} 
+                 onSwap={() => onSwap?.(hasSwap)}
+                 swapDisabled={!hasSwap}
+                 swapDisabledHint="No direct swap available for this recipe yet."
                  layout="inline" 
                  className="w-full sm:justify-between"
                />

@@ -42,6 +42,13 @@ export type RecommendationCard = {
   swapRecipe: {
     id: string;
     title: string;
+    slug: string | null;
+    imageUrl: string | null;
+    macrosLabel: string | null;
+    calories: number | null;
+    proteinGrams: number | null;
+    carbsGrams: number | null;
+    fatGrams: number | null;
   } | null;
   metadata: {
     rankingSource: "llm" | "deterministic";

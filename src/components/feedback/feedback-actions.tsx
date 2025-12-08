@@ -15,6 +15,9 @@ type FeedbackActionsProps = {
   layout?: "stacked" | "inline";
   className?: string;
   disabledHint?: string;
+  onSwap?: () => void;
+  swapDisabled?: boolean;
+  swapDisabledHint?: string;
 };
 
 export function FeedbackActions({
@@ -23,6 +26,9 @@ export function FeedbackActions({
   layout = "stacked",
   className,
   disabledHint,
+  onSwap,
+  swapDisabled = false,
+  swapDisabledHint,
 }: FeedbackActionsProps) {
   const feedbackMutation = useFeedbackMutation();
   const [pendingAction, setPendingAction] = useState<FeedbackEventPayload["action"] | null>(null);
@@ -33,6 +39,13 @@ export function FeedbackActions({
     if (!canSubmit) {
       toast.error("Missing context to log feedback", {
         description: disabledHint ?? "Open this recipe from your recommendation list to track actions.",
+      });
+      return;
+    }
+
+    if (action === "SWAP" && swapDisabled) {
+      toast.error("Swap unavailable", {
+        description: swapDisabledHint ?? "No direct swap available for this recipe yet.",
       });
       return;
     }
@@ -50,9 +63,15 @@ export function FeedbackActions({
         throw new Error(response.message);
       }
 
-      toast.success(action === "ACCEPT" ? "Accepted" : "Swap requested", {
+      const isAccept = action === "ACCEPT";
+
+      toast.success(isAccept ? "Accepted" : "Swap requested", {
         description: "We saved this choice to your profile and will tune future menus.",
       });
+
+      if (!isAccept) {
+        onSwap?.();
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to save feedback right now.";
       toast.error("Feedback not captured", { description: message });
@@ -91,7 +110,7 @@ export function FeedbackActions({
 
       <button
         type='button'
-        disabled={!canSubmit || pendingAction !== null}
+        disabled={!canSubmit || pendingAction !== null || swapDisabled}
         onClick={() => handleAction("SWAP")}
         className={cn(
           baseButton,
@@ -99,6 +118,7 @@ export function FeedbackActions({
           "px-3 sm:px-4"
         )}
         aria-label='Request a swap'
+        title={swapDisabled ? swapDisabledHint ?? "No swap available for this recipe yet." : undefined}
       >
         <ArrowsLeftRight className='h-4 w-4' weight='bold' />
         {isSwapping ? "Requesting..." : "Swap"}

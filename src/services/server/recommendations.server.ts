@@ -224,6 +224,23 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
     }));
   }
 
+  // Fallback: if no swap was assigned, pick the next-best candidate as a swap target
+  const scoredById = new Map(scored.map((c) => [c.id, c]));
+  const pickFallbackSwap = (currentId: string) => {
+    const fallback = scored.find((candidate) => candidate.id !== currentId);
+    return fallback ? fallback.id : null;
+  };
+
+  finalSelection = finalSelection.map((entry) => {
+    const swapId = entry.swapRecipeId ?? pickFallbackSwap(entry.id);
+    // Avoid self-swaps
+    const safeSwapId = swapId && swapId !== entry.id ? swapId : null;
+    return {
+      ...entry,
+      swapRecipeId: safeSwapId,
+    };
+  });
+
   const persisted = await Promise.all(
     finalSelection.map((entry) =>
       prisma.recommendation.create({
@@ -253,6 +270,28 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
     if (!entry) {
       throw new Error("Recommendation metadata mismatch.");
     }
+
+    const safeSwapId = entry.swapRecipeId && entry.swapRecipeId !== entry.id ? entry.swapRecipeId : null;
+    const swapEntry = safeSwapId ? candidateMap.get(safeSwapId) : null;
+    const swapRecipeRecord = safeSwapId && record.healthySwapRecipe?.id === safeSwapId ? record.healthySwapRecipe : null;
+    const swapMacrosLabel =
+      swapEntry?.macrosLabel ??
+      (swapRecipeRecord ? buildMacrosLabelFromNumbers(swapRecipeRecord.proteinGrams, swapRecipeRecord.carbsGrams, swapRecipeRecord.fatGrams) : null);
+    const swapImage = normalizeImageUrl(swapEntry?.imageUrl ?? swapRecipeRecord?.imageUrl ?? null);
+    const swapPayload =
+      (swapEntry || swapRecipeRecord) && safeSwapId
+        ? {
+            id: swapEntry?.id ?? swapRecipeRecord!.id,
+            title: swapEntry?.title ?? swapRecipeRecord!.title,
+            slug: swapEntry?.slug ?? swapRecipeRecord?.slug ?? null,
+            imageUrl: swapImage,
+            macrosLabel: swapMacrosLabel,
+            calories: swapEntry?.calories ?? swapRecipeRecord?.calories ?? null,
+            proteinGrams: swapEntry?.proteinGrams ?? swapRecipeRecord?.proteinGrams ?? null,
+            carbsGrams: swapEntry?.carbsGrams ?? swapRecipeRecord?.carbsGrams ?? null,
+            fatGrams: swapEntry?.fatGrams ?? swapRecipeRecord?.fatGrams ?? null,
+          }
+        : null;
 
     return {
       recommendationId: record.id,
@@ -300,9 +339,7 @@ export async function generateRecommendations(input: GenerateRecommendationsInpu
       },
       rationale: record.rationale,
       healthySwapCopy: record.healthySwapRationale ?? entry.healthySwapCopy ?? null,
-      swapRecipe: record.healthySwapRecipe
-        ? { id: record.healthySwapRecipe.id, title: record.healthySwapRecipe.title }
-        : null,
+      swapRecipe: swapPayload,
       metadata: {
         rankingSource: entry.rankingSource,
         baseScore: entry.score,
@@ -1056,6 +1093,25 @@ function buildMacrosLabel(recipe: SlimRecipe) {
   }
   if (recipe.fatGrams != null) {
     macros.push(`${recipe.fatGrams}g fat`);
+  }
+
+  return macros.join(" · ");
+}
+
+function buildMacrosLabelFromNumbers(
+  proteinGrams: number | null | undefined,
+  carbsGrams: number | null | undefined,
+  fatGrams: number | null | undefined
+) {
+  const macros: string[] = [];
+  if (proteinGrams != null) {
+    macros.push(`${proteinGrams}g protein`);
+  }
+  if (carbsGrams != null) {
+    macros.push(`${carbsGrams}g carbs`);
+  }
+  if (fatGrams != null) {
+    macros.push(`${fatGrams}g fat`);
   }
 
   return macros.join(" · ");

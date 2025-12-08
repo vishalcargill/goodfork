@@ -10,9 +10,11 @@ export type InsightsPanelProps = {
   userId: string;
   onClose: () => void;
   className?: string;
+  isSwapped?: boolean;
+  onSwap?: (hasSwap: boolean) => void;
 };
 
-export function InsightsPanel({ card, userId, onClose, className }: InsightsPanelProps) {
+export function InsightsPanel({ card, userId, onClose, className, isSwapped = false, onSwap }: InsightsPanelProps) {
   const pantry = card.pantry ?? {
     status: "IN_STOCK" as const,
     cookableServings: 2,
@@ -125,7 +127,25 @@ export function InsightsPanel({ card, userId, onClose, className }: InsightsPane
           <p className="text-xs text-muted-foreground mb-3">
              Help us tune your future menus by rating this recommendation.
           </p>
-          <FeedbackActions recommendationId={card.recommendationId} userId={userId} layout="stacked" />
+          <FeedbackActions
+            recommendationId={card.recommendationId}
+            userId={userId}
+            layout="stacked"
+            onSwap={() => {
+              const hasSwap = Boolean(card.swapRecipe && card.swapRecipe.id !== card.recipeId);
+              if (!hasSwap) return;
+              onSwap?.(hasSwap);
+              onClose();
+            }}
+            swapDisabled={!card.swapRecipe || card.swapRecipe.id === card.recipeId}
+            swapDisabledHint="No direct swap available for this recipe yet."
+          />
+          {isSwapped && (
+            <p className="text-[11px] font-semibold text-success flex items-center gap-1">
+              <Info className="h-4 w-4" />
+              Swap applied
+            </p>
+          )}
         </section>
       </div>
     </aside>

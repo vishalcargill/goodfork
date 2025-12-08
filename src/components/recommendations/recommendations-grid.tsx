@@ -137,6 +137,17 @@ type RecommendationsListProps = {
 function RecommendationsList({ apiResponse }: RecommendationsListProps) {
   const cards = apiResponse.recommendations;
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [swappedIds, setSwappedIds] = useState<Set<string>>(new Set());
+
+  const markSwapped = (recommendationId: string, hasSwap: boolean) => {
+    if (!hasSwap) return;
+    setSwappedIds((prev) => {
+      const next = new Set(prev);
+      next.add(recommendationId);
+      return next;
+    });
+    setSelectedCardId(null);
+  };
 
   const selectedCard = useMemo(() => cards.find((c) => c.recommendationId === selectedCardId), [cards, selectedCardId]);
 
@@ -169,6 +180,8 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
                 <RecommendationCard
                   card={card}
                   userId={apiResponse.userId}
+                  isSwapped={swappedIds.has(card.recommendationId)}
+                  onSwap={(hasSwap) => markSwapped(card.recommendationId, hasSwap)}
                   onOpenInsights={() => setSelectedCardId(card.recommendationId)}
                 />
               </div>
@@ -182,6 +195,8 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
             <InsightsPanel
               card={selectedCard}
               userId={apiResponse.userId}
+              isSwapped={swappedIds.has(selectedCard.recommendationId)}
+              onSwap={(hasSwap) => markSwapped(selectedCard.recommendationId, hasSwap)}
               onClose={() => setSelectedCardId(null)}
               className='h-full rounded-xl border border-border bg-surface/50 backdrop-blur-sm'
             />
@@ -199,6 +214,8 @@ function RecommendationsList({ apiResponse }: RecommendationsListProps) {
             <InsightsPanel
               card={selectedCard}
               userId={apiResponse.userId}
+              isSwapped={swappedIds.has(selectedCard.recommendationId)}
+              onSwap={(hasSwap) => markSwapped(selectedCard.recommendationId, hasSwap)}
               onClose={() => setSelectedCardId(null)}
               className='h-full border-none shadow-none'
             />
