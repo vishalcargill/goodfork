@@ -59,6 +59,7 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 | [x] | Should | Capture feedback events (accept/save/swap) and persist them for analytics. | BE | `/api/feedback` now validates Zod payloads, logs to Prisma `Feedback` with action enums, and updates recommendation status for analytics. |
 | [x] | Should | Add basic telemetry for recommendation requests and failures. | TL | `/api/recommendations` now emits request/success/failure events with requestId + latency via the shared telemetry logger for quick log-based metrics. |
 | [x] | Should | Validate mobile SSR experience and basic accessibility for the flow. | FE | Onboarding + recommendation UIs now expose aria labels/live regions and stack actions cleanly at 360px for the demo-ready sweep. |
+| [x] | Bugfix | Enforce diet styles (vegetarian/vegan/pescatarian) as hard filters before scoring; added tests and personalization controls to edit diet/taste. | BE/FE | Backend diet filter now rejects conflicting recipes; personalization page can edit diet/taste; node-based unit tests cover veg/vegan/pescatarian cases. |
 
 ### Dependencies
 - Phase 0 foundations in place (schema, migrations, seed data, Postgres connectivity, shared Axios).

@@ -29,6 +29,7 @@
 - Operator pantry vs personal pantry: dedicated `SYSTEM_USER_ID` rows represent the global/operator pantry; personal pantry rows share the same schema.
 - APIs: `/api/pantry` (GET/PATCH), `/api/pantry/restock`, `/api/pantry/consume`; admin imports use `/api/admin/inventory/import` plus `npm run inventory:import`.
 - Recommendation logic highlights: load recipe ingredients + operator pantry + user pantry; filter hard fails (global out of stock); compute servings, missing ingredients, low stock; boost ready-to-cook, penalize shortfalls/low stock, surface expiry/shortfall hints in rationale.
+- Dietary styles are hard filters: vegetarian/vegan/pescatarian must match tags (vegan also excludes dairy/eggs) before scoring.
 - Historical recipe-level inventory is considered deprecated; keep only for compatibility in older migrations.
 - Seeds/importers: `prisma/seed.ts` seeds recipes + pantry demo data; `scripts/generated/ingredient-pantry-seed.sql` bulk seeds the ingredient catalog; inventory importer supports CSV/JSON feeds.
 

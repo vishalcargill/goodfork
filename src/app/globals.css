@@ -56,44 +56,44 @@
     "Courier New", monospace;
   --radius: 0.75rem;
 
-  /* Clean, flat palette */
-  --background: #ffffff;
-  --foreground: #0f172a; /* slate-900 */
+  /* Clean, flat palette - High Contrast / Clinical */
+  --background: #f8fafc; /* slate-50 - subtle page bg */
+  --foreground: #020617; /* slate-950 - deeper black */
   
   --surface: #ffffff;
-  --surface-subtle: #f8fafc; /* slate-50 */
+  --surface-subtle: #f1f5f9; /* slate-100 */
   
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #020617;
   
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --popover-foreground: #020617;
   
-  --primary: #10b981; /* emerald-500 - vibrant */
+  --primary: #059669; /* emerald-600 - AA accessible */
   --primary-foreground: #ffffff;
   
   --secondary: #f1f5f9; /* slate-100 */
   --secondary-foreground: #0f172a;
   
-  --muted: #f8fafc;
-  --muted-foreground: #64748b; /* slate-500 */
+  --muted: #f1f5f9;
+  --muted-foreground: #475569; /* slate-600 - higher contrast */
   
-  --accent: #f0fdf4; /* emerald-50 */
-  --accent-foreground: #166534; /* emerald-800 */
+  --accent: #ecfdf5; /* emerald-50 */
+  --accent-foreground: #047857; /* emerald-700 */
   
-  --destructive: #ef4444;
+  --destructive: #dc2626; /* red-600 */
   --destructive-foreground: #ffffff;
   
-  --success: #22c55e;
+  --success: #16a34a; /* green-600 */
   --success-foreground: #ffffff;
   
-  --warning: #f59e0b;
+  --warning: #b45309; /* amber-700 - readable on white */
   --warning-foreground: #ffffff;
   
-  --border: #e2e8f0; /* slate-200 */
-  --border-subtle: #f1f5f9; /* slate-100 */
-  --input: #e2e8f0;
-  --ring: #10b981;
+  --border: #cbd5e1; /* slate-300 - crisp borders */
+  --border-subtle: #e2e8f0; /* slate-200 */
+  --input: #cbd5e1;
+  --ring: #059669;
   
   --chart-1: #10b981;
   --chart-2: #34d399;

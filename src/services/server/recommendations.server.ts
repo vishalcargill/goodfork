@@ -346,6 +346,16 @@ async function loadCandidateRecipes({
       : Promise.resolve([] as PantryItem[]),
   ]);
 
+  const dietFiltered = filterRecipesByDietPreferences(profile, recipes);
+  if (dietFiltered.length === 0) {
+    throw createRecommendationError("No recipes match the selected dietary styles with current inventory.", {
+      statusCode: 404,
+      clientMessage:
+        "We couldn’t find menus matching your diet style with today’s inventory. Adjust diet settings or check back after restock.",
+      errorCode: "dietary_preferences_unmatched",
+    });
+  }
+
   const pantryMap = new Map<string, PantryItem>();
   pantryItems.forEach((item) => pantryMap.set(item.ingredientId, item));
   const operatorPantryMap = new Map<string, PantryItem>();
@@ -354,7 +364,7 @@ async function loadCandidateRecipes({
 
   const allergens = profile.allergens ?? [];
 
-  const allergenSafe = recipes.filter((recipe) => isAllergenSafe(recipe, allergens));
+  const allergenSafe = dietFiltered.filter((recipe) => isAllergenSafe(recipe, allergens));
   const enriched: CandidateRecipe[] = allergenSafe.map((recipe) => ({
     ...recipe,
     recipeIngredients: recipe.recipeIngredients as RecipeIngredientWithMeta[],
@@ -403,6 +413,65 @@ function isAllergenSafe(recipe: Recipe, allergens: string[]) {
   }
 
   return !recipe.allergens.some((allergen) => allergens.includes(allergen));
+}
+
+export function filterRecipesByDietPreferences(profile: UserProfile, recipes: Recipe[]) {
+  const preferences = profile.dietaryPreferences ?? [];
+  if (!preferences.length) {
+    return recipes;
+  }
+
+  const prefersVegetarian = preferences.includes("VEGETARIAN");
+  const prefersVegan = preferences.includes("VEGAN");
+  const prefersPescatarian = preferences.includes("PESCATARIAN");
+
+  // Build allowed tag sets
+  const allowedTags = new Set<string>();
+  preferences.forEach((preference) => {
+    (preferenceTagMap[preference] ?? [preference]).forEach((tag) => allowedTags.add(tag));
+  });
+
+  return recipes.filter((recipe) => {
+    const tags = recipe.tags ?? [];
+    const allergens = recipe.allergens ?? [];
+
+    // Vegan: must be tagged vegan/plant based and exclude dairy/eggs
+    if (prefersVegan) {
+      const tagMatch = tags.some((tag) => preferenceTagMap.VEGAN.includes(tag));
+      const excludesAnimalProducts = !allergens.some((allergen) => allergen === "DAIRY" || allergen === "EGGS");
+      if (!(tagMatch && excludesAnimalProducts)) {
+        return false;
+      }
+    }
+
+    // Vegetarian: must be tagged vegetarian/plant based
+    if (prefersVegetarian) {
+      const tagMatch = tags.some((tag) => preferenceTagMap.VEGETARIAN.includes(tag));
+      if (!tagMatch) {
+        return false;
+      }
+    }
+
+    // Pescatarian: allow seafood + vegetarian/plant based; reject other meats unless explicitly tagged
+    if (prefersPescatarian) {
+      const pescatarianTags = preferenceTagMap.PESCATARIAN;
+      const vegTags = preferenceTagMap.VEGETARIAN;
+      const isPescatarianFriendly =
+        tags.some((tag) => pescatarianTags.includes(tag)) || tags.some((tag) => vegTags.includes(tag));
+      if (!isPescatarianFriendly) {
+        return false;
+      }
+    }
+
+    // If none of the strict checks failed, allow
+    // Also allow other soft preferences to remain in scoring.
+    if (prefersVegan || prefersVegetarian || prefersPescatarian) {
+      // Ensure at least one tag from allowed set exists to avoid empty-tag recipes sneaking in
+      return tags.some((tag) => allowedTags.has(tag));
+    }
+
+    return true;
+  });
 }
 
 function calculatePantryCoverage(

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useProfileSettingsMutation, type ProfileApiResponse } from "@/services/client/profile.client";
 import type { UserProfile } from "@/generated/prisma/client";
 import type { ProfileSettingsPayload } from "@/schema/profile-settings.schema";
-import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
+import { ALLERGEN_OPTIONS, DIET_OPTIONS, GOAL_OPTIONS, TASTE_OPTIONS } from "@/constants/personalization-options";
 
 type PersonalizationSettingsFormProps = {
   user: {
@@ -24,6 +24,8 @@ type FieldErrors = Record<string, string[]>;
 export function PersonalizationSettingsForm({ user, profile }: PersonalizationSettingsFormProps) {
   const [goals, setGoals] = useState<string[]>(profile?.dietaryGoals ?? []);
   const [allergens, setAllergens] = useState<string[]>(profile?.allergens ?? []);
+  const [dietaryPreferences, setDietaryPreferences] = useState<string[]>(profile?.dietaryPreferences ?? []);
+  const [tastePreferences, setTastePreferences] = useState<string[]>(profile?.tastePreferences ?? []);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -43,6 +45,24 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
       .join(" · ");
   }, [allergens]);
 
+  const dietSummary = useMemo(() => {
+    if (dietaryPreferences.length === 0) {
+      return "No diet styles set";
+    }
+    return DIET_OPTIONS.filter((diet) => dietaryPreferences.includes(diet.value))
+      .map((diet) => diet.label)
+      .join(" · ");
+  }, [dietaryPreferences]);
+
+  const tasteSummary = useMemo(() => {
+    if (tastePreferences.length === 0) {
+      return "Add taste vibes";
+    }
+    return TASTE_OPTIONS.filter((taste) => tastePreferences.includes(taste.value))
+      .map((taste) => taste.label)
+      .join(" · ");
+  }, [tastePreferences]);
+
   const toggleGoal = (value: string) => {
     setGoals((prev) => (prev.includes(value) ? prev.filter((entry) => entry !== value) : [...prev, value]));
   };
@@ -51,11 +71,21 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
     setAllergens((prev) => (prev.includes(value) ? prev.filter((entry) => entry !== value) : [...prev, value]));
   };
 
+  const toggleDiet = (value: string) => {
+    setDietaryPreferences((prev) => (prev.includes(value) ? prev.filter((entry) => entry !== value) : [...prev, value]));
+  };
+
+  const toggleTaste = (value: string) => {
+    setTastePreferences((prev) => (prev.includes(value) ? prev.filter((entry) => entry !== value) : [...prev, value]));
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const payload: ProfileSettingsPayload = {
       dietaryGoals: goals,
       allergens,
+      dietaryPreferences,
+      tastePreferences,
       password: password || undefined,
       confirmPassword: confirmPassword || undefined,
     };
@@ -85,6 +115,8 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
 
   const goalError = fieldErrors.dietaryGoals?.[0];
   const allergenError = fieldErrors.allergens?.[0];
+  const dietError = fieldErrors.dietaryPreferences?.[0];
+  const tasteError = fieldErrors.tastePreferences?.[0];
   const passwordError = fieldErrors.password?.[0];
   const confirmPasswordError = fieldErrors.confirmPassword?.[0];
 
@@ -102,6 +134,14 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
           <div className='rounded-lg border border-border bg-surface p-4'>
             <p className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>Allergen shields</p>
             <p className='mt-2 text-sm font-semibold text-foreground'>{allergenSummary}</p>
+          </div>
+          <div className='rounded-lg border border-border bg-surface p-4'>
+            <p className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>Diet styles</p>
+            <p className='mt-2 text-sm font-semibold text-foreground'>{dietSummary}</p>
+          </div>
+          <div className='rounded-lg border border-border bg-surface p-4'>
+            <p className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>Taste vibes</p>
+            <p className='mt-2 text-sm font-semibold text-foreground'>{tasteSummary}</p>
           </div>
         </div>
       </div>
@@ -139,6 +179,72 @@ export function PersonalizationSettingsForm({ user, profile }: PersonalizationSe
           </div>
           {goalError ? (
             <p className='mt-2 text-sm text-destructive'>{goalError}</p>
+          ) : null}
+        </section>
+
+        <section>
+          <div className='flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-foreground'>Dietary styles</h2>
+            <span className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-muted-foreground'>
+              Strict filter
+            </span>
+          </div>
+          <p className='mt-1 text-sm text-muted-foreground'>We only show menus that match these styles.</p>
+          <div className='mt-4 flex flex-wrap gap-2'>
+            {DIET_OPTIONS.map((diet) => {
+              const active = dietaryPreferences.includes(diet.value);
+              return (
+                <button
+                  type='button'
+                  key={diet.value}
+                  onClick={() => toggleDiet(diet.value)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                    active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-surface text-muted-foreground hover:text-foreground hover:bg-surface-subtle"
+                  )}
+                >
+                  {diet.label}
+                </button>
+              );
+            })}
+          </div>
+          {dietError ? (
+            <p className='mt-2 text-sm text-destructive'>{dietError}</p>
+          ) : null}
+        </section>
+
+        <section>
+          <div className='flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-foreground'>Taste profile</h2>
+            <span className='inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-muted-foreground'>
+              Flavor boosts
+            </span>
+          </div>
+          <p className='mt-1 text-sm text-muted-foreground'>We’ll favor menus that match these taste vibes.</p>
+          <div className='mt-4 flex flex-wrap gap-2'>
+            {TASTE_OPTIONS.map((taste) => {
+              const active = tastePreferences.includes(taste.value);
+              return (
+                <button
+                  type='button'
+                  key={taste.value}
+                  onClick={() => toggleTaste(taste.value)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                    active
+                      ? "border-lime-400 bg-lime-50 text-emerald-800"
+                      : "border-border bg-surface text-muted-foreground hover:text-foreground hover:bg-surface-subtle"
+                  )}
+                >
+                  {taste.label}
+                </button>
+              );
+            })}
+          </div>
+          {tasteError ? (
+            <p className='mt-2 text-sm text-destructive'>{tasteError}</p>
           ) : null}
         </section>
 
