@@ -4,6 +4,8 @@ export const profileSettingsSchema = z
   .object({
     dietaryGoals: z.array(z.string()).min(1, "Select at least one goal"),
     allergens: z.array(z.string()).default([]),
+    dietaryPreferences: z.array(z.string()).default([]),
+    tastePreferences: z.array(z.string()).default([]),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")

@@ -168,7 +168,7 @@ function computeInventoryDefaults({ ratingCount, serves, difficulty }: Inventory
 }
 
 async function main() {
-  const sourceFile = process.argv[2] ?? "data/recipes.json";
+  const sourceFile = process.argv[2] ?? "data/recipes1.json";
   const absolutePath = path.resolve(process.cwd(), sourceFile);
 
   await bootstrapSlugSet();
