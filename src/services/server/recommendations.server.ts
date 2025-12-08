@@ -18,7 +18,6 @@ import {
   REQUIRE_AI_RANKING,
 } from "@/constants/app.constants";
 import { normalizeImageUrl } from "@/lib/images";
-import { findSimilarRecipes } from "@/services/server/recipe-embeddings.server";
 import type {
   RecommendationCard,
   RecommendationResponse,
@@ -351,13 +350,6 @@ async function resolveUser(input: GenerateRecommendationsInput) {
 async function loadCandidateRecipes({ profile, userId }: { profile: UserProfile; userId: string }) {
   const systemPantryUserId = await getSystemPantryUserId().catch(() => null);
 
-  const queryParts = [
-    ...(profile.dietaryGoals ?? []),
-    ...(profile.tastePreferences ?? []),
-    ...(profile.dietaryPreferences ?? []),
-    profile.lifestyleNotes ?? "",
-  ].filter(Boolean);
-
   const [recipes, pantryItems, operatorPantryItems, vectorMatches] = await Promise.all([
     prisma.recipe
       .findMany({
@@ -405,7 +397,7 @@ async function loadCandidateRecipes({ profile, userId }: { profile: UserProfile;
           where: { userId: systemPantryUserId },
         })
       : Promise.resolve([] as PantryItem[]),
-    queryParts.length > 0 ? findSimilarRecipes(queryParts.join(" "), 60) : Promise.resolve([]),
+    Promise.resolve([] as { recipeId: string; score: number }[]),
   ]);
 
   const vectorScores = new Map<string, number>();
