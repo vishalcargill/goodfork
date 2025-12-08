@@ -6,6 +6,25 @@
 
 Assume all secrets (OpenAI keys, database URLs, feature flags) live in `.env.local` and are never committed. Document new variables inside that file with inline comments when added.
 
+## Recipe data enrichment (recipes1.json → Prisma)
+- **Source**: `data/recipes1.json` (fields include `id`, `name`, `url`, `image`, `description`, `author`, `ratings`, `ingredients`, `steps`, `nutrients.cal/protein/carbs/fat`, `times.preparation/cooking`, `serves`, `difficulty`, `vote_count`, `subcategory`, `dish_type`, `cuisine`).
+- **Target mapping (Prisma/AdminRecipeInput)**:
+  - `title` ← `name`; `slug` ← slugified `name` (dedupe); `sourceId` ← `id`; `sourceUrl` ← `url`; `author` ← `author`
+  - `imageUrl` ← `image`; `description` ← `description`; `cuisine` ← `cuisine`
+  - `calories` ← parse `nutrients.cal|kcal`; `proteinGrams` / `carbsGrams` / `fatGrams` ← parse `nutrients.protein|carbs|fat` (strip units, numbers)
+  - `ingredients` ← array of strings from `ingredients`; `instructions` ← string array from `steps`
+  - `prepTimeMinutes` / `cookTimeMinutes` ← parse `times.preparation|cooking` to minutes
+  - `serves` ← numeric `serves`; `difficulty` ← `difficulty`
+  - `averageRating` ← `ratings`; `ratingCount` ← `vote_count`
+  - `dishType` ← `dish_type`; `mainCategory` ← `maincategory` if present; `subCategory` ← `subcategory`
+  - `nutrients` ← raw `nutrients` JSON; `timers` ← raw `times` JSON
+- **Enrichment (LLM/normalization)**:
+  - `tags`: include dietary/dish tags (e.g., `VEGAN`, `VEGETARIAN`, `LOW_CARB`, `PESCATARIAN`, `PLANT_BASED`, dish-type tags) to enable diet filtering.
+  - `allergens`: inferred from ingredients, restricted to `ALLERGEN_OPTIONS`.
+  - `healthyHighlights`: e.g., `HIGH_PROTEIN`, `LIGHTER_CHOICE`, `OMEGA_3`, or LLM-derived highlights.
+  - `priceCents`: heuristic from ingredient count + difficulty.
+- **Inventory defaults (demo)**: create `InventoryItem` per recipe with baseline quantity/status (e.g., `quantity: 10`, `unitLabel: "plate"`, `status: IN_STOCK`; optional `restockDate`) to keep menus cookable in the hackathon demo.
+
 ## Local Database Setup
 - Run a local Postgres server (Homebrew, Docker, or Prisma Dev) and create a database named `goodfork_dev` (`createdb goodfork_dev`).
 - Copy the connection string `postgresql://postgres:postgres@localhost:5432/goodfork_dev?schema=public` into `.env.local` as `DATABASE_URL`.
@@ -59,6 +78,7 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 | [x] | Should | Capture feedback events (accept/save/swap) and persist them for analytics. | BE | `/api/feedback` now validates Zod payloads, logs to Prisma `Feedback` with action enums, and updates recommendation status for analytics. |
 | [x] | Should | Add basic telemetry for recommendation requests and failures. | TL | `/api/recommendations` now emits request/success/failure events with requestId + latency via the shared telemetry logger for quick log-based metrics. |
 | [x] | Should | Validate mobile SSR experience and basic accessibility for the flow. | FE | Onboarding + recommendation UIs now expose aria labels/live regions and stack actions cleanly at 360px for the demo-ready sweep. |
+| [x] | Bugfix | Enforce diet styles (vegetarian/vegan/pescatarian) as hard filters before scoring; added tests and personalization controls to edit diet/taste. | BE/FE | Backend diet filter now rejects conflicting recipes; personalization page can edit diet/taste; node-based unit tests cover veg/vegan/pescatarian cases. |
 
 ### Dependencies
 - Phase 0 foundations in place (schema, migrations, seed data, Postgres connectivity, shared Axios).
@@ -134,4 +154,11 @@ Build an end-to-end personalized menu flow that returns 3–5 AI-ranked menu car
 - Performance tuning: enable Next.js image optimizations, preload critical fonts, and verify lighthouse scores on mobile.
 - Add micro-interactions (150–200ms transitions) for cards, sticky bottom nav, and CTA buttons; hover/focus states for larger screens.
 - Finalize operator onboarding docs, add demo script, and capture screenshots/video for submission.
-- Deploy to Vercel, configure production `.env.local` equivalents, and validate database migrations + seeds in staging.
+- Deploy to Netlify (Next.js adapter) with Supabase Postgres, configure production `.env.local` equivalents, and validate database migrations + seeds in staging.
+
+### Deploy – Netlify + Supabase (production/preview)
+- Netlify config: `netlify.toml` uses `npm run build`, publishes `.next`, and enables `@netlify/plugin-nextjs` (Node `20` set in `[build.environment]`). Point the Netlify site at this repo; no extra base dir required.
+- Environment on Netlify: set `DATABASE_URL` to the Supabase (pooled) connection string; also set `OPENAI_API_KEY`, `OPENAI_BASE_URL` (if overridden), `JWT_SECRET`, `ADMIN_EMAIL`, `SYSTEM_PANTRY_EMAIL`, `RECIPE_EMBEDDING_MODEL`, `RECIPE_EMBEDDING_PROVIDER`, `RECIPE_EMBEDDING_VERSION`, `INVENTORY_SYNC_SECRET`, `SUPABASE_URL`/`SUPABASE_PROJECT_URL`, `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SERVICE_KEY`), `SUPABASE_SCHEMA`, and `SUPABASE_MCP_URL`/`SUPABASE_MCP_API_KEY` when MCP is used.
+- Prisma migrations to Supabase: temporarily set `DATABASE_URL` to Supabase and run `npx prisma migrate deploy`; regenerate the client. Initial bootstrap can also run `supabase-init.sql` via Supabase SQL Editor.
+- Seeding Supabase: either run `npm run db:seed` with `DATABASE_URL` pointing to Supabase or export local data via `npm run supabase:export -- --truncate` (requires Supabase URL + service role key).
+- Verification: run `npm run supabase:verify` (needs `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and hit `/api/health` on a Netlify preview to confirm DB connectivity + envs. Ensure an admin user exists in Supabase (run `npm run admin:create` with `DATABASE_URL` targeting Supabase).

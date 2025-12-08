@@ -203,13 +203,74 @@ function sanitizeNutrientValue(value: unknown): string {
   return JSON.stringify(value ?? "");
 }
 
-async function requestEmbedding(input: string): Promise<number[]> {
+export async function requestEmbedding(input: string): Promise<number[]> {
   switch (RECIPE_EMBEDDING_PROVIDER) {
     case "openai":
       return requestOpenAIEmbedding(input);
     default:
       throw new Error(`Unsupported embedding provider: ${RECIPE_EMBEDDING_PROVIDER}`);
   }
+}
+
+export async function findSimilarRecipes(
+  query: string,
+  limit: number = 20
+): Promise<{ recipeId: string; score: number }[]> {
+  if (!RECIPE_EMBEDDING_MODEL) {
+    return [];
+  }
+
+  try {
+    // Generate embedding for the query
+    const queryVector = await requestEmbedding(query);
+
+    // Fetch all active recipe embeddings
+    // Note: For a larger dataset, we would use pgvector or similar in the DB.
+    // For ~160 recipes, in-memory comparison is sufficiently fast and avoids schema changes.
+    const embeddings = await prisma.recipeEmbedding.findMany({
+      where: {
+        status: EmbeddingStatus.ACTIVE,
+        provider: RECIPE_EMBEDDING_PROVIDER,
+        model: RECIPE_EMBEDDING_MODEL,
+        version: RECIPE_EMBEDDING_VERSION,
+      },
+      select: {
+        recipeId: true,
+        embedding: true,
+      },
+    });
+
+    if (!embeddings.length) {
+      return [];
+    }
+
+    // Calculate cosine similarity
+    const scored = embeddings.map((record) => {
+      const score = cosineSimilarity(queryVector, record.embedding);
+      return { recipeId: record.recipeId, score };
+    });
+
+    // Sort descending by score
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored.slice(0, limit);
+  } catch (error) {
+    console.error("Vector search failed", error);
+    return [];
+  }
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) return 0;
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB)) || 0;
 }
 
 async function requestOpenAIEmbedding(input: string): Promise<number[]> {

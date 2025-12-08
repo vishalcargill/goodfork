@@ -28,6 +28,8 @@ export async function generateRecommendationsViaSupabaseMcp(
       headers,
       body: JSON.stringify({
         ...input,
+        // Ask the MCP service to mirror backend heuristics (diet/allergen filters, pantry, goals).
+        applyBackendHeuristics: true,
         source: DEFAULT_RECOMMENDATION_DATA_SOURCE,
       }),
     });

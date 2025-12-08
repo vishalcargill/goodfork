@@ -32,3 +32,19 @@ export const ALLERGEN_OPTIONS = [
   { value: "GLUTEN", label: "Gluten" },
   { value: "SESAME", label: "Sesame" },
 ] as const;
+
+export const DIET_OPTIONS = [
+  { value: "VEGETARIAN", label: "Vegetarian" },
+  { value: "VEGAN", label: "Vegan" },
+  { value: "PESCATARIAN", label: "Pescatarian" },
+  { value: "MEDITERRANEAN", label: "Mediterranean" },
+  { value: "LOW_CARB", label: "Lower carb" },
+] as const;
+
+export const TASTE_OPTIONS = [
+  { value: "SPICY", label: "Spicy kick" },
+  { value: "COMFORT", label: "Comforting" },
+  { value: "BRIGHT", label: "Bright & citrusy" },
+  { value: "UMAMI", label: "Umami-rich" },
+  { value: "EXPLORER", label: "Adventurous" },
+] as const;

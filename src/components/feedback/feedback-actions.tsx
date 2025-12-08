@@ -70,7 +70,7 @@ export function FeedbackActions({
     <div
       className={cn(
         "flex w-full gap-2",
-        layout === "inline" ? "flex-col sm:flex-row sm:items-center sm:justify-end" : "flex-col",
+        layout === "inline" ? "flex-row flex-wrap items-center sm:justify-end" : "flex-col",
         className
       )}
     >
@@ -80,7 +80,8 @@ export function FeedbackActions({
         onClick={() => handleAction("ACCEPT")}
         className={cn(
           baseButton,
-          "border-emerald-500 bg-emerald-600 text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] hover:-translate-y-0.5 hover:shadow-[0_16px_44px_rgba(16,185,129,0.35)]"
+          "border-emerald-500 bg-emerald-600 text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] hover:-translate-y-0.5 hover:shadow-[0_16px_44px_rgba(16,185,129,0.35)]",
+          "px-3 sm:px-4" // Reduced padding on small screens/containers
         )}
         aria-label='Accept this recipe'
       >
@@ -94,7 +95,8 @@ export function FeedbackActions({
         onClick={() => handleAction("SWAP")}
         className={cn(
           baseButton,
-          "border-emerald-200 bg-white text-emerald-800 shadow-[0_8px_24px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(15,23,42,0.12)]"
+          "border-emerald-200 bg-white text-emerald-800 shadow-[0_8px_24px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(15,23,42,0.12)]",
+          "px-3 sm:px-4"
         )}
         aria-label='Request a swap'
       >

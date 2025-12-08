@@ -1,22 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { GearSix } from "@phosphor-icons/react/dist/ssr";
-
-import { RecommendationsDemo } from "@/components/recommendations/recommendations-demo";
+import { RecommendationsGrid } from "@/components/recommendations/recommendations-grid";
+import { ProfileSummaryBar } from "@/components/profile/profile-summary-bar";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ADMIN_EMAIL } from "@/constants/app.constants";
 import { ALLERGEN_OPTIONS, GOAL_OPTIONS } from "@/constants/personalization-options";
 import { normalizeRecommendationSource } from "@/constants/data-sources";
 import { InventoryStatus } from "@/generated/prisma/client";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "GoodFork | Personalized Menus",
+  title: "GoodFork | Your Menus",
   description:
-    "Review personalized menu cards, swap insights, and live inventory signals tailored to your onboarding profile.",
+    "Personalized menus tuned to your goals, allergens, and pantry inventory.",
 };
 
 type MenusPageProps = {
@@ -49,6 +46,13 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
     include: { profile: true },
   });
 
+  // Double check profile existence if we rely on it heavily
+  if (!user?.profile) {
+    // If user exists but no profile, they might need onboarding
+     // This redirect logic might loop if user is created but not profiled properly, 
+     // but for now it matches existing flow.
+  }
+
   const profile = user?.profile ?? null;
   const pantryItems =
     user && user.id
@@ -69,70 +73,35 @@ export default async function MenusPage({ searchParams }: MenusPageProps) {
 
   const readyPantryCount = pantryItems.filter((item) => item.status === InventoryStatus.IN_STOCK).length;
   const lowPantryCount = pantryItems.filter((item) => item.status === InventoryStatus.LOW_STOCK).length;
-  const pantryValues =
-    pantryItems.length === 0
-      ? ["Add pantry items to unlock cookable menus"]
-      : [
-          `Ready: ${readyPantryCount}`,
-          lowPantryCount ? `${lowPantryCount} low stock` : "Fully stocked",
-        ];
-
-  const sessionHighlights = [
-    {
-      label: "Active goals",
-      values: goalLabels.length ? goalLabels : ["Add goals in personalization"],
-    },
-    {
-      label: "Allergen shields",
-      values: allergenLabels.length ? allergenLabels : ["No active shields"],
-    },
-    {
-      label: "Pantry pulse",
-      values: pantryValues,
-    },
-  ];
+  const pantryIsEmpty = pantryItems.length === 0;
 
   return (
-    <div className='space-y-8 pb-8'>
-      <header className='flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between'>
-        <div className='space-y-2'>
-          <h1 className='text-3xl font-bold text-foreground'>
+    <div className="flex flex-col min-h-full">
+      <ProfileSummaryBar 
+        goalLabels={goalLabels} 
+        allergenLabels={allergenLabels} 
+        pantryStats={{
+          readyCount: readyPantryCount,
+          lowCount: lowPantryCount,
+          isEmpty: pantryIsEmpty
+        }}
+      />
+
+      <div className="flex-1 space-y-8 p-4 md:p-8 max-w-7xl mx-auto w-full">
+        <header className="max-w-3xl space-y-2">
+          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
             Your Menus
           </h1>
-          <p className='max-w-3xl text-muted-foreground'>
-            Menus tuned to your saved profile, inventory, and preferences.
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Menus tuned to your goals, allergens, and pantry. <br className="hidden sm:inline"/>
+            Adjust your profile above and we’ll re-personalize in seconds.
           </p>
-        </div>
-        <Link
-          href='/personalization'
-          className='inline-flex items-center gap-2 self-start rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-surface-subtle hover:text-primary'
-        >
-          <GearSix className='h-5 w-5 text-primary' weight='duotone' />
-          Adjust settings
-        </Link>
-      </header>
+        </header>
 
-      <section className='grid gap-4 sm:grid-cols-3'>
-        {sessionHighlights.map((highlight) => (
-          <div key={highlight.label} className='rounded-xl border border-border bg-surface p-4 shadow-sm'>
-            <p className='text-xs font-semibold uppercase tracking-wider text-primary mb-2'>{highlight.label}</p>
-            <div className='flex flex-wrap gap-2'>
-              {highlight.values.map((value) => (
-                <span
-                  key={`${highlight.label}-${value}`}
-                  className='inline-flex items-center rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium text-foreground border border-border-subtle'
-                >
-                  {value}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <section>
-        <RecommendationsDemo activeEmail={displayEmail} initialSource={initialSource} />
-      </section>
+        <section>
+          <RecommendationsGrid activeEmail={displayEmail} initialSource={initialSource} />
+        </section>
+      </div>
     </div>
   );
 }

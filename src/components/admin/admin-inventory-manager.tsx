@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import type { InventoryItem, InventoryStatus, Recipe } from "@/generated/prisma/client";
-import { AlertTriangle, Loader2, RefreshCcw, Search, Truck } from "lucide-react";
+import { Warning, CircleNotch, ArrowsClockwise, MagnifyingGlass, Truck } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 import { apiClient } from "@/config/axios.config";
-import { RecommendationCard } from "@/components/recommendations/recommendations-demo";
+import { RecommendationCard } from "@/components/recommendations/recommendation-card";
 import type { RecommendationCard as RecommendationCardType } from "@/services/shared/recommendations.types";
 import { cn } from "@/lib/utils";
 
@@ -394,7 +394,7 @@ function InventoryFilters({
       <div className='flex flex-col gap-4 lg:flex-row lg:items-center'>
         <label className='flex-1 rounded-lg border border-border bg-surface px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary'>
           <span className='flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary'>
-            <Search className='h-3.5 w-3.5' />
+            <MagnifyingGlass className='h-3.5 w-3.5' />
             Search recipes
           </span>
           <input
@@ -464,7 +464,7 @@ function InventoryAlerts({ lowCount, criticalCount, onFocusLow }: InventoryAlert
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div className='flex items-start gap-3'>
           <span className='rounded-lg bg-surface p-2 text-warning shadow-sm'>
-            <AlertTriangle className='h-5 w-5' />
+            <Warning className='h-5 w-5' />
           </span>
           <div>
             <p className='text-xs font-bold uppercase tracking-wider'>Attention</p>
@@ -603,7 +603,7 @@ function InventoryRow({
           >
             {saving ? (
               <span className='flex items-center justify-center gap-2'>
-                <Loader2 className='h-4 w-4 animate-spin' />
+                <CircleNotch className='h-4 w-4 animate-spin' />
                 Saving
               </span>
             ) : (
@@ -736,12 +736,12 @@ function RestockDrawer({
           >
             {pending ? (
               <>
-                <Loader2 className='h-4 w-4 animate-spin' />
+                <CircleNotch className='h-4 w-4 animate-spin' />
                 Recording…
               </>
             ) : (
               <>
-                <RefreshCcw className='h-4 w-4' />
+                <ArrowsClockwise className='h-4 w-4' />
                 Save restock
               </>
             )}
