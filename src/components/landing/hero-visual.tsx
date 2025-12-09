@@ -18,7 +18,7 @@ export function HeroVisual() {
           y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 0 }
         }}
-        className="absolute left-4 right-4 top-8 z-10 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl sm:left-8 sm:right-8 sm:p-5"
+        className="absolute inset-x-3 top-8 z-10 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl sm:inset-x-6 sm:p-5 lg:inset-x-8"
       >
         <div className="flex items-start gap-4">
           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-emerald-100 sm:h-20 sm:w-20">
@@ -61,7 +61,7 @@ export function HeroVisual() {
         initial={{ opacity: 0, x: 20, y: 10 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 0.5, duration: 0.6 }}
-        className="absolute -right-4 top-1/3 z-20 w-48 rounded-xl border border-emerald-100 bg-white p-3 shadow-lg shadow-emerald-900/5 sm:-right-8"
+        className="absolute right-0 top-1/3 z-20 w-48 max-w-[12rem] rounded-xl border border-emerald-100 bg-white p-3 shadow-lg shadow-emerald-900/5 sm:right-2 lg:right-6"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
@@ -79,7 +79,7 @@ export function HeroVisual() {
         initial={{ opacity: 0, x: -20, y: 20 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 0.8, duration: 0.6 }}
-        className="absolute -left-4 bottom-1/4 z-20 w-52 rounded-xl border border-slate-100 bg-white p-3 shadow-lg shadow-slate-900/5 sm:-left-8"
+        className="absolute left-0 bottom-1/4 z-20 w-52 max-w-[13rem] rounded-xl border border-slate-100 bg-white p-3 shadow-lg shadow-slate-900/5 sm:left-2 lg:left-6"
       >
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
