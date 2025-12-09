@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -57,6 +57,7 @@ export function OnboardingFlow() {
   const onboardingMutation = useOnboardingSubmitMutation();
   const isPending = onboardingMutation.isPending;
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const accountComplete =
     values.name.trim().length >= 2 && values.email.trim().length > 0 && values.password.trim().length >= 8;
@@ -93,7 +94,16 @@ export function OnboardingFlow() {
     onboardingMutation.mutate(payload, {
       onSuccess: (data) => {
         setResult(data);
-        router.refresh();
+        if (data?.success) {
+          const nextParam = searchParams?.get("next");
+          const safeNext = nextParam && nextParam.startsWith("/") ? nextParam : null;
+          const recommendationsHref = values.email
+            ? `/menus?prefillEmail=${encodeURIComponent(values.email.trim())}`
+            : "/menus";
+          const destination = safeNext ?? recommendationsHref;
+          router.push(destination);
+          router.refresh();
+        }
       },
       onError: () =>
         setResult({
@@ -106,9 +116,12 @@ export function OnboardingFlow() {
   const fieldError = (field: keyof OnboardingPayload) => result?.fieldErrors?.[field]?.[0];
 
   const showSuccess = result?.success;
+  const nextParam = searchParams?.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") ? nextParam : null;
   const recommendationsHref = values.email
     ? `/menus?prefillEmail=${encodeURIComponent(values.email.trim())}`
-    : "/onboarding";
+    : "/menus";
+  const destinationHref = safeNext ?? recommendationsHref;
 
   return (
     <div className='rounded-[28px] border border-emerald-100 bg-white/95 p-6 shadow-[0_24px_65px_rgba(16,185,129,0.15)] sm:p-10'>
@@ -396,16 +409,15 @@ export function OnboardingFlow() {
           >
             <p className='flex items-center gap-2 text-emerald-700'>
               <CheckCircle2 className='h-4 w-4' />
-              {result?.message}
+              {result?.message} Redirecting you to your menus…
             </p>
-            <Link
-              href={recommendationsHref}
-              prefetch={false}
-              className='mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 underline'
-            >
-              Head to menus
-              <ArrowRight className='h-3.5 w-3.5' />
-            </Link>
+            <p className='mt-2 text-xs text-emerald-700'>
+              If you are not redirected,{" "}
+              <Link href={destinationHref} prefetch={false} className='font-semibold underline'>
+                head to menus
+              </Link>
+              .
+            </p>
           </div>
         ) : null}
       </div>
